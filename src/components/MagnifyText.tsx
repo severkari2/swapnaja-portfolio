@@ -9,8 +9,8 @@ interface MagnifyTextProps {
   baseFontSize?: number;
   /** Influence radius of the pointer, as a multiple of the font size. */
   radiusScale?: number;
-  /** Magnification at the pointer, 0..1. */
-  bulge?: number;
+  /** Inward pull at the pointer. Negative values magnify outward instead. */
+  strength?: number;
 }
 
 const VERT = `#version 300 es
@@ -21,12 +21,15 @@ void main() {
   gl_Position = vec4(aPos, 0.0, 1.0);
 }`;
 
-// Two superimposed displacements inside a smooth bump `w` around the pointer:
-//   - a radial magnification (uBulge), which enlarges glyphs near the pointer;
-//   - a translation along the pointer's recent motion (uDrag), which smears them.
-// Because both vary continuously across a glyph, straight stems bow and strokes taper —
-// the non-affine part of the reference that CSS transforms cannot reproduce. The bump is
-// C1 at its edge so the warp never folds, which would show up as streaking artifacts.
+// A single radial displacement around the pointer: an output pixel at distance r samples
+// the source at r * (1 + strength * falloff), so glyphs are drawn inward and compressed
+// toward the pointer while the rest of the word keeps its resting size. Because the pull
+// varies continuously across a glyph, stems bow and letters at the edge of the falloff
+// shear into a slant — the non-affine part that CSS transforms cannot reproduce.
+//
+// Deliberately no translation term: displacing the neighbourhood bodily smears the whole
+// word onto a curved baseline, which loses the localised "lens travelling along the line"
+// read. Keeping the radius near the font size is what keeps the effect local.
 const FRAG = `#version 300 es
 precision highp float;
 in vec2 vUv;
@@ -34,16 +37,13 @@ out vec4 outColor;
 uniform sampler2D uTex;
 uniform vec2 uSize;
 uniform vec2 uPointer;
-uniform vec2 uDrag;
 uniform float uRadius;
-uniform float uBulge;
+uniform float uStrength;
 void main() {
   vec2 p = vec2(vUv.x, 1.0 - vUv.y) * uSize;
   vec2 d = p - uPointer;
-  float u = clamp(length(d) / uRadius, 0.0, 1.0);
-  float w = 1.0 - u * u;
-  w = w * w * w;
-  vec2 uv = (uPointer + d * max(1.0 - uBulge * w, 0.05) - uDrag * w) / uSize;
+  float t = clamp(1.0 - length(d) / uRadius, 0.0, 1.0);
+  vec2 uv = (uPointer + d * max(1.0 + uStrength * t * t, 0.05)) / uSize;
   if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
     outColor = vec4(0.0);
     return;
@@ -51,15 +51,9 @@ void main() {
   outColor = texture(uTex, uv);
 }`;
 
-// Damping, normalised to 60fps frames. The reference clip settles back to a clean word
-// roughly 0.9s after the pointer stops, which DRAG_DECAY reproduces (0.9^54 ≈ 0.003).
+// Damping, normalised to 60fps frames.
 const POINTER_EASE = 0.2;
-const DRAG_DECAY = 0.9;
-// Chosen so a sustained pointer speed v settles at a smear of v * 0.5s, tuned against
-// the bend depth of the `ll` stems in reference frames 22 and 32.
-const DRAG_KICK = 3;
-/** Smear ceiling, as a multiple of the font size, so fast flicks stay legible. */
-const DRAG_MAX = 1.2;
+const STRENGTH_EASE = 0.1;
 const SETTLED = 0.002;
 
 function compile(gl: WebGL2RenderingContext, type: number, src: string) {
@@ -78,8 +72,8 @@ export const MagnifyText: React.FC<MagnifyTextProps> = ({
   text,
   className = "",
   baseFontSize,
-  radiusScale = 2.25,
-  bulge = 0.55,
+  radiusScale = 1.6,
+  strength = 1,
 }) => {
   const wrapRef = useRef<HTMLDivElement>(null);
   const spanRef = useRef<HTMLSpanElement>(null);
@@ -143,9 +137,8 @@ export const MagnifyText: React.FC<MagnifyTextProps> = ({
     gl.useProgram(program);
     const uSize = gl.getUniformLocation(program, "uSize");
     const uPointer = gl.getUniformLocation(program, "uPointer");
-    const uDrag = gl.getUniformLocation(program, "uDrag");
     const uRadius = gl.getUniformLocation(program, "uRadius");
-    const uBulge = gl.getUniformLocation(program, "uBulge");
+    const uStrength = gl.getUniformLocation(program, "uStrength");
     gl.uniform1i(gl.getUniformLocation(program, "uTex"), 0);
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
@@ -160,15 +153,13 @@ export const MagnifyText: React.FC<MagnifyTextProps> = ({
     let cssH = 0;
     let pad = 0;
     let radius = 0;
-    let dragMax = 0;
     let rect = canvas.getBoundingClientRect();
 
-    // `raw` is the latest input; `eased` trails it, `moved` accumulates pointer travel
-    // since the last frame, and `drag` is the decaying smear built from that travel.
-    const raw = { x: 0, y: 0 };
+    // `raw` is the latest input; `eased` trails it so the lens lags slightly behind the
+    // cursor, and `easedStrength` fades the whole effect in and out.
+    const raw = { x: 0, y: 0, present: false };
     const eased = { x: 0, y: 0 };
-    const moved = { x: 0, y: 0 };
-    const drag = { x: 0, y: 0 };
+    let easedStrength = 0;
     let seeded = false;
     let last = 0;
 
@@ -179,10 +170,9 @@ export const MagnifyText: React.FC<MagnifyTextProps> = ({
       const spanRect = span.getBoundingClientRect();
       const fontSize = parseFloat(getComputedStyle(span).fontSize) || 16;
       radius = fontSize * radiusScale;
-      dragMax = fontSize * DRAG_MAX;
       // Ink never travels the full influence radius, so the canvas needs less padding
       // than that — otherwise the raster gets needlessly huge at display sizes.
-      pad = radius * 0.45 + dragMax;
+      pad = radius * 0.6;
       cssW = Math.max(1, Math.ceil(spanRect.width + pad * 2));
       cssH = Math.max(1, Math.ceil(spanRect.height + pad * 2));
 
@@ -242,17 +232,13 @@ export const MagnifyText: React.FC<MagnifyTextProps> = ({
       }
     };
 
-    const draw = (mag: number) => {
+    const draw = () => {
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.uniform2f(uSize, cssW, cssH);
       gl.uniform2f(uPointer, eased.x, eased.y);
-      gl.uniform2f(uDrag, drag.x, drag.y);
       gl.uniform1f(uRadius, Math.max(1, radius));
-      // The magnification is gated on how hard the word is currently being dragged, so a
-      // pointer resting near it leaves the word completely undistorted — the clean rest
-      // state the reference holds for its last 1.3s.
-      gl.uniform1f(uBulge, bulge * Math.min(1, mag / (dragMax * 0.5)));
+      gl.uniform1f(uStrength, easedStrength);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     };
 
@@ -262,34 +248,24 @@ export const MagnifyText: React.FC<MagnifyTextProps> = ({
       const step = last ? Math.min(((now - last) / 1000) * 60, 3) : 1;
       last = now;
 
+      // Position-driven, not motion-driven: the lens holds while the pointer rests over
+      // the word, and only fades out when the pointer leaves the document.
+      const targetStrength = raw.present ? strength : 0;
       eased.x += (raw.x - eased.x) * POINTER_EASE * step;
       eased.y += (raw.y - eased.y) * POINTER_EASE * step;
-
-      const decay = Math.pow(DRAG_DECAY, step);
-      drag.x = drag.x * decay + moved.x * DRAG_KICK;
-      drag.y = drag.y * decay + moved.y * DRAG_KICK;
-      moved.x = 0;
-      moved.y = 0;
-      let mag = Math.hypot(drag.x, drag.y);
-      if (mag > dragMax) {
-        drag.x *= dragMax / mag;
-        drag.y *= dragMax / mag;
-        mag = dragMax;
-      }
+      easedStrength += (targetStrength - easedStrength) * STRENGTH_EASE * step;
 
       const settled =
-        mag < SETTLED * dragMax &&
+        Math.abs(targetStrength - easedStrength) < SETTLED &&
         Math.abs(raw.x - eased.x) < 0.5 &&
         Math.abs(raw.y - eased.y) < 0.5;
       if (settled) {
+        easedStrength = targetStrength;
         eased.x = raw.x;
         eased.y = raw.y;
-        drag.x = 0;
-        drag.y = 0;
-        mag = 0;
         last = 0;
       }
-      draw(mag);
+      draw();
       if (!settled) frame = requestAnimationFrame(tick);
     };
 
@@ -303,16 +279,19 @@ export const MagnifyText: React.FC<MagnifyTextProps> = ({
     const onMouseMove = (e: MouseEvent) => {
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-      if (seeded) {
-        moved.x += x - raw.x;
-        moved.y += y - raw.y;
-      } else {
+      if (!seeded) {
         seeded = true;
         eased.x = x;
         eased.y = y;
       }
       raw.x = x;
       raw.y = y;
+      raw.present = true;
+      schedule();
+    };
+
+    const onMouseLeave = () => {
+      raw.present = false;
       schedule();
     };
 
@@ -329,12 +308,13 @@ export const MagnifyText: React.FC<MagnifyTextProps> = ({
     const start = () => {
       if (cancelled) return;
       layout();
-      draw(0);
+      draw();
       setActive(true);
       observer.observe(span);
       window.addEventListener("mousemove", onMouseMove);
       window.addEventListener("scroll", onViewportChange, { passive: true });
       window.addEventListener("resize", onViewportChange);
+      document.addEventListener("mouseleave", onMouseLeave);
     };
 
     // Without this the texture bakes the fallback font instead of the loaded webfont.
@@ -349,6 +329,7 @@ export const MagnifyText: React.FC<MagnifyTextProps> = ({
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("scroll", onViewportChange);
       window.removeEventListener("resize", onViewportChange);
+      document.removeEventListener("mouseleave", onMouseLeave);
       gl.deleteProgram(program);
       gl.deleteBuffer(buffer);
       gl.deleteVertexArray(vao);
@@ -356,7 +337,7 @@ export const MagnifyText: React.FC<MagnifyTextProps> = ({
       gl.getExtension("WEBGL_lose_context")?.loseContext();
       setActive(false);
     };
-  }, [text, baseFontSize, radiusScale, bulge]);
+  }, [text, baseFontSize, radiusScale, strength]);
 
   return (
     <div
