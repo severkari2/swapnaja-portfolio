@@ -11,6 +11,8 @@ interface MagnifyTextProps {
   radiusScale?: number;
   /** Inward pull at the pointer. Negative values magnify outward instead. */
   strength?: number;
+  /** Background color of the container. Defaults to #D2042D. */
+  backgroundColor?: string;
 }
 
 const VERT = `#version 300 es
@@ -74,6 +76,7 @@ export const MagnifyText: React.FC<MagnifyTextProps> = ({
   baseFontSize,
   radiusScale = 1.6,
   strength = 1,
+  backgroundColor = "#D2042D",
 }) => {
   const wrapRef = useRef<HTMLDivElement>(null);
   const spanRef = useRef<HTMLSpanElement>(null);
@@ -342,7 +345,8 @@ export const MagnifyText: React.FC<MagnifyTextProps> = ({
   return (
     <div
       ref={wrapRef}
-      className="relative inline-block cursor-default select-none"
+      className="relative inline-block cursor-default select-none bg-[#D2042D]"
+      style={{ backgroundColor }}
     >
       <span
         ref={spanRef}

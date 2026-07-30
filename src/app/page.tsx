@@ -1,5 +1,5 @@
 import { WorkFolder, type WorkFolderItem } from "@/components/WorkFolder";
-
+import { MagnifyText } from "@/components/MagnifyText";
 // Aspect ratios come from the placeholder SVGs in public/folder-demo. They are
 // deliberately mixed: a card hides behind the folder by exactly its own height, so
 // varying the ratio is what staggers the fan. The tallest card sits in the middle of
@@ -63,15 +63,22 @@ export default function Home() {
     // viewports, but clipping the top would cut the fan off.
     <div className="flex min-h-screen flex-col overflow-x-clip bg-white">
       {/* Navigation */}
-      <nav className="flex items-center justify-between px-8 py-5">
-        <span className="text-lg font-medium tracking-tight text-black">LP</span>
-        <span className="text-sm text-black">works</span>
-        <span className="text-sm text-black">about</span>
+      <nav className="absolute top-0 z-10 flex w-full items-center justify-between px-8 py-5 text-black">
+        <span className="text-lg font-medium tracking-tight">LP</span>
+        <span className="text-sm">works</span>
+        <span className="text-sm">about</span>
       </nav>
+
+      <section className="flex min-h-screen w-full items-center justify-center bg-[#D2042D]">
+        <MagnifyText 
+          text="-hello." 
+          className="text-[12vw] font-bold text-black tracking-tighter"
+        />
+      </section>
 
       {/* The fan reaches roughly two card-widths above the folders, so the stack sits
           low in the viewport to leave it room. */}
-      <main className="flex flex-1 items-end justify-center px-4 pb-16">
+      <section className="flex min-h-screen flex-1 items-end justify-center px-4 py-32 bg-white">
         <WorkFolder
           items={items}
           className="w-full max-w-[1124px]"
@@ -82,7 +89,7 @@ export default function Home() {
             } as React.CSSProperties
           }
         />
-      </main>
+      </section>
     </div>
   );
 }
