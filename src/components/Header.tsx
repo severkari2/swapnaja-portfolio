@@ -4,10 +4,12 @@ import { NavLink } from "./NavLink";
 export function Header() {
   return (
     // Full height at the top of the page; off the top it comes back at the compact height.
+    // Kept out of the way on the archive, whose mockups fill the screen from the top edge.
     <AutoHideBar
       edge="top"
       spacerClassName="h-[var(--header-h)]"
       className="h-[var(--header-h)] data-scrolled:h-[var(--header-h-compact)]"
+      hiddenOn={["/work/archive"]}
     >
       <header className="h-full bg-paper">
         {/* Three equal columns rather than justify-between: "works" stays optically centred

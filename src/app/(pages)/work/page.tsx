@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { WorkFolder, type WorkFolderProps } from "@/components/WorkFolder";
+import { WorkSwitch } from "@/components/WorkSwitch";
 
 export const metadata: Metadata = {
   title: "Work — Swapnaja",
@@ -60,8 +61,9 @@ const u = (px: number) => `calc(${px} * var(--u))`;
 
 export default function Work() {
   return (
-    <>
+    <div className="pb-[calc(74*var(--u))]">
       <h1 className="sr-only">works</h1>
+      <WorkSwitch />
       <WorkFolder
         items={folders}
         labels={false}
@@ -82,6 +84,6 @@ export default function Work() {
           } as CSSProperties
         }
       />
-    </>
+    </div>
   );
 }

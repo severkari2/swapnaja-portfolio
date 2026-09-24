@@ -79,8 +79,9 @@ Pages never draw their own nav or footer. Everything except home lives in the `(
 | Route | State |
 |---|---|
 | `/` | Built. Screen 1 matches `Home.png`: the `-hello.` `MagnifyText` hero (Montserrat, `text-burgundy`, on paper) filling `--view-h`, so it lands between the header and footer. Screen 2 matches `Home-section-2.png`: a full-bleed landscape photo, and a burgundy about card (Times italic + Montserrat) with a portrait beneath it. Both photos are `ImageHolder` placeholders. Screen 3 is `AboutMe` on paper. |
-| `/work` | Hero built to match `Work-hero-section.jpeg`. `work/layout.tsx` holds the *works* / *archive* switch (`WorkSwitch`, Montserrat; the current view is in ink, the other is dimmed) and defines `--u`. This page renders `WorkFolder` with *branding*, *packaging* and *editorial* (burgundy / stone / burgundy). Folder cards and links (`#branding`, …) are placeholders. The footer stays hidden here. |
-| `/work/archive` | Filler: three `ImageHolder` tiles covering the same area as the folders, until the archive hero is specified. |
+| `/work` | Hero built to match `Work-hero-section.jpeg`: the *works* / *archive* switch (`WorkSwitch`, Montserrat; the current view is in ink, the other is dimmed), then `WorkFolder` with *branding*, *packaging* and *editorial* (burgundy / stone / burgundy). Folder cards and links (`#branding`, …) are placeholders. `work/layout.tsx` defines `--u` (one pixel of the 1400px mockups, from `100cqw`) for everything under `/work`. The footer stays hidden here. |
+| `/work/archive` | Matches `archive-section.jpeg`: *archives* (Times italic) and three captioned photos linking to the entries. No header or footer. Both are hidden here and come back at their screen edge. |
+| `/work/archive/[slug]` | *i model*, *i document*, *behind the scenes* (`archive-section-*.jpeg`). One page layout, fed by `archive/entries.ts`. Each entry has its copy with hand-set line breaks, plus the positions measured off its own mockup, which differ slightly between them. The collage is one `ImageHolder` (603×819 mockup px), because each mockup's collage is a single composed image. Only the listed slugs exist (`dynamicParams = false`). |
 | `/about` | Placeholder awaiting content. |
 
 Design inspiration reference: `https://swapnajasevekari.framer.website/` (client-rendered
@@ -104,7 +105,12 @@ inspect).
 
   `hiddenOn` lists routes, sub-pages included. On those routes the bar starts hidden and
   scrolling never shows it; only the pointer reveal and keyboard focus do. The spacer is
-  dropped there too. The footer uses it for `/work`, where it would cover the folders.
+  dropped there too. The footer uses it for `/work`, where it would cover the folders. The
+  header uses it for `/work/archive`, whose mockups fill the screen from the top edge.
+- `QuietLink` — faint micro-caps link, for pages whose mockups draw no navigation (the
+  archive). Keep these out of the bars' reveal zones: the top and bottom 48px, plus the
+  whole bar once it shows. The archive keeps them top-right, on the title's baseline.
+  Bottom corners don't work: reaching for a link there pulls the footer up over it.
 - `Header` / `Footer` — server components, laid out as in `Home.png`. Header is a 3-column
   grid: *home*, *works* centred, *about*. Each link is a
   `NavLink` (client, `usePathname`) that turns `text-burgundy` and sets `aria-current` on

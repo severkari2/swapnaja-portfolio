@@ -1,21 +1,15 @@
-import { WorkSwitch } from "@/components/WorkSwitch";
-
-// Shared by /work and /work/archive. The switch lives here so it stays put while the view
-// under it changes.
+// Shared by /work and everything under /work/archive.
 //
-// --u is one pixel of the 1400px-wide mockup (Work-hero-section.jpeg), measured against
-// this section so it matches the percentage widths inside it.
+// --u is one pixel of the 1400px-wide mockups (Work-hero-section.jpeg, archive-section*.jpeg),
+// measured against this container so it matches the percentage widths inside it.
 export default function WorkLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <section className="@container">
-      <div className="pb-[calc(74*var(--u))] [--u:calc(100cqw/1400)]">
-        <WorkSwitch />
-        {children}
-      </div>
-    </section>
+    <div className="@container">
+      <div className="[--u:calc(100cqw/1400)]">{children}</div>
+    </div>
   );
 }

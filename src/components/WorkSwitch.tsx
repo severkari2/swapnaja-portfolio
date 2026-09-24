@@ -8,9 +8,9 @@ const views = [
   { href: "/work/archive", label: "archive" },
 ];
 
-// The "works / archive" pair at the top of the work pages (Work-hero-section.jpeg). Each is
-// its own route; the one you are on stays in ink and the other steps back. Sized in --u,
-// which the work layout defines.
+// The "works / archive" pair at the top of /work (Work-hero-section.jpeg). Each is its own
+// route; the one you are on stays in ink and the other steps back. The archive draws its
+// own heading in place of this row. Sized in --u, which the work layout defines.
 export function WorkSwitch() {
   const pathname = usePathname();
 
@@ -25,8 +25,6 @@ export function WorkSwitch() {
           <Link
             key={view.href}
             href={view.href}
-            // Switching views swaps only what is under this row, so the page holds still.
-            scroll={false}
             aria-current={active ? "page" : undefined}
             className={`justify-self-start transition-colors duration-300 ${
               i === 0
