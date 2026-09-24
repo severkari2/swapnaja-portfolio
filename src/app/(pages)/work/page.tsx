@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 // One card per project filed in the folder: its cover, named on hover, linking to its page.
 const projectCards = (folder: ProjectFolder) =>
   projects
-    .filter((project) => project.folder === folder)
+    .filter((project) => project.folders.includes(folder))
     .map((project) => ({
       src: project.cover.src,
       aspectRatio: project.cover.aspectRatio,

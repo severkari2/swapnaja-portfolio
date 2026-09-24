@@ -1,6 +1,7 @@
 // Project pages under /work/[slug], rebuilt from the designer's PDF layouts rather than
-// embedding the PDFs (Brew for You's is 288MB, Nektar's 302MB and Surahi's 294MB; their
-// images come to about 2.5–3MB each).
+// embedding the PDFs (Brew for You's is 288MB, Nektar's 302MB, Surahi's 294MB and Raya's
+// 324MB; their images come to about 2.5–3MB each, and Raya's, with twice the pictures, to
+// under 5MB).
 //
 // Every position is in PDF points from the page's top-left corner, measured off the PDF
 // itself. From lg up the page lays each block out at exactly that spot, scaled to the
@@ -72,9 +73,9 @@ export type ProjectBlock =
 export interface Project {
   slug: string;
   title: string;
-  /** The folder on /work whose cards include this project. */
-  folder: ProjectFolder;
-  /** Its card in that folder. */
+  /** The folders on /work whose cards include this project. */
+  folders: ProjectFolder[];
+  /** Its card in those folders. */
   cover: { src: string; aspectRatio: number };
   /** Size of the PDF page the blocks were measured on, in points. */
   page: { width: number; height: number };
@@ -86,6 +87,7 @@ export interface Project {
 const brew = (file: string) => `/work/brew-for-you/${file}`;
 const nektar = (file: string) => `/work/nektar/${file}`;
 const surahi = (file: string) => `/work/surahi/${file}`;
+const raya = (file: string) => `/work/raya/${file}`;
 
 // Nektar's own inks: its orange, and the rust it sets its Times italic lines in.
 const nektarOrange = "#ee6023";
@@ -99,7 +101,7 @@ export const projects: Project[] = [
   {
     slug: "brew-for-you",
     title: "Brew For You",
-    folder: "branding",
+    folders: ["branding"],
     cover: { src: brew("logo.jpg"), aspectRatio: 563 / 422 },
     page: { width: 1195.28, height: 7786.41 },
     blocks: [
@@ -192,7 +194,7 @@ export const projects: Project[] = [
   {
     slug: "nektar",
     title: "Nektar",
-    folder: "packaging",
+    folders: ["packaging"],
     cover: { src: nektar("logo.svg"), aspectRatio: 328.7 / 246.5 },
     page: { width: 1195.28, height: 6711.83 },
     face: "sans",
@@ -299,7 +301,7 @@ export const projects: Project[] = [
   {
     slug: "surahi",
     title: "Surahi",
-    folder: "branding",
+    folders: ["branding"],
     cover: { src: surahi("logo.svg"), aspectRatio: 328.67 / 246.5 },
     page: { width: 1195.28, height: 9899.33 },
     face: "sans",
@@ -431,6 +433,124 @@ export const projects: Project[] = [
       // The closing panel is one picture: the resort photo's rounded corners sit on the
       // panel's cream, which is not the page's paper.
       { kind: "image", src: surahi("closing.jpg"), alt: "Wyndham Resort, Udaipur, at dusk, beside the Surahi logo", x: 62.4, y: 9146.92, w: 1056.34, h: 611.77 },
+    ],
+  },
+  {
+    slug: "raya",
+    title: "Raya",
+    folders: ["branding", "packaging"],
+    cover: { src: raya("logo.jpg"), aspectRatio: 329.04 / 251.27 },
+    page: { width: 1195.28, height: 11597.6 },
+    face: "sans",
+    // Raya's wordmarks are set in Samarkan, and its banners in Baskervville and Outfit, so
+    // every line in those faces is part of its picture. Only the Montserrat and Times
+    // italic lines are text here.
+    blocks: [
+      { kind: "image", src: raya("hero.jpg"), alt: "The Raya cast in festive Indian wear, seated on steps strewn with rose petals around the Raya logo", x: 0, y: 0, w: 1195.28, h: 800.23, stack: "bleed" },
+      // The motif and the two taped-up photos are one composition.
+      { kind: "image", src: raya("about.webp"), alt: "A blush floral motif beside two taped-up photos of a model in an orange top and olive trousers, front and back", x: 77.6, y: 802, w: 713.26, h: 517.8 },
+      { kind: "text", role: "title", x: 518.61, baseline: 1255.07, size: 32.97, lines: ["About Raya"] },
+      {
+        kind: "text",
+        role: "body",
+        x: 476.63,
+        baseline: 1287.05,
+        size: 12,
+        lines: [
+          "Raya is a contemporary Indian fashion label that",
+          "reimagines traditional craftsmanship through",
+          "modern, refined silhouettes. Rooted in heritage",
+          "and designed for today, Raya celebrates culture,",
+          "connection and timeless elegance through",
+          "thoughtfully crafted apparel made for every",
+          "celebration.",
+        ],
+      },
+
+      { kind: "image", src: raya("logo.jpg"), alt: "The Raya logo, “raya by Bhumi Goyanka”, in blush on maroon", x: 68.59, y: 1477.3, w: 329.04, h: 251.27, stack: "half" },
+      { kind: "image", src: raya("logomark.jpg"), alt: "The Raya logomark, a letter r with a teardrop, in blush on maroon", x: 797.65, y: 1477.29, w: 329.03, h: 199.57, stack: "half" },
+      { kind: "text", role: "label", x: 68.59, baseline: 1755.85, size: 12, lines: ["LOGO"], stack: "half" },
+      { kind: "text", role: "label", x: 797.65, baseline: 1698.35, size: 12, lines: ["LOGOMARK"], stack: "half" },
+      { kind: "image", src: raya("shared-plate.jpg"), alt: "A woman feeding a laughing man from a bowl, before a patterned hanging", x: 437.57, y: 1477.3, w: 320.14, h: 491.53 },
+
+      { kind: "text", role: "heading", x: 68.59, baseline: 2078.05, size: 24, lines: ["THOUGHT BEHIND", "THE LOGO"] },
+      { kind: "text", role: "body", x: 500.95, baseline: 2102.99, size: 12, lines: ["Represents continuity,", "connection and", "the thread of relationships."] },
+      { kind: "rule", x: 510.55, y: 2143.54, w: 1, h: 44.52 },
+      { kind: "text", role: "body", x: 232.21, baseline: 2188.06, size: 12, lines: ["Symbolises growth,", "beauty, femininity and", "Indian craftsmanship."] },
+      { kind: "rule", x: 380.37, y: 2187.56, w: 44.52, h: 1 },
+      { kind: "image", src: raya("wordmark.webp"), alt: "The Raya wordmark in black", x: 450.9, y: 2136.4, w: 263.63, h: 153.03 },
+      { kind: "rule", x: 632.87, y: 2294.73, w: 1, h: 44.52 },
+      { kind: "text", role: "body", x: 562.1, baseline: 2356.71, size: 12, lines: ["Elegant, flowing and", "contemporary,", "balancing tradition with modernity."] },
+      { kind: "image", src: raya("tradition.jpg"), alt: "A rust card reading “Where tradition finds its modern form.”", x: 772.92, y: 2011.34, w: 378.49, h: 472.77 },
+
+      { kind: "text", role: "label", x: 96.67, baseline: 2548.77, size: 12, lines: ["COLOR"] },
+      { kind: "image", src: raya("palette.svg"), alt: "The colour palette: blush, rust, black and sand swatches, each with a starburst, around a maroon one", x: 97.2, y: 2561.4, w: 410.9, h: 337.4 },
+      { kind: "text", role: "label", x: 639.89, baseline: 2548.77, size: 12, lines: ["TYPOGRAPHY"] },
+      {
+        kind: "text",
+        role: "display",
+        x: 639.89,
+        baseline: 2607.87,
+        size: 48,
+        lines: [
+          "Primary font",
+          { text: "Outfit", italic: true },
+          "",
+          "Secondary font",
+          { text: "Baskerville", italic: true },
+        ],
+      },
+
+      { kind: "text", role: "label", x: 73.17, baseline: 2981.94, size: 12, lines: ["PACKAGING"] },
+      // The tag hangs over the foot of the cloth photo, so the two are one picture.
+      { kind: "image", src: raya("cloth-and-tag.webp"), alt: "A cream dust bag stitched with the Raya logo, and a maroon swing tag on a blush card", x: 73.17, y: 3009.92, w: 413.8, h: 514.35, stack: "half" },
+      { kind: "image", src: raya("gift-boxes.jpg"), alt: "Gold and maroon Raya gift boxes beside a vintage typewriter", x: 524.97, y: 3006.87, w: 326.57, h: 408.06, stack: "half" },
+      { kind: "image", src: raya("envelope.jpg"), alt: "A maroon Raya envelope and a card with a gold wax seal", x: 888.91, y: 3009, w: 233.19, h: 179.61, stack: "half" },
+      { kind: "image", src: raya("pov.jpg"), alt: "An illustrated card of two women whispering, captioned “POV: You just found Raya.”", x: 894.61, y: 3218.12, w: 236.1, h: 289.84, stack: "half" },
+
+      { kind: "text", role: "label", x: 84.29, baseline: 3535.87, size: 12, lines: ["COLLECTIONS"] },
+      { kind: "text", role: "label", x: 84.29, baseline: 3560.66, size: 12, lines: ["About the collection"] },
+      { kind: "image", src: raya("mehr-website.jpg"), alt: "The Raya website’s festive-season banner: friends in festive wear sharing sweets", x: 74.37, y: 3606.17, w: 1056.34, h: 604.49 },
+      { kind: "text", role: "label", x: 74.37, baseline: 4243.86, size: 12, lines: ["website", "graphics"] },
+      { kind: "image", src: raya("mehr-for-her.jpg"), alt: "Web banner “for her”: two women in festive wear", x: 74.37, y: 4288.22, w: 519, h: 193.59 },
+      { kind: "image", src: raya("mehr-for-him.jpg"), alt: "Web banner “for him”: a group of men in kurtas greeting each other", x: 611.01, y: 4288.22, w: 519.7, h: 193.59 },
+      { kind: "image", src: raya("mehr-grid.jpg"), alt: "The Raya Instagram grid in reds and rusts: “an exclusive bride’s maid edit”, “Nazar is real”, “Don’t spill the tea”, and a block-printing stamp", x: 77.53, y: 4503.91, w: 1050.03, h: 800.88 },
+      { kind: "image", src: raya("presenting-mehr.jpg"), alt: "Social post “presenting Mehr” over the collection’s cast", x: 77.93, y: 5344.12, w: 326.43, h: 412.84, stack: "half" },
+      { kind: "image", src: raya("bridesmaid-edit.jpg"), alt: "Social post “an exclusive bride’s maid edit” over a red embroidered sleeve and gold bangles", x: 712.02, y: 5343.67, w: 414.84, h: 518.17, stack: "half" },
+      { kind: "image", src: raya("clothes-rack.jpg"), alt: "A rail of festive garments in a studio", x: 77.93, y: 5778.34, w: 403.22, h: 569.16, stack: "half" },
+      { kind: "image", src: raya("mothers-day.jpg"), alt: "A Mother’s Day post: hands holding an old photo of a mother and daughter", x: 865.72, y: 6251.91, w: 209.69, h: 261.92, stack: "half" },
+      { kind: "image", src: raya("mehr-banner.jpg"), alt: "Web banner for the Mehr collection: friends gathered on the floor", x: 520.35, y: 5880.36, w: 601.75, h: 338.79 },
+      { kind: "image", src: raya("banno-ki-saheli.jpg"), alt: "A lace-edged card reading “banno ki saheli” on red", x: 569.68, y: 6251.91, w: 254.54, h: 148.48 },
+      { kind: "image", src: raya("mehr-look-1.jpg"), alt: "Mehr lookbook page: an orange kurta, with fabric details", x: 77.93, y: 6365.06, w: 165.74, h: 207.02, stack: "half" },
+      { kind: "image", src: raya("mehr-look-2.jpg"), alt: "Mehr lookbook page: a green blouse and maroon skirt, with fabric details", x: 315.41, y: 6365.06, w: 165.74, h: 207.02, stack: "half" },
+      { kind: "image", src: raya("mehr-look-3.jpg"), alt: "Mehr lookbook page: a blue kurta set, with fabric details", x: 77.57, y: 6582.38, w: 166.45, h: 207.9, stack: "half" },
+      { kind: "image", src: raya("mehr-look-4.jpg"), alt: "Mehr lookbook page: a peach sari, with fabric details", x: 314.74, y: 6581.98, w: 167.08, h: 208.69, stack: "half" },
+      { kind: "image", src: raya("dhol.jpg"), alt: "Hands in gold bangles and rings resting on a dhol", x: 569.68, y: 6551.39, w: 552.42, h: 322.37 },
+      { kind: "image", src: raya("block-print.jpg"), alt: "A wooden block stamping a gold floral print onto red cloth", x: 77.93, y: 6904.42, w: 664.85, h: 404.73, stack: "half" },
+      { kind: "image", src: raya("bangles.jpg"), alt: "Stacks of red and green glass bangles", x: 770.93, y: 6908.81, w: 351.17, h: 395.96, stack: "half" },
+
+      { kind: "text", role: "label", x: 92.76, baseline: 7378.87, size: 12, lines: ["COLLECTIONS"] },
+      { kind: "text", role: "label", x: 92.76, baseline: 7403.67, size: 12, lines: ["About the collection"] },
+      { kind: "image", src: raya("dhaaga-website.jpg"), alt: "The Raya website’s festive-season banner: the Dhaaga cast before a patterned hanging", x: 82.84, y: 7449.17, w: 1056.34, h: 615.57 },
+      { kind: "text", role: "body", x: 82.84, baseline: 8086.86, size: 21.75, lines: ["website", "graphics"] },
+      { kind: "image", src: raya("dhaaga-for-her.jpg"), alt: "Web banner “for her”: friends tying rakhis", x: 85.99, y: 8126.62, w: 510.11, h: 190.38 },
+      { kind: "image", src: raya("dhaaga-for-him.jpg"), alt: "Web banner “for him”: two young men laughing", x: 627.86, y: 8126.62, w: 504.76, h: 188.27 },
+      { kind: "image", src: raya("dhaaga-grid.jpg"), alt: "The Dhaaga Instagram grid in maroon, olive and cream: stamps, rakhi illustrations, and the collection’s story, vision and mission", x: 86.51, y: 8335.31, w: 1043.38, h: 794.2 },
+      { kind: "image", src: raya("dhaaga-couple.jpg"), alt: "Three friends around a plate of sweets, under the Dhaaga wordmark", x: 86.51, y: 9150.28, w: 296.24, h: 419.04, stack: "half" },
+      { kind: "image", src: raya("nok-jhok.jpg"), alt: "A maroon card of a rakhi and a sibling photo, addressed “To, Nok-Jhok”", x: 716.8, y: 9153.96, w: 414.84, h: 514.49, stack: "half" },
+      { kind: "image", src: raya("rakhi-edit.jpg"), alt: "A folder labelled “the rakhi edit”, holding a photo of a sister applying a tilak and a “New Collection Launch” card", x: 86.51, y: 9611.92, w: 425.82, h: 574.73 },
+      { kind: "image", src: raya("dhaaga-banner.jpg"), alt: "Web banner for the Dhaaga collection: the cast before a patterned hanging", x: 528.81, y: 9723.36, w: 601.76, h: 338.79 },
+      { kind: "image", src: raya("green-card.jpg"), alt: "An olive card with a woven motif: “Not everything meaningful fits into a pattern.”", x: 578.15, y: 10075.49, w: 222.32, h: 222.32, stack: "half" },
+      { kind: "image", src: raya("raksha-bandhan.jpg"), alt: "An illustration of a sister tying a rakhi on her brother’s wrist, “Inspired by Raksha Bandhan, woven for today.”", x: 836.7, y: 10075.49, w: 291.69, h: 291.7, stack: "half" },
+      { kind: "image", src: raya("dhaaga-look-1.jpg"), alt: "Dhaaga lookbook page: an orange top and olive trousers", x: 86.51, y: 10208.06, w: 165.63, h: 241.18, stack: "half" },
+      { kind: "image", src: raya("dhaaga-look-2.jpg"), alt: "Dhaaga lookbook page: a red kurta and white trousers", x: 316.63, y: 10208.06, w: 165.63, h: 241.18, stack: "half" },
+      { kind: "image", src: raya("dhaaga-look-3.jpg"), alt: "Dhaaga lookbook page: a pale pink dress", x: 86.51, y: 10454.4, w: 165.63, h: 241.18, stack: "half" },
+      { kind: "image", src: raya("dhaaga-look-4.jpg"), alt: "Dhaaga lookbook page: a pink kurta", x: 315.76, y: 10454.4, w: 167.36, h: 243.7, stack: "half" },
+      { kind: "image", src: raya("pattern.jpg"), alt: "The Dhaaga pattern: maroon floral motifs on cream", x: 578.15, y: 10394.39, w: 550.24, h: 322.37 },
+      { kind: "image", src: raya("rakhi.jpg"), alt: "A rakhi of twisted threads being tied on a wrist", x: 86.51, y: 10770.69, w: 602.8, h: 366.95 },
+      { kind: "image", src: raya("dhaaga-stamp.jpg"), alt: "A maroon card framing a group photo as a postage stamp under the Dhaaga wordmark", x: 758, y: 10768.39, w: 369.25, h: 369.25 },
+
+      { kind: "image", src: raya("closing.jpg"), alt: "The Raya logo, “raya by Bhumi Goyanka”, in maroon on sand", x: 0, y: 11168.5, w: 1195.28, h: 429.1, stack: "bleed" },
     ],
   },
 ];
