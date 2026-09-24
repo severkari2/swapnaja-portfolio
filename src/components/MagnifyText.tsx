@@ -11,7 +11,7 @@ interface MagnifyTextProps {
   radiusScale?: number;
   /** Inward pull at the pointer. Negative values magnify outward instead. */
   strength?: number;
-  /** Background color of the container. Defaults to #D2042D. */
+  /** Background color of the container. Defaults to #74070E. */
   backgroundColor?: string;
 }
 
@@ -76,7 +76,7 @@ export const MagnifyText: React.FC<MagnifyTextProps> = ({
   baseFontSize,
   radiusScale = 1.6,
   strength = 1,
-  backgroundColor = "#D2042D",
+  backgroundColor = "#74070E",
 }) => {
   const wrapRef = useRef<HTMLDivElement>(null);
   const spanRef = useRef<HTMLSpanElement>(null);
@@ -340,12 +340,14 @@ export const MagnifyText: React.FC<MagnifyTextProps> = ({
       gl.getExtension("WEBGL_lose_context")?.loseContext();
       setActive(false);
     };
-  }, [text, baseFontSize, radiusScale, strength]);
+    // `className` carries the font, size and colour the raster is baked from, so a change
+    // to it has to re-run `layout()` — otherwise the texture keeps the previous type.
+  }, [text, className, baseFontSize, radiusScale, strength]);
 
   return (
     <div
       ref={wrapRef}
-      className="relative inline-block cursor-default select-none bg-[#D2042D]"
+      className="relative inline-block cursor-default select-none"
       style={{ backgroundColor }}
     >
       <span

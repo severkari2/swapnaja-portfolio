@@ -77,9 +77,10 @@ const CSS = `
   --wf-ink: #000;
   --wf-ease: cubic-bezier(0.33, 1, 0.68, 1);
   --wf-title-size: 50px;
-  --wf-label-size: 11px;
-  --wf-font-title: ui-serif, Georgia, "Times New Roman", serif;
-  --wf-font-label: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --wf-label-size: 13px;
+  /* Defaults to the site type system; override per instance only to break from it. */
+  --wf-font-title: var(--font-display);
+  --wf-font-label: var(--font-sans);
   /* Clamped so a folder narrower than the tab cannot have its notch overrun its own edge. */
   --wf-tab: min(var(--wf-tab-w), 55%);
 
@@ -141,7 +142,8 @@ a.wf-panel { cursor: pointer; }
   font-family: var(--wf-font-label);
   font-size: var(--wf-label-size);
   line-height: 1;
-  letter-spacing: 0.08em;
+  /* Matches the site-wide "label" utility in globals.css. */
+  letter-spacing: 0.22em;
 }
 
 .wf-title {
