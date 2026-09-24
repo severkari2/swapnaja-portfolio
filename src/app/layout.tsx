@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
-import { Bodoni_Moda, Libre_Baskerville, Montserrat } from "next/font/google";
+import {
+  Bodoni_Moda,
+  Libre_Baskerville,
+  Montserrat,
+  Tinos,
+} from "next/font/google";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import "./globals.css";
@@ -32,6 +37,18 @@ const montserrat = Montserrat({
   display: "swap",
 });
 
+// Header and footer links are set in Times italic. The system Times is preferred (see
+// --font-times); Tinos is the fallback for platforms without it. Not preloaded, since on
+// Windows and macOS the browser never needs to fetch it.
+const tinos = Tinos({
+  variable: "--font-tinos",
+  weight: "400",
+  style: "italic",
+  subsets: ["latin"],
+  display: "swap",
+  preload: false,
+});
+
 export const metadata: Metadata = {
   title: "Swapnaja — Graphic Designer",
   description:
@@ -46,11 +63,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${bodoni.variable} ${baskerville.variable} ${montserrat.variable} h-full antialiased`}
+      className={`${bodoni.variable} ${baskerville.variable} ${montserrat.variable} ${tinos.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-paper text-ink">
         <Header />
-        <main className="flex-1">{children}</main>
+        <main className="flex flex-1 flex-col">{children}</main>
         <Footer />
       </body>
     </html>

@@ -24,21 +24,23 @@ exposes them as Tailwind utilities. **Never hardcode a hex or a font stack in a 
 | `--ink` | `text-ink` | `#1a1613` — warm near-black |
 | `--burgundy` | `bg-burgundy` | `#74070e` — hero only |
 | `--rule` | `border-rule` | 14% ink — hairlines |
-| `--header-h` | — | `76px`, `100px` from `sm:` up. Full-bleed sections use `min-h-[calc(100svh-var(--header-h))]`, so change it in `globals.css` only — never hardcode the bar height. |
+| `--header-h` | — | `76px`, `140px` from `sm:` up. Full-bleed sections use `min-h-[calc(100svh-var(--header-h))]`, so change it in `globals.css` only — never hardcode the bar height. |
 
-The one exception is `MagnifyText`, which needs the burgundy as a literal JS string
-(`backgroundColor="#74070E"`) because it feeds a WebGL clear colour, not CSS.
+`MagnifyText` takes its text colour from `className` (`text-burgundy`) and its container
+background from a `backgroundColor` prop that defaults to `transparent`, so it sits on the
+paper. The WebGL canvas itself always clears to transparent.
 
 ## Typography
 
-Three families, **one per role**. Loaded in `src/app/layout.tsx` via `next/font/google`
-and self-hosted. Pick by role, not by taste.
+Four families, **one per role**. Loaded in `src/app/layout.tsx` via `next/font/google`
+and self-hosted (Times is the system face, with Tinos as the fallback). Pick by role, not by taste.
 
 | Family | Token | Utility | Role |
 |---|---|---|---|
 | Bodoni Moda | `--font-bodoni` | `font-display` | Headings, the wordmark, the hero. Nothing else. |
 | Libre Baskerville | `--font-baskerville` | `font-serif` | Prose. Static family — weights named in the loader; it ships **no bold italic**, so never pass a `style` array with `700`. |
-| Montserrat | `--font-montserrat` | `font-sans` | All chrome: nav, labels, buttons. Also the `body` default. Variable 100–900. |
+| Montserrat | `--font-montserrat` | `font-sans` | The home hero (`-hello.`), labels, buttons. Also the `body` default. Variable 100–900. |
+| Times italic | `--font-times` | `nav-link` | Header and footer links only, lowercase: *works*, *about*, *e-mail*, *ig*, *in*. System `Times New Roman`/`Times` first; Tinos italic (self-hosted, not preloaded) is the fallback. |
 
 Three tiers, applied everywhere:
 1. **Display** — `font-display`, `clamp(2.25rem,4vw,3.5rem)` for section headings up to
@@ -48,7 +50,9 @@ Three tiers, applied everywhere:
    `max-w-[60ch]`. Libre Baskerville has a large x-height and needs the extra leading.
 3. **Micro-caps** — the `label` utility (custom `@utility` in `globals.css`): Montserrat,
    uppercase, 15px / `0.22em` by default. Every nav item, section eyebrow, footer link and
-   text button uses it. Use `label`; don't respell it as a utility chain.
+   text button uses it, apart from the header and footer. Use `label`; don't respell it as a utility chain.
+4. **Nav links** — the `nav-link` utility: Times italic, lowercase copy,
+   `clamp(1.25rem,2.2vw,2rem)` via `--nav-size`. Header and footer only.
 
 `label` reads its size and tracking from `--label-size` / `--label-tracking`, so call
 sites tune it with arbitrary properties — `label [--label-size:13px] sm:[--label-size:17px]`
@@ -73,7 +77,7 @@ Pages render section content only — they never draw their own nav.
 
 | Route | State |
 |---|---|
-| `/` | Built. Burgundy `-hello.` hero + `WHO AM I?` section + "More about me" → `/about`. |
+| `/` | Built, matching `Home.png`: a single screen with only the `-hello.` `MagnifyText` hero (Montserrat, `text-burgundy`, on paper). |
 | `/work` | Placeholder awaiting content. |
 | `/about` | Placeholder awaiting content. |
 
@@ -83,9 +87,11 @@ inspect).
 
 ## Components
 
-- `Header` / `Footer` — server components. Header is a sticky 3-column grid so the middle
-  link stays optically centred regardless of the wordmark's width.
-- `ArrowUpRight` — the shared hairline diagonal arrow. Put `group` on the parent link to
+- `Header` / `Footer` — server components, laid out as in `Home.png`. Header is a sticky
+  3-column grid with an empty first column, *works* centred and *about* on the right. Footer
+  has *e-mail* on the left and *ig* / *in* on the right, with no top rule. `<main>` is a flex
+  column, so a page section with `flex-1` fills exactly the space between them.
+- `ArrowUpRight` — the shared hairline diagonal arrow (currently unused). Put `group` on the parent link to
   get the hover nudge. **There is no icon library, by design** — inline SVG only. Brand
   logos would fight the aesthetic; don't add `react-icons` or `lucide`.
 - `MagnifyText` — WebGL2 lens over canvas-rasterized text. Two things bite:

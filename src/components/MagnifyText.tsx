@@ -11,7 +11,7 @@ interface MagnifyTextProps {
   radiusScale?: number;
   /** Inward pull at the pointer. Negative values magnify outward instead. */
   strength?: number;
-  /** Background color of the container. Defaults to #74070E. */
+  /** Background color of the container. Defaults to transparent, so the page shows through. */
   backgroundColor?: string;
 }
 
@@ -76,7 +76,7 @@ export const MagnifyText: React.FC<MagnifyTextProps> = ({
   baseFontSize,
   radiusScale = 1.6,
   strength = 1,
-  backgroundColor = "#74070E",
+  backgroundColor = "transparent",
 }) => {
   const wrapRef = useRef<HTMLDivElement>(null);
   const spanRef = useRef<HTMLSpanElement>(null);

@@ -11,7 +11,7 @@
 
 @media (min-width: 640px) {
   :root {
-    --header-h: 100px;
+    --header-h: 140px;
   }
 }
 
@@ -25,6 +25,9 @@
   --font-display: var(--font-bodoni), ui-serif, Georgia, "Times New Roman", serif;
   --font-serif: var(--font-baskerville), Georgia, "Times New Roman", serif;
   --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+  /* Header and footer links. The system Times comes first; Tinos (metric-compatible with
+     Times New Roman) is self-hosted for platforms that ship neither. */
+  --font-times: "Times New Roman", Times, var(--font-tinos), serif;
 }
 
 body {
@@ -44,4 +47,13 @@ body {
   line-height: 1;
   text-transform: uppercase;
   letter-spacing: var(--label-tracking, 0.22em);
+}
+
+/* Header and footer links: lowercase Times italic, as drawn on Home.png. Size comes through
+   a custom property, same pattern as `label`. */
+@utility nav-link {
+  font-family: var(--font-times);
+  font-style: italic;
+  font-size: var(--nav-size, clamp(1.25rem, 2.2vw, 2rem));
+  line-height: 1;
 }
