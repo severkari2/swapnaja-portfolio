@@ -1,6 +1,6 @@
 // Project pages under /work/[slug], rebuilt from the designer's PDF layouts rather than
-// embedding the PDFs (Brew for You's is 288MB and Nektar's 302MB; their images come to
-// about 2.5MB each).
+// embedding the PDFs (Brew for You's is 288MB, Nektar's 302MB and Surahi's 294MB; their
+// images come to about 2.5–3MB each).
 //
 // Every position is in PDF points from the page's top-left corner, measured off the PDF
 // itself. From lg up the page lays each block out at exactly that spot, scaled to the
@@ -85,10 +85,15 @@ export interface Project {
 
 const brew = (file: string) => `/work/brew-for-you/${file}`;
 const nektar = (file: string) => `/work/nektar/${file}`;
+const surahi = (file: string) => `/work/surahi/${file}`;
 
 // Nektar's own inks: its orange, and the rust it sets its Times italic lines in.
 const nektarOrange = "#ee6023";
 const nektarRust = "#af4025";
+
+// Surahi's olive, which fills the two menu panels, and the near-black of its third panel.
+const surahiOlive = "#4f4c1f";
+const surahiBlack = "#231f20";
 
 export const projects: Project[] = [
   {
@@ -289,6 +294,143 @@ export const projects: Project[] = [
       { kind: "image", src: nektar("eyes-closed.jpg"), alt: "A young man with his eyes closed, drinking from a can of Nektar pink guava", x: 611.09, y: 5279.6, w: 506.41, h: 305.37 },
       { kind: "image", src: nektar("chessboard.jpg"), alt: "Hands over a drinking-game chessboard of shot glasses", x: 68.56, y: 5615.37, w: 503.84, h: 715.21 },
       { kind: "image", src: nektar("straw.jpg"), alt: "A young man sipping through a straw, seen through a fisheye lens", x: 613.5, y: 5624.18, w: 504, h: 287.74 },
+    ],
+  },
+  {
+    slug: "surahi",
+    title: "Surahi",
+    folder: "branding",
+    cover: { src: surahi("logo.svg"), aspectRatio: 328.67 / 246.5 },
+    page: { width: 1195.28, height: 9899.33 },
+    face: "sans",
+    blocks: [
+      { kind: "image", src: surahi("hero.jpg"), alt: "The Surahi lounge: patterned sofas beneath the Surahi wall sign, lit by a brass lantern", x: 0, y: 0, w: 1195.28, h: 798.97, stack: "bleed" },
+      { kind: "image", src: surahi("about-stand.jpg"), alt: "A tiered stand of lime wedges and shot glasses on the bar, framed as a postage stamp", x: 496.81, y: 900.24, w: 197.04, h: 294.1 },
+      { kind: "text", role: "title", x: 507.67, baseline: 1243.87, size: 32.97, lines: ["About Surahi"] },
+      {
+        kind: "text",
+        role: "body",
+        x: 453.82,
+        baseline: 1275.81,
+        size: 12,
+        lines: [
+          "Surahi is a poolside bar at Wyndham Resort, Udaipur,",
+          "created for laid-back days, good food, and refreshing",
+          "drinks. Blending a relaxed poolside atmosphere with a",
+          "vibrant dining experience, Surahi is a space to unwind,",
+          "sip, snack, and soak in the Udaipur sun.",
+        ],
+      },
+
+      { kind: "image", src: surahi("logo.svg"), alt: "The Surahi logo, an illustrated surahi flowing into the wordmark, in olive on sand", x: 88.54, y: 1477.93, w: 328.67, h: 246.5, stack: "half" },
+      { kind: "image", src: surahi("logomark.svg"), alt: "The Surahi logomark, the illustrated surahi on an olive pebble", x: 817.44, y: 1477.93, w: 323.37, h: 198.79, stack: "half" },
+      { kind: "text", role: "label", x: 109.2, baseline: 1755.9, size: 12, lines: ["LOGO"], stack: "half" },
+      { kind: "text", role: "label", x: 838.26, baseline: 1698.39, size: 12, lines: ["LOGOMARK"], stack: "half" },
+      { kind: "image", src: surahi("pick-your-mood.jpg"), alt: "A cocktail card: a coupe of orange liqueur above the line “Pick your mood, we’ll pour the rest.”", x: 461, y: 1391.79, w: 292, h: 526.5 },
+
+      { kind: "text", role: "heading", x: 68.59, baseline: 2078.09, size: 24, lines: ["THOUGHT BEHIND", "THE LOGO"] },
+      { kind: "image", src: surahi("wordmark.svg"), alt: "The Surahi logo in black", x: 403.97, y: 2156.56, w: 315.06, h: 123.44 },
+      {
+        kind: "text",
+        role: "body",
+        x: 480.21,
+        baseline: 2071.3,
+        size: 12,
+        lines: [
+          "The surahi flows naturally into",
+          "the wordmark, making the",
+          "symbol and typography feel like",
+          "one cohesive mark rather than",
+          "separate elements.",
+        ],
+      },
+      { kind: "rule", x: 489.81, y: 2144.97, w: 1, h: 44.52 },
+      {
+        kind: "text",
+        role: "body",
+        x: 195.02,
+        baseline: 2188.14,
+        size: 12,
+        lines: [
+          "The illustrated",
+          "surahi acts as the",
+          "key visual symbol,",
+          "immediately",
+          "connecting the",
+          "identity to Indian",
+          "culture, craft and",
+          "traditional vessels.",
+        ],
+      },
+      { kind: "rule", x: 343.18, y: 2187.61, w: 44.52, h: 1 },
+      { kind: "rule", x: 632.87, y: 2294.77, w: 1, h: 44.52 },
+      {
+        kind: "text",
+        role: "body",
+        x: 562.1,
+        baseline: 2356.78,
+        size: 12,
+        lines: [
+          "A bold, rounded serif typeface",
+          "gives the logo a soft, elegant and",
+          "handcrafted character,",
+          "balancing tradition with a",
+          "contemporary feel.",
+        ],
+      },
+      { kind: "image", src: surahi("stamp.svg"), alt: "An olive postage stamp with a cream sun over waves", x: 813.66, y: 2035.24, w: 278.54, h: 402.62 },
+
+      { kind: "text", role: "label", x: 96.67, baseline: 2548.82, size: 12, lines: ["COLOR"] },
+      { kind: "image", src: surahi("swatch-brown.svg"), alt: "Colour swatch: brown, with a cream swirl motif", x: 97.24, y: 2572.3, w: 177.69, h: 287.74, stack: "half" },
+      { kind: "image", src: surahi("swatch-cream.svg"), alt: "Colour swatch: cream, with an olive swirl motif", x: 294.16, y: 2572.3, w: 177.69, h: 287.74, stack: "half" },
+      { kind: "text", role: "label", x: 639.89, baseline: 2548.82, size: 12, lines: ["TYPOGRAPHY"] },
+      {
+        kind: "text",
+        role: "display",
+        x: 639.89,
+        baseline: 2607.91,
+        size: 48,
+        lines: [
+          "Primary font",
+          { text: "Montserrat", italic: true },
+          "",
+          "Secondary font",
+          { text: "Baskerville", italic: true },
+        ],
+      },
+
+      { kind: "image", src: surahi("postcard.jpg"), alt: "Surahi postcards over banana leaves, one showing the resort’s domed pavilion", x: 73.17, y: 2964.83, w: 496.05, h: 399.35 },
+      { kind: "image", src: surahi("mindful-mover.jpg"), alt: "A poster reading “For the mindful mover”, beside a woman stretching on a towel in the sand", x: 75.24, y: 3394.19, w: 344.64, h: 191.52 },
+      { kind: "image", src: surahi("poolside.jpg"), alt: "Legs stretched out on a poolside lounger, beside an aperitif and a deck of cards", x: 594.18, y: 2964.83, w: 513.08, h: 641.12 },
+
+      { kind: "text", role: "label", x: 79.94, baseline: 3673.15, size: 12.23, lines: ["BEVERAGE MENU"] },
+      { kind: "rule", x: 74.37, y: 3713.09, w: 1056.34, h: 575.18, color: surahiOlive },
+      { kind: "image", src: surahi("beverage-menu.jpg"), alt: "The Surahi beverage menu, an embossed green cover with the logo in cream, laid on a dinner plate", x: 78.07, y: 4315.72, w: 571.43, h: 588.67, stack: "half" },
+      { kind: "image", src: surahi("menu-holder.jpg"), alt: "A wooden menu holder engraved with the Surahi logo", x: 693.32, y: 4315.72, w: 437.39, h: 604.49, stack: "half" },
+      { kind: "text", role: "label", x: 74.37, baseline: 4953.41, size: 12.23, lines: ["basic idea"] },
+      { kind: "image", src: surahi("glass-sketch.jpg"), alt: "A black-and-white photo of a hand at the table, with a wine glass picked out in cream", x: 74.59, y: 4997.78, w: 518.57, h: 384.92 },
+      { kind: "image", src: surahi("drinks-menu.jpg"), alt: "The open Surahi drinks menu, listing cocktails such as Khaade Masaale and Marygranate Mimosa", x: 611.01, y: 4997.78, w: 519.7, h: 634.14 },
+      { kind: "image", src: surahi("napkin.jpg"), alt: "An olive napkin printed with the Surahi logo, under the foot of a glass", x: 74.37, y: 5414.84, w: 383.61, h: 217.08 },
+      { kind: "image", src: surahi("shaker.jpg"), alt: "A bartender’s cocktail shaker, blurred mid-shake", x: 126.71, y: 5654.26, w: 326.57, h: 194.69, stack: "half" },
+      { kind: "image", src: surahi("pour.svg"), alt: "A line drawing of hands pouring from a bottle, in olive", x: 860.48, y: 5698.46, w: 333.43, h: 328.43, stack: "half" },
+      { kind: "image", src: surahi("thank-you-card.jpg"), alt: "A brown card framing a pavilion arch, reading “would love to host you again”", x: 74.37, y: 5883.97, w: 236.11, h: 292.03, stack: "half" },
+      { kind: "image", src: surahi("reserved.jpg"), alt: "A “Reserved” table card carrying the Surahi mark, on a wooden stand", x: 87.42, y: 6198.46, w: 405.15, h: 513.37, stack: "half" },
+      { kind: "image", src: surahi("apron.jpg"), alt: "An olive apron embroidered with the Surahi logo", x: 329.68, y: 5894.03, w: 507.81, h: 292.02 },
+      { kind: "rule", x: 504.42, y: 6199.13, w: 511.52, h: 305.38, color: surahiBlack },
+
+      { kind: "text", role: "label", x: 71.01, baseline: 6773.63, size: 12.23, lines: ["FOOD MENU"] },
+      { kind: "rule", x: 62.4, y: 6821.97, w: 1056.34, h: 575.18, color: surahiOlive },
+      { kind: "image", src: surahi("food-menu.jpg"), alt: "The open Surahi food menu in a ring binder, listing vegetarian and non-vegetarian starters", x: 62.4, y: 7457.15, w: 604.49, h: 604.49, stack: "half" },
+      { kind: "image", src: surahi("tablet-menu.jpg"), alt: "Hands holding the Surahi snack menu at a café table", x: 691.44, y: 7456.96, w: 427.3, h: 604.87, stack: "half" },
+      { kind: "image", src: surahi("platter.jpg"), alt: "Guests reaching for canapés served on banana leaves", x: 456.68, y: 8106.69, w: 662.06, h: 417.23 },
+      { kind: "image", src: surahi("serve.svg"), alt: "A line drawing of one figure seasoning a dish that another holds out, in olive", x: 62.26, y: 8075.81, w: 361.81, h: 365.23, stack: "half" },
+      { kind: "image", src: surahi("hallway.jpg"), alt: "A painted palace corridor with the Surahi logomark", x: 698.77, y: 8589.72, w: 419.97, h: 473.25, stack: "half" },
+      { kind: "image", src: surahi("motifs.jpg"), alt: "A painted mural of cranes, pheasants and palms by the water, framed as a postage stamp", x: 82.58, y: 8588.13, w: 566.39, h: 391.84 },
+      { kind: "text", role: "body", x: 86.77, baseline: 9024.97, size: 21.75, lines: ["personalised motifs"] },
+
+      // The closing panel is one picture: the resort photo's rounded corners sit on the
+      // panel's cream, which is not the page's paper.
+      { kind: "image", src: surahi("closing.jpg"), alt: "Wyndham Resort, Udaipur, at dusk, beside the Surahi logo", x: 62.4, y: 9146.92, w: 1056.34, h: 611.77 },
     ],
   },
 ];
