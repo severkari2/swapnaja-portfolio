@@ -53,43 +53,35 @@ const folders: WorkFolderProps["items"] = [
   },
 ];
 
-// One pixel of the 1400px-wide mockup (Work-hero-section.jpeg). The folders' widths are
-// percentages, so everything else about them scales with the section to keep the tabs,
-// notches and titles in proportion. Below 700px WorkFolder stacks them at fixed sizes.
+// In mockup pixels: --u comes from the work layout. The folders' widths are percentages,
+// so everything else about them scales with the section to keep the tabs, notches and
+// titles in proportion. Below 700px WorkFolder stacks them at fixed sizes.
 const u = (px: number) => `calc(${px} * var(--u))`;
 
 export default function Work() {
   return (
-    <section aria-labelledby="work-title" className="@container">
-      <div className="pb-[calc(74*var(--u))] [--u:calc(100cqw/1400)]">
-        <div className="grid grid-cols-2 pb-[max(4rem,calc(169*var(--u)))] pt-[calc(13*var(--u))] font-sans text-[max(1.75rem,calc(51*var(--u)))] leading-none">
-          <h1 id="work-title" className="pl-[max(1.5rem,calc(25*var(--u)))]">
-            works
-          </h1>
-          <p className="pl-[calc(6*var(--u))]">archive</p>
-        </div>
-
-        <WorkFolder
-          items={folders}
-          labels={false}
-          rowHeight={u(120)}
-          panelHeight={u(156)}
-          tabWidth={u(322)}
-          photoWidth={u(155)}
-          photoGap={u(137)}
-          lift={u(12)}
-          dimColor="color-mix(in srgb, var(--ink) 5%, var(--paper))"
-          dimInk="var(--placeholder)"
-          style={
-            {
-              "--wf-tab-rise": u(36),
-              "--wf-pad": u(56),
-              "--wf-pad-top": u(40),
-              "--wf-title-size": u(63),
-            } as CSSProperties
-          }
-        />
-      </div>
-    </section>
+    <>
+      <h1 className="sr-only">works</h1>
+      <WorkFolder
+        items={folders}
+        labels={false}
+        rowHeight={u(120)}
+        panelHeight={u(156)}
+        tabWidth={u(322)}
+        photoWidth={u(155)}
+        photoGap={u(137)}
+        lift={u(12)}
+        dimColor="color-mix(in srgb, var(--ink) 5%, var(--paper))"
+        dimInk="var(--placeholder)"
+        style={
+          {
+            "--wf-tab-rise": u(36),
+            "--wf-pad": u(56),
+            "--wf-pad-top": u(40),
+            "--wf-title-size": u(63),
+          } as CSSProperties
+        }
+      />
+    </>
   );
 }

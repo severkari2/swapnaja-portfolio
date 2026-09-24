@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type FocusEvent } from "react";
 
 // Scroll distance ignored before the direction counts, so trackpad jitter can't flicker a bar.
@@ -14,17 +15,27 @@ const REVEAL_ZONE = 48;
 // The spacer keeps the bar's at-rest height in the flow, so hiding or resizing the bar never
 // moves the page. The bar exposes data-scrolled (page is off the top) for callers to style,
 // e.g. the header's compact height.
+//
+// On the routes in hiddenOn (and their sub-pages) the bar starts hidden and scrolling never
+// brings it back: only the pointer at its edge or keyboard focus does. It also drops its
+// spacer there, so the page can use the space the bar would have kept.
 export function AutoHideBar({
   edge,
   spacerClassName,
   className = "",
+  hiddenOn = [],
   children,
 }: {
   edge: "top" | "bottom";
   spacerClassName: string;
   className?: string;
+  hiddenOn?: string[];
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const tucked = hiddenOn.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
+  );
   const [scrolled, setScrolled] = useState(false);
   const [scrolledAway, setScrolledAway] = useState(false);
   const [pointerNear, setPointerNear] = useState(false);
@@ -81,11 +92,11 @@ export function AutoHideBar({
     };
   }, [edge]);
 
-  const hidden = scrolledAway && !pointerNear && !focused;
+  const hidden = (tucked || scrolledAway) && !pointerNear && !focused;
   const offscreen = edge === "top" ? "-translate-y-full" : "translate-y-full";
 
   return (
-    <div className={`shrink-0 ${spacerClassName}`}>
+    <div className={`shrink-0 ${tucked ? "" : spacerClassName}`}>
       <div
         ref={bar}
         data-scrolled={scrolled || undefined}

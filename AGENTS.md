@@ -79,7 +79,8 @@ Pages never draw their own nav or footer. Everything except home lives in the `(
 | Route | State |
 |---|---|
 | `/` | Built. Screen 1 matches `Home.png`: the `-hello.` `MagnifyText` hero (Montserrat, `text-burgundy`, on paper) filling `--view-h`, so it lands between the header and footer. Screen 2 matches `Home-section-2.png`: a full-bleed landscape photo, and a burgundy about card (Times italic + Montserrat) with a portrait beneath it. Both photos are `ImageHolder` placeholders. Screen 3 is `AboutMe` on paper. |
-| `/work` | Hero built to match `Work-hero-section.jpeg`: *works* / *archive* in Montserrat, then `WorkFolder` with *branding*, *packaging* and *editorial* (burgundy / stone / burgundy). Folder cards and links (`#branding`, …) are placeholders. |
+| `/work` | Hero built to match `Work-hero-section.jpeg`. `work/layout.tsx` holds the *works* / *archive* switch (`WorkSwitch`, Montserrat; the current view is in ink, the other is dimmed) and defines `--u`. This page renders `WorkFolder` with *branding*, *packaging* and *editorial* (burgundy / stone / burgundy). Folder cards and links (`#branding`, …) are placeholders. The footer stays hidden here. |
+| `/work/archive` | Filler: three `ImageHolder` tiles covering the same area as the folders, until the archive hero is specified. |
 | `/about` | Placeholder awaiting content. |
 
 Design inspiration reference: `https://swapnajasevekari.framer.website/` (client-rendered
@@ -100,6 +101,10 @@ inspect).
   fixed bar never moves the page. It sets `data-scrolled` once the page leaves the top; the
   header styles that as `data-scrolled:h-[var(--header-h-compact)]`. Hiding uses
   `translate`, so `--view-h` never changes.
+
+  `hiddenOn` lists routes, sub-pages included. On those routes the bar starts hidden and
+  scrolling never shows it; only the pointer reveal and keyboard focus do. The spacer is
+  dropped there too. The footer uses it for `/work`, where it would cover the folders.
 - `Header` / `Footer` — server components, laid out as in `Home.png`. Header is a 3-column
   grid: *home*, *works* centred, *about*. Each link is a
   `NavLink` (client, `usePathname`) that turns `text-burgundy` and sets `aria-current` on

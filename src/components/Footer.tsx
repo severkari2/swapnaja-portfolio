@@ -11,10 +11,12 @@ const socials = [
 export function Footer() {
   return (
     // Pinned to the bottom of the viewport on every page; rendered once, by the root layout.
+    // Kept out of the way on the work pages, where it would sit on top of the folders.
     <AutoHideBar
       edge="bottom"
       spacerClassName="h-[var(--footer-h)]"
       className="h-[var(--footer-h)]"
+      hiddenOn={["/work"]}
     >
       <footer className="flex h-full items-end justify-between bg-paper px-6 pb-10 sm:px-[7vw] sm:pb-16">
         <a
