@@ -82,7 +82,7 @@ Pages never draw their own nav or footer. Everything except home lives in the `(
 | `/work` | Hero built to match `Work-hero-section.jpeg`: the *works* / *archive* switch (`WorkSwitch`, Montserrat; the current view is in ink, the other is dimmed), then `WorkFolder` with *branding*, *packaging* and *editorial* (burgundy / stone / burgundy). Folder cards and links (`#branding`, …) are placeholders. `work/layout.tsx` defines `--u` (one pixel of the 1400px mockups, from `100cqw`) for everything under `/work`. The footer stays hidden here. |
 | `/work/archive` | Matches `archive-section.jpeg`: *archives* (Times italic) and three captioned photos linking to the entries. No header or footer. Both are hidden here and come back at their screen edge. |
 | `/work/archive/[slug]` | *i model*, *i document*, *behind the scenes* (`archive-section-*.jpeg`). One page layout, fed by `archive/entries.ts`. Each entry has its copy with hand-set line breaks, plus the positions measured off its own mockup, which differ slightly between them. The collage is one `ImageHolder` (603×819 mockup px), because each mockup's collage is a single composed image. Only the listed slugs exist (`dynamicParams = false`). |
-| `/about` | Placeholder awaiting content. |
+| `/about` | Matches `about-page.jpeg` and `about-second-section.jpeg`, two 1400×842 frames in `--u` from `md:` up, stacked below. Hero: *about* (Times italic) centred, then Montserrat copy with Times italic burgundy words at the **same** size (`0.99em`, not the `AboutMe` `1.18em`), and an `ImageHolder` portrait. Second screen: *what i contribute to the ~~table~~?* with *team* above it, the table drawing, and four burgundy Montserrat labels around it. The drawing is `public/about/team-table.svg`, traced from the mockup, so it is crisp at any size. The heading carries `0.016em` tracking because the mockup's Times sets wider than Times New Roman. No header or footer. |
 
 Design inspiration reference: `https://swapnajasevekari.framer.website/` (client-rendered
 Framer site — plain fetching returns only the bio copy, so it needs a real browser to
@@ -106,7 +106,8 @@ inspect).
   `hiddenOn` lists routes, sub-pages included. On those routes the bar starts hidden and
   scrolling never shows it; only the pointer reveal and keyboard focus do. The spacer is
   dropped there too. The footer uses it for `/work`, where it would cover the folders. The
-  header uses it for `/work/archive`, whose mockups fill the screen from the top edge.
+  header uses it for `/work/archive`, whose mockups fill the screen from the top edge. Both
+  use it for `/about`, whose mockups draw neither bar.
 - `QuietLink` — faint micro-caps link, for pages whose mockups draw no navigation (the
   archive). Keep these out of the bars' reveal zones: the top and bottom 48px, plus the
   whole bar once it shows. The archive keeps them top-right, on the title's baseline.
