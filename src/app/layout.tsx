@@ -6,7 +6,6 @@ import {
   Tinos,
 } from "next/font/google";
 import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import "./globals.css";
 
 // Three families, one per role, drawn from three of the pairings on
@@ -67,8 +66,9 @@ export default function RootLayout({
     >
       <body className="flex min-h-full flex-col bg-paper text-ink">
         <Header />
-        <main className="flex flex-1 flex-col">{children}</main>
-        <Footer />
+        {/* Pages supply their own <main>; the footer comes from src/app/(pages)/layout.tsx,
+            or from the home page's first screen. */}
+        {children}
       </body>
     </html>
   );

@@ -5,6 +5,8 @@
   --ink: #1a1613;
   --burgundy: #74070e;
   --rule: rgba(26, 22, 19, 0.14);
+  /* Fill for image holders until real photos land. */
+  --placeholder: #d9d3ca;
   /* Full-bleed sections subtract this, so it has to be a token rather than a class. */
   --header-h: 76px;
 }
@@ -20,6 +22,7 @@
   --color-ink: var(--ink);
   --color-burgundy: var(--burgundy);
   --color-rule: var(--rule);
+  --color-placeholder: var(--placeholder);
   /* One family per role: Didone for display, a text serif for prose, a geometric sans
      for chrome. See AGENTS.md for which goes where. */
   --font-display: var(--font-bodoni), ui-serif, Georgia, "Times New Roman", serif;

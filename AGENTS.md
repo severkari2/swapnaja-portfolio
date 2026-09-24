@@ -24,6 +24,7 @@ exposes them as Tailwind utilities. **Never hardcode a hex or a font stack in a 
 | `--ink` | `text-ink` | `#1a1613` — warm near-black |
 | `--burgundy` | `bg-burgundy` | `#74070e` — hero only |
 | `--rule` | `border-rule` | 14% ink — hairlines |
+| `--placeholder` | `bg-placeholder` | `#d9d3ca` — fill for `ImageHolder` until real photos land |
 | `--header-h` | — | `76px`, `140px` from `sm:` up. Full-bleed sections use `min-h-[calc(100svh-var(--header-h))]`, so change it in `globals.css` only — never hardcode the bar height. |
 
 `MagnifyText` takes its text colour from `className` (`text-burgundy`) and its container
@@ -72,12 +73,15 @@ to build hierarchy with.
 
 ## Structure
 
-`src/app/layout.tsx` owns the shell: `<Header />`, `<main>{children}</main>`, `<Footer />`.
-Pages render section content only — they never draw their own nav.
+`src/app/layout.tsx` owns `<Header />`. Everything except home lives in the `(pages)` route
+group (URLs are unaffected), whose layout supplies `<main>` and `<Footer />`. Home supplies
+its own `<main>` and renders `<Footer />` at the bottom of its first screen, because the
+mockups put the contact row there and show nothing after the second section. Pages never
+draw their own nav.
 
 | Route | State |
 |---|---|
-| `/` | Built, matching `Home.png`: a single screen with only the `-hello.` `MagnifyText` hero (Montserrat, `text-burgundy`, on paper). |
+| `/` | Built. Screen 1 matches `Home.png`: the `-hello.` `MagnifyText` hero (Montserrat, `text-burgundy`, on paper) with the footer at the bottom of the screen. Screen 2 matches `Home-section-2.png`: a full-bleed landscape photo, and a burgundy about card (Times italic + Montserrat) with a portrait beneath it. Both photos are `ImageHolder` placeholders. |
 | `/work` | Placeholder awaiting content. |
 | `/about` | Placeholder awaiting content. |
 
@@ -87,10 +91,18 @@ inspect).
 
 ## Components
 
-- `Header` / `Footer` — server components, laid out as in `Home.png`. Header is a sticky
-  3-column grid with an empty first column, *works* centred and *about* on the right. Footer
+- `Header` / `Footer` — server components, laid out as in `Home.png`. Header is a 3-column
+  grid: *home*, *works* centred, *about*. It is **not sticky**: the home page's second
+  section is a full-bleed photo that the mockup shows with no bar over it. Each link is a
+  `NavLink` (client, `usePathname`) that turns `text-burgundy` and sets `aria-current` on
+  the page it points to. Footer
   has *e-mail* on the left and *ig* / *in* on the right, with no top rule. `<main>` is a flex
   column, so a page section with `flex-1` fills exactly the space between them.
+- `ImageHolder` — filler block for a photo not yet supplied. Swap for `next/image` with the
+  same sizing classes.
+- Home's second section is measured in `--u` (one pixel of the 1400px-wide mockup,
+  `max(1px, 0.07143vw)`), so its proportions track the mockup exactly and never shrink below
+  drawn size. Tune it in mockup pixels: `calc(17*var(--u))`.
 - `ArrowUpRight` — the shared hairline diagonal arrow (currently unused). Put `group` on the parent link to
   get the hover nudge. **There is no icon library, by design** — inline SVG only. Brand
   logos would fight the aesthetic; don't add `react-icons` or `lucide`.

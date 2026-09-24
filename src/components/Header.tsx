@@ -1,25 +1,26 @@
-import Link from "next/link";
+import { NavLink } from "./NavLink";
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 h-[var(--header-h)] w-full bg-paper">
+    // Not sticky: the home page's second section is a full-bleed photo that the mockup
+    // shows with no bar over it.
+    <header className="h-[var(--header-h)] w-full bg-paper">
       {/* Three equal columns rather than justify-between: "works" stays optically centred
-          no matter how wide the right-hand link gets. The first column is left empty. */}
-      <div className="grid h-full grid-cols-3 items-center px-6 sm:px-[7vw]">
-        <Link
-          href="/work"
-          className="nav-link col-start-2 justify-self-center transition-opacity hover:opacity-60"
-        >
+          no matter how wide the outer links get. */}
+      <nav
+        aria-label="Main"
+        className="grid h-full grid-cols-3 items-center px-6 sm:px-[7vw]"
+      >
+        <NavLink href="/" className="justify-self-start">
+          home
+        </NavLink>
+        <NavLink href="/work" className="justify-self-center">
           works
-        </Link>
-
-        <Link
-          href="/about"
-          className="nav-link justify-self-end transition-opacity hover:opacity-60"
-        >
+        </NavLink>
+        <NavLink href="/about" className="justify-self-end">
           about
-        </Link>
-      </div>
+        </NavLink>
+      </nav>
     </header>
   );
 }
