@@ -14,7 +14,7 @@ export interface WorkFolderImage {
   href?: string;
   /** Shown above the card while it is pointed at or focused. */
   title?: string;
-  /** width / height. Drives how far the card travels, since it hides behind the folder by exactly its own height. */
+  /** width / height of the picture. A picture shorter than `cardHeight` gets a blank filler under it. */
   aspectRatio?: number;
   /** Degrees. Overrides the angle this card would get from the fan. */
   rotate?: number;
@@ -70,6 +70,13 @@ export interface WorkFolderProps {
   /** Width of the raised tab on the folder's top-left. */
   tabWidth?: WorkFolderLength;
   photoWidth?: WorkFolderLength;
+  /**
+   * The least a card stands out of its folder once revealed. A card is a sheet with its
+   * picture at the top, and its foot always stays tucked inside the folder, so it reads
+   * as pulled up from inside rather than resting on top. Pictures shorter than this get
+   * a blank filler below them to make up the length. Defaults to `photoWidth`.
+   */
+  cardHeight?: WorkFolderLength;
   /** Centre-to-centre spacing of the cards. Below `photoWidth` they overlap. */
   photoGap?: WorkFolderLength;
   /** The fan spans -maxTilt … +maxTilt degrees, left to right. */
@@ -115,6 +122,13 @@ const CSS = `
   --wf-caption-ink: currentColor;
   /* How far a pointed-at card rises out of the fan. */
   --wf-card-lift: 8px;
+  /* The sheet each picture is mounted on, which shows as filler under a short one. A
+     shade whiter than the page, so it reads as paper stock rather than a hole. */
+  --wf-sheet: color-mix(in srgb, white 60%, var(--paper));
+  --wf-sheet-edge: var(--rule);
+  /* How deep a revealed card's foot stays inside its folder, before its tilt is added.
+     Covers the pointed-at lift, so even a raised card never shows its bottom edge. */
+  --wf-tuck: calc(var(--wf-card-lift) + 10px);
   /* Defaults to the site type system; override per instance only to break from it. */
   --wf-font-title: var(--font-times);
   --wf-font-label: var(--font-sans);
@@ -223,31 +237,45 @@ a.wf-panel { cursor: pointer; }
   transition: transform var(--wf-dur) var(--wf-ease);
 }
 
+/* A card is a sheet: its picture at the top, then filler down to the foot, which stays
+   inside the folder. Long enough to stand out by --wf-card-h, or by the picture's own
+   height when that is taller. */
 .wf-card {
+  --wf-foot: calc(var(--wf-tuck) + var(--wf-photo-w) * var(--wf-bleed));
   position: absolute;
   left: 50%;
   bottom: 0;
   z-index: var(--wf-z);
   display: block;
   width: var(--wf-photo-w);
-  aspect-ratio: var(--wf-ar);
+  height: calc(max(var(--wf-card-h), var(--wf-photo-w) / var(--wf-ar)) + var(--wf-foot));
   color: inherit;
   text-decoration: none;
   /* Fan out around the base of each card, so their bottom edges stay on one line. */
   transform-origin: 50% 100%;
+  /* Parked past its full height plus its tilt, and 2px more, so neither the sheet's
+     hairline nor an antialiased edge peeks out along the fold. */
   transform:
     translateX(calc(-50% + var(--wf-photo-gap) * var(--wf-x)))
-    translateY(calc(var(--wf-photo-w) * var(--wf-hidden)))
+    translateY(calc(100% + var(--wf-photo-w) * var(--wf-bleed) + 2px))
     rotate(var(--wf-r));
   transition: transform var(--wf-dur) var(--wf-ease);
+}
+
+.wf-sheet {
+  display: block;
+  height: 100%;
+  background-color: var(--wf-sheet);
+  box-shadow: 0 0 0 1px var(--wf-sheet-edge);
+  transition: translate var(--wf-dur) var(--wf-ease);
 }
 
 .wf-card-img {
   display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
+  aspect-ratio: var(--wf-ar);
   object-fit: cover;
-  transition: translate var(--wf-dur) var(--wf-ease);
 }
 
 /* Cards with a link or a title take the pointer; plain ones stay see-through, as before.
@@ -309,18 +337,18 @@ a.wf-card { cursor: pointer; }
 .wf-item:has(:is(.wf-panel, .wf-card-live):hover, :is(.wf-panel, .wf-card):focus-visible) .wf-card {
   transform:
     translateX(calc(-50% + var(--wf-photo-gap) * var(--wf-x)))
-    translateY(calc(-1 * var(--wf-oy)))
+    translateY(calc(var(--wf-foot) - var(--wf-oy)))
     rotate(var(--wf-r));
 }
 
-/* The pointed-at card comes to the front of the fan and rises. Only the picture and its
+/* The pointed-at card comes to the front of the fan and rises. Only the sheet and its
    caption move: the link itself stays put, so the card cannot slide out from under the
    pointer and flicker. */
 .wf-card-live:hover,
 .wf-card:focus-visible { z-index: 100; }
 
-.wf-card-live:hover .wf-card-img,
-.wf-card:focus-visible .wf-card-img {
+.wf-card-live:hover .wf-sheet,
+.wf-card:focus-visible .wf-sheet {
   translate: 0 calc(-1 * var(--wf-card-lift));
 }
 
@@ -336,7 +364,7 @@ a.wf-card { cursor: pointer; }
 }
 
 .wf-card:focus-visible { outline: none; }
-.wf-card:focus-visible .wf-card-img {
+.wf-card:focus-visible .wf-sheet {
   outline: 2px solid var(--wf-caption-ink);
   outline-offset: 3px;
 }
@@ -366,7 +394,7 @@ a.wf-card { cursor: pointer; }
   .wf-panel,
   .wf-photos,
   .wf-card,
-  .wf-card-img,
+  .wf-sheet,
   .wf-card-title {
     transition-duration: 0.01ms;
   }
@@ -374,16 +402,13 @@ a.wf-card { cursor: pointer; }
 `;
 
 /**
- * How far below the fold a card must sit for its rotated corners to stay hidden, as a
- * multiple of the card width, so it holds at any card size.
+ * How far a tilted card's corners swing past its level edges, as a multiple of the card
+ * width. Rotating about the bottom centre moves each corner up or down by (w/2)·sinθ. A
+ * revealed card tucks its foot this much deeper, so the raised bottom corner stays inside
+ * the folder, and a parked one sinks this much further, so the raised top corner does too.
  */
-function hiddenOffset(aspectRatio: number, deg: number) {
-  const height = 1 / aspectRatio;
-  const rad = (Math.abs(deg) * Math.PI) / 180;
-  // Rotating about the bottom edge lifts the far top corner by (w/2)·sinθ while the
-  // near one drops by h·(1 − cosθ); the card has to clear the difference.
-  const bleed = Math.max(0, Math.sin(rad) / 2 - height * (1 - Math.cos(rad)));
-  return height + bleed;
+function tiltBleed(deg: number) {
+  return Math.sin((Math.abs(deg) * Math.PI) / 180) / 2;
 }
 
 const length = (value: WorkFolderLength) =>
@@ -405,6 +430,7 @@ export const WorkFolder: React.FC<WorkFolderProps> = ({
   panelHeight = 152,
   tabWidth = 266,
   photoWidth = 155,
+  cardHeight,
   photoGap = 137,
   maxTilt = 11,
   lift = 12,
@@ -421,6 +447,7 @@ export const WorkFolder: React.FC<WorkFolderProps> = ({
     "--wf-panel-h": length(panelHeight),
     "--wf-tab-w": length(tabWidth),
     "--wf-photo-w": length(photoWidth),
+    "--wf-card-h": cardHeight === undefined ? "var(--wf-photo-w)" : length(cardHeight),
     "--wf-photo-gap": length(photoGap),
     "--wf-gap": length(gap),
     "--wf-lift": length(lift),
@@ -505,22 +532,24 @@ export const WorkFolder: React.FC<WorkFolderProps> = ({
                       "--wf-r": `${rotate}deg`,
                       "--wf-x": `${offsetX}`,
                       "--wf-oy": length(image.offsetY ?? 0),
-                      "--wf-hidden": `${hiddenOffset(aspectRatio, rotate)}`,
+                      "--wf-bleed": `${tiltBleed(rotate)}`,
                     } as React.CSSProperties,
                   };
                   const content = (
                     <>
-                      {/* Sources are arbitrary consumer strings, and next/image refuses
-                          SVG without images.dangerouslyAllowSVG. */}
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        className="wf-card-img"
-                        src={image.src}
-                        alt={image.alt ?? ""}
-                        loading="lazy"
-                        decoding="async"
-                        draggable={false}
-                      />
+                      <span className="wf-sheet">
+                        {/* Sources are arbitrary consumer strings, and next/image refuses
+                            SVG without images.dangerouslyAllowSVG. */}
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          className="wf-card-img"
+                          src={image.src}
+                          alt={image.alt ?? ""}
+                          loading="lazy"
+                          decoding="async"
+                          draggable={false}
+                        />
+                      </span>
                       {image.title && (
                         <span className="wf-card-title">{image.title}</span>
                       )}

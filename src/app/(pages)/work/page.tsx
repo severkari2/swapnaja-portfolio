@@ -10,8 +10,6 @@ export const metadata: Metadata = {
 };
 
 // One card per project filed in the folder: its cover, named on hover, linking to its page.
-// Each rises by the tab's height on top of the usual reveal, so the whole cover clears the
-// tab instead of the bottom of it hiding behind the folder.
 const projectCards = (folder: ProjectFolder) =>
   projects
     .filter((project) => project.folder === folder)
@@ -20,12 +18,9 @@ const projectCards = (folder: ProjectFolder) =>
       aspectRatio: project.cover.aspectRatio,
       title: project.title,
       href: projectHref(project),
-      offsetY: "var(--wf-tab-rise)",
     }));
 
-// Folders without projects yet still show the demo cards. Their aspect ratios stagger the
-// fan (a card hides behind its folder by exactly its own height) and were tuned against
-// the original reference recording.
+// Folders without projects yet still show the demo cards.
 const folders: WorkFolderProps["items"] = [
   {
     title: "branding",
@@ -45,11 +40,7 @@ const folders: WorkFolderProps["items"] = [
     span: 1.228,
     color: "var(--stone)",
     ink: "var(--burgundy)",
-    images: [
-      { src: "/folder-demo/photoworks-1.svg", aspectRatio: 232 / 174 },
-      { src: "/folder-demo/photoworks-2.svg", aspectRatio: 188 / 235 },
-      { src: "/folder-demo/photoworks-3.svg", aspectRatio: 240 / 160 },
-    ],
+    images: projectCards("packaging"),
   },
   {
     title: "editorial",

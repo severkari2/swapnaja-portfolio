@@ -1,5 +1,6 @@
 // Project pages under /work/[slug], rebuilt from the designer's PDF layouts rather than
-// embedding the PDFs (the Brew for You one is 288MB; its images come to about 2MB).
+// embedding the PDFs (Brew for You's is 288MB and Nektar's 302MB; their images come to
+// about 2.5MB each).
 //
 // Every position is in PDF points from the page's top-left corner, measured off the PDF
 // itself. From lg up the page lays each block out at exactly that spot, scaled to the
@@ -14,15 +15,21 @@ export type ProjectStack = "full" | "half" | "bleed";
 /**
  * Sets the type:
  * - title: Times italic, a section title.
- * - heading: Outfit, the uppercase section headings.
- * - label: Outfit, small captions such as "LOGO".
+ * - heading: the uppercase section headings, in the project's `face`.
+ * - label: small captions such as "LOGO", in the project's `face`.
  * - body: Montserrat Medium prose.
  * - display: Montserrat Medium at display size, one line per row even when stacked.
  */
 export type ProjectTextRole = "title" | "heading" | "label" | "body" | "display";
 
-/** A line of text as drawn. `italic` sets that line in Times italic. "" is a blank line. */
-export type ProjectLine = string | { text: string; italic: true };
+/** A run of text. `italic` sets it in Times italic. */
+export type ProjectRun = string | { text: string; italic: true };
+
+/** A line of text as drawn: one run, or several where the face changes mid-line. "" is a blank line. */
+export type ProjectLine = ProjectRun | ProjectRun[];
+
+/** The face of the heading and label roles, whichever the PDF sets them in. */
+export type ProjectFace = "outfit" | "sans";
 
 export type ProjectBlock =
   | {
@@ -45,15 +52,21 @@ export type ProjectBlock =
       size: number;
       /** One entry per line, broken where the PDF breaks it. */
       lines: ProjectLine[];
+      /** The PDF's own ink, where it isn't the page's. Drawn over any image it overlaps. */
+      color?: string;
       stack?: ProjectStack;
     }
   | {
-      /** A hairline callout. Only drawn in the PDF layout, since it points across it. */
+      /**
+       * A hairline callout, or a plain block of `color` (ink by default). Only drawn in the
+       * PDF layout, since it lines up with what is around it.
+       */
       kind: "rule";
       x: number;
       y: number;
       w: number;
       h: number;
+      color?: string;
     };
 
 export interface Project {
@@ -65,10 +78,17 @@ export interface Project {
   cover: { src: string; aspectRatio: number };
   /** Size of the PDF page the blocks were measured on, in points. */
   page: { width: number; height: number };
+  /** Defaults to Outfit. */
+  face?: ProjectFace;
   blocks: ProjectBlock[];
 }
 
 const brew = (file: string) => `/work/brew-for-you/${file}`;
+const nektar = (file: string) => `/work/nektar/${file}`;
+
+// Nektar's own inks: its orange, and the rust it sets its Times italic lines in.
+const nektarOrange = "#ee6023";
+const nektarRust = "#af4025";
 
 export const projects: Project[] = [
   {
@@ -162,6 +182,113 @@ export const projects: Project[] = [
       { kind: "image", src: brew("awning.jpg"), alt: "A navy café awning carrying the Brew for You logo", x: 614.47, y: 6860.02, w: 509.44, h: 297.29 },
       { kind: "image", src: brew("menu-banner.jpg"), alt: "The Brew for You logo over a café with a hand-painted menu banner", x: 71.36, y: 7181.55, w: 686.69, h: 373.24 },
       { kind: "image", src: brew("pour-over-post.jpg"), alt: "Social post: a steaming pour-over coffee", x: 800.06, y: 7189.63, w: 323.85, h: 365.16 },
+    ],
+  },
+  {
+    slug: "nektar",
+    title: "Nektar",
+    folder: "packaging",
+    cover: { src: nektar("logo.svg"), aspectRatio: 328.7 / 246.5 },
+    page: { width: 1195.28, height: 6711.83 },
+    face: "sans",
+    blocks: [
+      { kind: "image", src: nektar("hero-can.jpg"), alt: "Hands pulling the tab on a can of Nektar lemon-lime & orange caffeinated water, over a desk of handwritten scent notes", x: 0, y: 0, w: 1195.28, h: 798.97, stack: "bleed" },
+      { kind: "image", src: nektar("oranges.jpg"), alt: "Halved oranges, close up", x: 387.54, y: 945.71, w: 421.34, h: 262.76 },
+      { kind: "rule", x: 510.1, y: 853, w: 175.1, h: 175.1, color: nektarOrange },
+      { kind: "text", role: "title", x: 503.79, baseline: 1255.11, size: 32.97, lines: ["About Nektar"] },
+      {
+        kind: "text",
+        role: "body",
+        x: 452.11,
+        baseline: 1287.06,
+        size: 12,
+        lines: [
+          "Surahi is a poolside bar at Wyndham Resort, Udaipur,",
+          "created for laid-back days, good food, and refreshing",
+          "drinks. Blending a relaxed poolside atmosphere with a",
+          "vibrant dining experience, Surahi is a space to unwind,",
+          "sip, snack, and soak in the Udaipur sun.",
+        ],
+      },
+
+      { kind: "image", src: nektar("logo.svg"), alt: "The Nektar wordmark in white on orange", x: 71.5, y: 1483, w: 328.7, h: 246.5, stack: "half" },
+      { kind: "image", src: nektar("logomark.svg"), alt: "The Nektar logomark, a flared letter N, in white on orange", x: 800.4, y: 1483, w: 323.4, h: 198.8, stack: "half" },
+      { kind: "text", role: "label", x: 72.5, baseline: 1752, size: 12, lines: ["LOGO"], stack: "half" },
+      { kind: "text", role: "label", x: 797.64, baseline: 1698.39, size: 12, lines: ["LOGOMARK"], stack: "half" },
+      { kind: "image", src: nektar("can-in-orange.jpg"), alt: "A can of Nektar lemon-lime & orange nestled inside a split orange", x: 452.11, y: 1485.4, w: 320.71, h: 483.57 },
+
+      { kind: "text", role: "label", x: 82.5, baseline: 2053.75, size: 12, lines: ["COLOR"] },
+      { kind: "image", src: nektar("swatch-orange.svg"), alt: "Colour swatch: orange, with a cream swirl motif", x: 83.1, y: 2077.2, w: 177.7, h: 287.8, stack: "half" },
+      { kind: "image", src: nektar("swatch-guava.svg"), alt: "Colour swatch: guava pink, with a deep red swirl motif", x: 280, y: 2077.2, w: 177.7, h: 287.8, stack: "half" },
+      { kind: "text", role: "label", x: 625.72, baseline: 2053.75, size: 12, lines: ["TYPOGRAPHY"] },
+      {
+        kind: "text",
+        role: "display",
+        x: 625.71,
+        baseline: 2112.84,
+        size: 48,
+        lines: [
+          "Primary font",
+          { text: "Montserrat", italic: true },
+          "",
+          "Secondary font",
+          { text: "Bricolage Grotesque", italic: true },
+          { text: "Caveat", italic: true },
+        ],
+      },
+
+      { kind: "text", role: "heading", x: 81.66, baseline: 2508.97, size: 24, lines: ["THOUGHT BEHIND", "THE PACKAGING"] },
+      { kind: "image", src: nektar("net-of-oranges.jpg"), alt: "A can of Nektar lemon-lime & orange in a red net bag of oranges", x: 77.56, y: 2602.59, w: 505.72, h: 361.5 },
+      { kind: "image", src: nektar("friends-toast.jpg"), alt: "Friends reaching across a table to toast with cans of Nektar", x: 620.78, y: 2602.59, w: 505.72, h: 287.74 },
+      { kind: "image", src: nektar("back-pocket.jpg"), alt: "A can of Nektar pink guava tucked into the back pocket of a pair of jeans", x: 77.56, y: 3001.55, w: 326.44, h: 412.85, stack: "half" },
+      { kind: "image", src: nektar("motion-blur.jpg"), alt: "A runner in orange, blurred in motion on a track", x: 445.46, y: 3001.55, w: 236.2, h: 176.65, stack: "half" },
+      { kind: "image", src: nektar("guava-bowl.jpg"), alt: "A can of Nektar pink guava tipped into a steel coupe beside halved guavas", x: 711.65, y: 3001.55, w: 414.85, h: 581.56 },
+      // The PDF draws these under the back-pocket photo, so the export leaves that corner clear.
+      { kind: "image", src: nektar("labels.webp"), alt: "The flat can labels for lemon-lime & orange and pink guava, with Dozy the sloth surfing on one and lifting weights on the other", x: 56.8, y: 3377.9, w: 506.8, h: 803.9 },
+      {
+        kind: "text",
+        role: "body",
+        x: 711.65,
+        baseline: 3643.05,
+        size: 12,
+        lines: [
+          "The surface graphics for Nektar",
+          "are designed to feel bold,",
+          "energetic, and playful.",
+          "",
+          "The bright colour palette creates",
+          "an immediate visual impact,",
+          ["while the oversized ", { text: "NEKTAR", italic: true }],
+          "wordmark gives the cans a",
+          "strong, recognisable presence.",
+          "",
+          "Supporting illustrations, organic",
+          "shapes, and flavour-led elements",
+          "add a sense of movement and",
+          "personality, reflecting the",
+          "brand’s youthful and",
+          "adventurous character.",
+          "",
+          "The overall system balances",
+          "expressive graphics with clear",
+          "product information, making the",
+          "can feel fresh, contemporary,",
+          "and easy to recognise.",
+        ],
+      },
+
+      { kind: "image", src: nektar("car-toast.jpg"), alt: "Two friends in a car raising a can of Nektar pink guava", x: 68.56, y: 4255.44, w: 505.72, h: 361.51 },
+      { kind: "image", src: nektar("street-sip.jpg"), alt: "A man in a cap drinking from a can of Nektar on a city street", x: 611.78, y: 4255.44, w: 505.72, h: 292.03 },
+      { kind: "image", src: nektar("paper-bag.jpg"), alt: "A can of Nektar pink guava in a brown paper bag beside halved guavas", x: 68.56, y: 4654.41, w: 326.44, h: 412.85, stack: "half" },
+      { kind: "image", src: nektar("late-night.jpg"), alt: "A woman drinking from a can at her desk late at night, laptop open", x: 426.79, y: 4653.52, w: 236.2, h: 176.65, stack: "half" },
+      { kind: "text", role: "title", x: 690.63, baseline: 4654.41, size: 48, lines: ["how to fix", "a bad day"], color: nektarRust },
+      { kind: "image", src: nektar("ice-bucket.jpg"), alt: "Cans of Nektar lemon-lime & orange with pink straws and lemon slices in an ice bucket", x: 702.65, y: 4654.41, w: 414.85, h: 581.56 },
+
+      { kind: "image", src: nektar("refresh-reboot-rework.jpg"), alt: "“refresh. reboot. rework.” in rust italic on orange", x: 68.6, y: 5293.4, w: 232, h: 162.9, stack: "half" },
+      { kind: "image", src: nektar("sunburst.jpg"), alt: "A silhouette holding the sun between their hands over the sea", x: 336.29, y: 5293.36, w: 236.11, h: 292.03, stack: "half" },
+      { kind: "image", src: nektar("eyes-closed.jpg"), alt: "A young man with his eyes closed, drinking from a can of Nektar pink guava", x: 611.09, y: 5279.6, w: 506.41, h: 305.37 },
+      { kind: "image", src: nektar("chessboard.jpg"), alt: "Hands over a drinking-game chessboard of shot glasses", x: 68.56, y: 5615.37, w: 503.84, h: 715.21 },
+      { kind: "image", src: nektar("straw.jpg"), alt: "A young man sipping through a straw, seen through a fisheye lens", x: 613.5, y: 5624.18, w: 504, h: 287.74 },
     ],
   },
 ];

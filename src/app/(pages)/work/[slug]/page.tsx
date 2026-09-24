@@ -5,6 +5,8 @@ import { notFound } from "next/navigation";
 import {
   projects,
   type ProjectBlock,
+  type ProjectFace,
+  type ProjectRun,
   type ProjectStack,
   type ProjectTextRole,
 } from "../projects";
@@ -32,12 +34,18 @@ const stackClass: Record<ProjectStack, string> = {
 };
 
 // The type in the stacked layout. From lg up every size comes from the PDF instead.
+// Headings and labels take their face from the project (faceClass).
 const roleClass: Record<ProjectTextRole, string> = {
   title: "mt-6 font-times text-[2rem] italic leading-[1.2]",
-  heading: "mt-10 font-outfit text-[1.375rem] leading-[1.2]",
-  label: "mt-2 font-outfit text-xs",
+  heading: "mt-10 text-[1.375rem] leading-[1.2]",
+  label: "mt-2 text-xs",
   body: "mb-2 max-w-[60ch] font-sans text-[0.9375rem] font-medium leading-[1.6]",
   display: "my-4 font-sans text-[2rem] font-medium leading-[1.2]",
+};
+
+const faceClass: Record<ProjectFace, string> = {
+  outfit: "font-outfit",
+  sans: "font-sans font-medium",
 };
 
 // From the top of a line box to its baseline, as a fraction of the font size, at the 1.2
@@ -45,9 +53,12 @@ const roleClass: Record<ProjectTextRole, string> = {
 // font's ascent.
 const baselineOffset = { sans: 0.9585, times: 0.9375, outfit: 0.97 };
 
-function fontOf(role: ProjectTextRole, italic: boolean) {
+const isItalic = (run: ProjectRun): run is Exclude<ProjectRun, string> =>
+  typeof run !== "string";
+
+function fontOf(role: ProjectTextRole, italic: boolean, face: ProjectFace) {
   if (italic || role === "title") return "times";
-  return role === "heading" || role === "label" ? "outfit" : "sans";
+  return role === "heading" || role === "label" ? face : "sans";
 }
 
 // From lg up a block sits where the PDF draws it: --x/--y/--w/--h are points, and --p is
@@ -59,10 +70,12 @@ const sized = "lg:w-[calc(var(--w)*var(--p))] lg:h-[calc(var(--h)*var(--p))]";
 function Block({
   block,
   pageWidth,
+  face,
   first,
 }: {
   block: ProjectBlock;
   pageWidth: number;
+  face: ProjectFace;
   first: boolean;
 }) {
   if (block.kind === "rule") {
@@ -70,7 +83,15 @@ function Block({
       <div
         aria-hidden="true"
         className={`hidden bg-ink lg:block ${placed} ${sized}`}
-        style={{ "--x": block.x, "--y": block.y, "--w": block.w, "--h": block.h } as CSSProperties}
+        style={
+          {
+            "--x": block.x,
+            "--y": block.y,
+            "--w": block.w,
+            "--h": block.h,
+            ...(block.color && { backgroundColor: block.color }),
+          } as CSSProperties
+        }
       />
     );
   }
@@ -111,31 +132,43 @@ function Block({
 
   const Tag = block.role === "title" || block.role === "heading" ? "h2" : "p";
   const firstLine = block.lines[0];
-  const firstFont = fontOf(block.role, typeof firstLine !== "string");
-  // Display lines always keep their own rows; the rest only do from lg up and wrap freely
-  // below it.
-  const lineClass = block.role === "display" ? "block" : "lg:block";
+  const firstRun = Array.isArray(firstLine) ? firstLine[0] : firstLine;
+  const firstFont = fontOf(block.role, isItalic(firstRun), face);
+  const roleFace = block.role === "heading" || block.role === "label" ? faceClass[face] : "";
 
   return (
+    // z-1: a line the PDF sets over a photo stays in front of it.
     <Tag
-      className={`${roleClass[block.role]} ${stackClass[block.stack ?? "full"]} lg:m-0 lg:max-w-none lg:whitespace-nowrap lg:text-[length:calc(var(--size)*var(--p))] lg:leading-[1.2] ${placed}`}
+      className={`${roleClass[block.role]} ${roleFace} ${stackClass[block.stack ?? "full"]} lg:z-1 lg:m-0 lg:max-w-none lg:whitespace-nowrap lg:text-[length:calc(var(--size)*var(--p))] lg:leading-[1.2] ${placed}`}
       style={
         {
           "--x": block.x,
           "--y": block.baseline - baselineOffset[firstFont] * block.size,
           "--size": block.size,
+          color: block.color,
         } as CSSProperties
       }
     >
       {block.lines.map((line, i) => {
-        const italic = typeof line !== "string";
-        const text = italic ? line.text : line;
+        const runs = Array.isArray(line) ? line : [line];
+        // Display lines always keep their own rows, and so does a blank line, which keeps
+        // paragraphs apart. The rest only do from lg up and wrap freely below it.
+        const lineClass = block.role === "display" || line === "" ? "block" : "lg:block";
         return (
           // Lines never reorder, and blank ones repeat, so the index is the identity.
           <span key={i}>
             {i > 0 && " "}
-            <span className={`${lineClass} ${italic ? "font-times font-normal italic" : ""}`}>
-              {text || " "}
+            <span className={lineClass}>
+              {runs.map((run, j) =>
+                isItalic(run) ? (
+                  // Runs within a line never reorder either.
+                  <span key={j} className="font-times font-normal italic">
+                    {run.text}
+                  </span>
+                ) : (
+                  run || " "
+                )
+              )}
             </span>
           </span>
         );
@@ -171,6 +204,7 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
           key={block.kind === "image" ? block.src : `${block.kind}-${i}`}
           block={block}
           pageWidth={page.width}
+          face={project.face ?? "outfit"}
           first={i === 0}
         />
       ))}
