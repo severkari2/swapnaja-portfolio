@@ -1,86 +1,95 @@
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
+import { WorkFolder, type WorkFolderProps } from "@/components/WorkFolder";
 
 export const metadata: Metadata = {
   title: "Work — Swapnaja",
   description: "Selected graphic design work by Swapnaja.",
 };
 
-// The folder fan this page is being built around already exists as
-// `@/components/WorkFolder`, together with its placeholder cards in public/folder-demo.
-// The config below was tuned against the reference recording — the aspect ratios stagger
-// the fan (a card hides behind its folder by exactly its own height) and the `span`
-// values reproduce the 39/61 row split — so it is parked here rather than re-derived
-// when the real projects land.
-//
-// import { WorkFolder, type WorkFolderItem } from "@/components/WorkFolder";
-//
-// const items: WorkFolderItem[] = [
-//   {
-//     title: "motion",
-//     href: "#motion",
-//     images: [
-//       { src: "/folder-demo/motion-1.svg", aspectRatio: 232 / 174 },
-//       { src: "/folder-demo/motion-3.svg", aspectRatio: 174 / 232 },
-//       { src: "/folder-demo/motion-2.svg", aspectRatio: 300 / 150 },
-//     ],
-//   },
-//   {
-//     title: "branding",
-//     href: "#branding",
-//     images: [
-//       { src: "/folder-demo/branding-1.svg", aspectRatio: 208 / 156 },
-//       { src: "/folder-demo/branding-3.svg", aspectRatio: 168 / 224 },
-//       { src: "/folder-demo/branding-2.svg", aspectRatio: 196 / 196 },
-//     ],
-//   },
-//   {
-//     title: "editorial",
-//     href: "#editorial",
-//     // The reference splits this row 39/61 rather than in half.
-//     span: 0.772,
-//     images: [
-//       { src: "/folder-demo/editorial-1.svg", aspectRatio: 240 / 180 },
-//       { src: "/folder-demo/editorial-2.svg", aspectRatio: 170 / 226 },
-//       { src: "/folder-demo/editorial-3.svg", aspectRatio: 216 / 162 },
-//     ],
-//   },
-//   {
-//     title: "photoworks",
-//     href: "#photoworks",
-//     span: 1.228,
-//     images: [
-//       { src: "/folder-demo/photoworks-1.svg", aspectRatio: 232 / 174 },
-//       { src: "/folder-demo/photoworks-2.svg", aspectRatio: 188 / 235 },
-//       { src: "/folder-demo/photoworks-3.svg", aspectRatio: 240 / 160 },
-//     ],
-//   },
-//   {
-//     title: "illustration",
-//     href: "#illustration",
-//     // Two columns wide, so it takes the last row on its own.
-//     span: 2,
-//     images: [
-//       { src: "/folder-demo/illustration-3.svg", aspectRatio: 228 / 171 },
-//       { src: "/folder-demo/illustration-1.svg", aspectRatio: 176 / 232 },
-//       { src: "/folder-demo/illustration-2.svg", aspectRatio: 200 / 200 },
-//     ],
-//   },
-// ];
-//
-// WorkFolder now reads --font-times / --font-sans by default, so it needs no
-// per-instance font overrides:
-// <WorkFolder items={items} className="w-full max-w-[1124px]" />
+// The aspect ratios stagger the fan: a card hides behind its folder by exactly its own
+// height. They were tuned against the original reference recording; keep them when the
+// real projects land.
+const folders: WorkFolderProps["items"] = [
+  {
+    title: "branding",
+    href: "#branding",
+    color: "var(--burgundy)",
+    ink: "var(--paper)",
+    images: [
+      { src: "/folder-demo/branding-1.svg", aspectRatio: 208 / 156 },
+      { src: "/folder-demo/branding-3.svg", aspectRatio: 168 / 224 },
+      { src: "/folder-demo/branding-2.svg", aspectRatio: 196 / 196 },
+    ],
+  },
+  // Fills the rest of row one, so "branding" keeps to the left half.
+  { blank: true },
+  // Row two splits 39/61. The blank cuts this row's tab into the bottom of "branding"
+  // and pushes "packaging" in to 540 of the mockup's 1400px.
+  { blank: true, span: 0.772 },
+  {
+    title: "packaging",
+    href: "#packaging",
+    span: 1.228,
+    color: "var(--stone)",
+    ink: "var(--burgundy)",
+    images: [
+      { src: "/folder-demo/photoworks-1.svg", aspectRatio: 232 / 174 },
+      { src: "/folder-demo/photoworks-2.svg", aspectRatio: 188 / 235 },
+      { src: "/folder-demo/photoworks-3.svg", aspectRatio: 240 / 160 },
+    ],
+  },
+  {
+    title: "editorial",
+    href: "#editorial",
+    span: 2,
+    color: "var(--burgundy)",
+    ink: "var(--paper)",
+    images: [
+      { src: "/folder-demo/editorial-1.svg", aspectRatio: 240 / 180 },
+      { src: "/folder-demo/editorial-2.svg", aspectRatio: 170 / 226 },
+      { src: "/folder-demo/editorial-3.svg", aspectRatio: 216 / 162 },
+    ],
+  },
+];
+
+// One pixel of the 1400px-wide mockup (Work-hero-section.jpeg). The folders' widths are
+// percentages, so everything else about them scales with the section to keep the tabs,
+// notches and titles in proportion. Below 700px WorkFolder stacks them at fixed sizes.
+const u = (px: number) => `calc(${px} * var(--u))`;
 
 export default function Work() {
   return (
-    <section className="mx-auto w-full max-w-[1180px] px-6 py-28 sm:px-10 sm:py-40">
-      <p className="label text-ink/60">Selected projects</p>
-      <h1 className="mt-8 font-times text-[clamp(3rem,9vw,7rem)] italic leading-[1.05]">
-        Work
-      </h1>
-      <p className="mt-10 font-sans text-[clamp(1.125rem,1.8vw,1.75rem)] leading-[1.6] text-ink/60">
-        Coming soon.
-      </p>
+    <section aria-labelledby="work-title" className="@container">
+      <div className="pb-[calc(74*var(--u))] [--u:calc(100cqw/1400)]">
+        <div className="grid grid-cols-2 pb-[max(4rem,calc(169*var(--u)))] pt-[calc(13*var(--u))] font-sans text-[max(1.75rem,calc(51*var(--u)))] leading-none">
+          <h1 id="work-title" className="pl-[max(1.5rem,calc(25*var(--u)))]">
+            works
+          </h1>
+          <p className="pl-[calc(6*var(--u))]">archive</p>
+        </div>
+
+        <WorkFolder
+          items={folders}
+          labels={false}
+          rowHeight={u(120)}
+          panelHeight={u(156)}
+          tabWidth={u(322)}
+          photoWidth={u(155)}
+          photoGap={u(137)}
+          lift={u(12)}
+          dimColor="color-mix(in srgb, var(--ink) 5%, var(--paper))"
+          dimInk="var(--placeholder)"
+          style={
+            {
+              "--wf-tab-rise": u(36),
+              "--wf-pad": u(56),
+              "--wf-pad-top": u(40),
+              "--wf-title-size": u(63),
+            } as CSSProperties
+          }
+        />
+      </div>
     </section>
   );
 }

@@ -16,12 +16,17 @@ export interface WorkFolderImage {
   offsetY?: number;
 }
 
+/** px when a number; any CSS length otherwise, e.g. "calc(120 * var(--u))". */
+export type WorkFolderLength = number | string;
+
 export interface WorkFolderItem {
   title: string;
   /** The "files" inside this folder. Any length, including none. */
   images?: WorkFolderImage[];
   /** Panel fill. Falls back to `palette[index % palette.length]`. */
   color?: string;
+  /** Text colour on the panel. Falls back to black. */
+  ink?: string;
   /** Defaults to the zero-padded position: "01", "02", … */
   label?: string;
   /** Renders the panel as a link, which also makes the reveal keyboard-reachable. */
@@ -30,22 +35,36 @@ export interface WorkFolderItem {
   span?: number;
 }
 
+/**
+ * An inert folder the colour of the page. It holds nothing and never reacts; it exists
+ * so the folder above gets the next row's tab cut into its bottom edge, and so the rest
+ * of its row starts further in. Dropped on narrow screens, where every folder gets a row.
+ */
+export interface WorkFolderBlank {
+  blank: true;
+  span?: number;
+  /** Defaults to `--paper`. */
+  color?: string;
+}
+
 export interface WorkFolderProps {
-  items: WorkFolderItem[];
+  items: (WorkFolderItem | WorkFolderBlank)[];
   /** Folders per row at full width. */
   columns?: number;
+  /** Show the "01", "02", … line above each title. */
+  labels?: boolean;
   /** Vertical pitch between folders. Panels are taller than this, so they overlap. */
-  rowHeight?: number;
-  panelHeight?: number;
+  rowHeight?: WorkFolderLength;
+  panelHeight?: WorkFolderLength;
   /** Width of the raised tab on the folder's top-left. */
-  tabWidth?: number;
-  photoWidth?: number;
+  tabWidth?: WorkFolderLength;
+  photoWidth?: WorkFolderLength;
   /** Centre-to-centre spacing of the cards. Below `photoWidth` they overlap. */
-  photoGap?: number;
+  photoGap?: WorkFolderLength;
   /** The fan spans -maxTilt … +maxTilt degrees, left to right. */
   maxTilt?: number;
   /** How far the hovered folder rises. */
-  lift?: number;
+  lift?: WorkFolderLength;
   /**
    * Fill the other folders repaint to. It is an opaque colour rather than a reduced
    * opacity: the folders overlap, and a translucent one would tint the folder beneath
@@ -57,7 +76,7 @@ export interface WorkFolderProps {
   /** ms. */
   duration?: number;
   /** Horizontal space between folders in a row. The reference butts them together. */
-  gap?: number;
+  gap?: WorkFolderLength;
   palette?: string[];
   className?: string;
   style?: React.CSSProperties;
@@ -74,6 +93,7 @@ const CSS = `
 .wf {
   --wf-tab-rise: ${TAB_RISE}px;
   --wf-pad: 25px;
+  --wf-pad-top: 14px;
   --wf-ink: #000;
   --wf-ease: cubic-bezier(0.33, 1, 0.68, 1);
   --wf-title-size: 50px;
@@ -81,8 +101,9 @@ const CSS = `
   /* Defaults to the site type system; override per instance only to break from it. */
   --wf-font-title: var(--font-times);
   --wf-font-label: var(--font-sans);
+  --wf-blank-color: var(--paper);
   /* Clamped so a folder narrower than the tab cannot have its notch overrun its own edge. */
-  --wf-tab: min(var(--wf-tab-w), 55%);
+  --wf-tab: min(var(--wf-tab-w), 100% - 2 * var(--wf-tab-rise));
 
   display: flex;
   flex-wrap: wrap;
@@ -104,14 +125,15 @@ const CSS = `
      stacking context and trap .wf-photos below the other folders' panels. */
 }
 
-.wf-panel {
+.wf-panel,
+.wf-blank::before {
   position: absolute;
   inset: 0 0 auto 0;
   height: var(--wf-panel-h);
   z-index: 1;
   display: block;
   box-sizing: border-box;
-  padding: 14px var(--wf-pad) 0;
+  padding: var(--wf-pad-top) var(--wf-pad) 0;
   border: 0;
   margin: 0;
   background-color: var(--wf-color);
@@ -137,6 +159,8 @@ const CSS = `
 
 a.wf-panel { cursor: pointer; }
 
+.wf-blank::before { content: ""; }
+
 .wf-label {
   display: block;
   font-family: var(--wf-font-label);
@@ -148,7 +172,6 @@ a.wf-panel { cursor: pointer; }
 
 .wf-title {
   display: block;
-  margin-top: 12px;
   font-family: var(--wf-font-title);
   font-size: var(--wf-title-size);
   font-style: italic;
@@ -157,6 +180,8 @@ a.wf-panel { cursor: pointer; }
   letter-spacing: -0.01em;
   white-space: nowrap;
 }
+
+.wf-label + .wf-title { margin-top: 12px; }
 
 .wf-photos {
   position: absolute;
@@ -232,20 +257,23 @@ a.wf-panel { cursor: pointer; }
 }
 
 @media (max-width: 700px) {
+  /* Important because the props and the style prop arrive as inline styles, which would
+     otherwise beat this block. */
   .wf {
-    --wf-row: 68px;
-    --wf-panel-h: 108px;
-    --wf-tab-w: 150px;
-    --wf-tab-rise: 18px;
-    --wf-pad: 18px;
-    --wf-title-size: 34px;
-    --wf-photo-w: 108px;
-    --wf-photo-gap: 95px;
+    --wf-row: 68px !important;
+    --wf-panel-h: 108px !important;
+    --wf-tab-w: 150px !important;
+    --wf-tab-rise: 18px !important;
+    --wf-pad: 18px !important;
+    --wf-pad-top: 10px !important;
+    --wf-title-size: 34px !important;
+    --wf-photo-w: 108px !important;
+    --wf-photo-gap: 95px !important;
   }
-  .wf-panel { padding-top: 10px; }
-  .wf-title { margin-top: 8px; }
+  .wf-label + .wf-title { margin-top: 8px; }
   /* One folder per row: spans stop meaning anything once there is only one column. */
   .wf-item { flex-basis: 100%; }
+  .wf-blank { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -257,16 +285,21 @@ a.wf-panel { cursor: pointer; }
 }
 `;
 
-/** How far below the fold a card must sit for its rotated corners to stay hidden. */
-function hiddenOffset(width: number, aspectRatio: number, deg: number) {
-  const height = width / aspectRatio;
+/**
+ * How far below the fold a card must sit for its rotated corners to stay hidden, as a
+ * multiple of the card width, so it holds at any card size.
+ */
+function hiddenOffset(aspectRatio: number, deg: number) {
+  const height = 1 / aspectRatio;
   const rad = (Math.abs(deg) * Math.PI) / 180;
   // Rotating about the bottom edge lifts the far top corner by (w/2)·sinθ while the
   // near one drops by h·(1 − cosθ); the card has to clear the difference.
-  const bleed = Math.max(0, (width / 2) * Math.sin(rad) - height * (1 - Math.cos(rad)));
-  // Returned as a multiple of the card width so it survives the responsive rescale.
-  return (height + bleed) / width;
+  const bleed = Math.max(0, Math.sin(rad) / 2 - height * (1 - Math.cos(rad)));
+  return height + bleed;
 }
+
+const length = (value: WorkFolderLength) =>
+  typeof value === "number" ? `${value}px` : value;
 
 /**
  * A stack of overlapping file folders. Hovering one dims the rest and fans that
@@ -278,6 +311,7 @@ function hiddenOffset(width: number, aspectRatio: number, deg: number) {
 export const WorkFolder: React.FC<WorkFolderProps> = ({
   items,
   columns = 2,
+  labels = true,
   rowHeight = 96,
   panelHeight = 152,
   tabWidth = 266,
@@ -294,13 +328,13 @@ export const WorkFolder: React.FC<WorkFolderProps> = ({
   style,
 }) => {
   const rootVars = {
-    "--wf-row": `${rowHeight}px`,
-    "--wf-panel-h": `${panelHeight}px`,
-    "--wf-tab-w": `${tabWidth}px`,
-    "--wf-photo-w": `${photoWidth}px`,
-    "--wf-photo-gap": `${photoGap}px`,
-    "--wf-gap": `${gap}px`,
-    "--wf-lift": `${lift}px`,
+    "--wf-row": length(rowHeight),
+    "--wf-panel-h": length(panelHeight),
+    "--wf-tab-w": length(tabWidth),
+    "--wf-photo-w": length(photoWidth),
+    "--wf-photo-gap": length(photoGap),
+    "--wf-gap": length(gap),
+    "--wf-lift": length(lift),
     "--wf-dim-bg": dimColor,
     "--wf-dim-ink": dimInk,
     "--wf-dur": `${duration}ms`,
@@ -315,6 +349,26 @@ export const WorkFolder: React.FC<WorkFolderProps> = ({
       </style>
       <ul className={`wf ${className}`.trim()} style={rootVars}>
         {items.map((item, i) => {
+          const frac = `${(item.span ?? 1) / columns}`;
+
+          if ("blank" in item) {
+            return (
+              <li
+                key={`blank-${i}`}
+                className="wf-item wf-blank"
+                aria-hidden="true"
+                style={
+                  {
+                    "--wf-frac": frac,
+                    "--wf-color": item.color ?? "var(--wf-blank-color)",
+                  } as React.CSSProperties
+                }
+              />
+            );
+          }
+
+          // Blanks are not folders, so they take neither a number nor a palette slot.
+          const n = items.slice(0, i).filter((other) => !("blank" in other)).length;
           const images = item.images ?? [];
           const Panel = item.href ? "a" : "div";
 
@@ -322,24 +376,23 @@ export const WorkFolder: React.FC<WorkFolderProps> = ({
             <li
               key={`${item.title}-${i}`}
               className="wf-item"
-              style={
-                {
-                  "--wf-frac": `${(item.span ?? 1) / columns}`,
-                } as React.CSSProperties
-              }
+              style={{ "--wf-frac": frac } as React.CSSProperties}
             >
               <Panel
                 className="wf-panel"
                 href={item.href}
                 style={
                   {
-                    "--wf-color": item.color ?? palette[i % palette.length],
+                    "--wf-color": item.color ?? palette[n % palette.length],
+                    ...(item.ink && { "--wf-ink": item.ink }),
                   } as React.CSSProperties
                 }
               >
-                <span className="wf-label">
-                  {item.label ?? String(i + 1).padStart(2, "0")}
-                </span>
+                {labels && (
+                  <span className="wf-label">
+                    {item.label ?? String(n + 1).padStart(2, "0")}
+                  </span>
+                )}
                 <span className="wf-title">{item.title}</span>
               </Panel>
 
@@ -374,11 +427,7 @@ export const WorkFolder: React.FC<WorkFolderProps> = ({
                           "--wf-r": `${rotate}deg`,
                           "--wf-x": `${offsetX}`,
                           "--wf-oy": `${image.offsetY ?? 0}px`,
-                          "--wf-hidden": `${hiddenOffset(
-                            photoWidth,
-                            aspectRatio,
-                            rotate
-                          )}`,
+                          "--wf-hidden": `${hiddenOffset(aspectRatio, rotate)}`,
                         } as React.CSSProperties
                       }
                     />

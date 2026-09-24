@@ -7,6 +7,8 @@
   --rule: rgba(26, 22, 19, 0.14);
   /* Fill for image holders until real photos land. */
   --placeholder: #d9d3ca;
+  /* Cool neutral grey: the packaging folder on the work page (Work-hero-section.jpeg). */
+  --stone: #aaabaa;
   /* The header and footer are sticky, so every page scrolls inside a frame between them.
      These are tokens rather than classes because full-screen sections size themselves to
      the space left over: min-h-[var(--view-h)]. */
@@ -31,6 +33,7 @@
   --color-burgundy: var(--burgundy);
   --color-rule: var(--rule);
   --color-placeholder: var(--placeholder);
+  --color-stone: var(--stone);
   /* Two families, site-wide: Montserrat and Times italic. See AGENTS.md for which goes
      where. */
   --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;

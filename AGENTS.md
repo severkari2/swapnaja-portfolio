@@ -25,6 +25,7 @@ exposes them as Tailwind utilities. **Never hardcode a hex or a font stack in a 
 | `--burgundy` | `bg-burgundy` | `#74070e` — hero only |
 | `--rule` | `border-rule` | 14% ink — hairlines |
 | `--placeholder` | `bg-placeholder` | `#d9d3ca` — fill for `ImageHolder` until real photos land |
+| `--stone` | `bg-stone` | `#aaabaa` — cool grey, the *packaging* folder on `/work` |
 | `--header-h` | — | `76px`, `140px` from `sm:` up. Height of the header at the top of the page. |
 | `--header-h-compact` | — | `76px`. The header's height whenever it reappears away from the top of the page. |
 | `--footer-h` | — | `84px`, `120px` from `sm:` up. Height of the sticky footer. |
@@ -78,7 +79,7 @@ Pages never draw their own nav or footer. Everything except home lives in the `(
 | Route | State |
 |---|---|
 | `/` | Built. Screen 1 matches `Home.png`: the `-hello.` `MagnifyText` hero (Montserrat, `text-burgundy`, on paper) filling `--view-h`, so it lands between the header and footer. Screen 2 matches `Home-section-2.png`: a full-bleed landscape photo, and a burgundy about card (Times italic + Montserrat) with a portrait beneath it. Both photos are `ImageHolder` placeholders. Screen 3 is `AboutMe` on paper. |
-| `/work` | Placeholder awaiting content. |
+| `/work` | Hero built to match `Work-hero-section.jpeg`: *works* / *archive* in Montserrat, then `WorkFolder` with *branding*, *packaging* and *editorial* (burgundy / stone / burgundy). Folder cards and links (`#branding`, …) are placeholders. |
 | `/about` | Placeholder awaiting content. |
 
 Design inspiration reference: `https://swapnajasevekari.framer.website/` (client-rendered
@@ -128,15 +129,23 @@ inspect).
     added to the effect's dependency array or the texture keeps the stale type.
   - It no-ops (renders plain text) under `prefers-reduced-motion: reduce` or without
     WebGL2 — so the fallback `<span>` styling has to look right on its own.
-- `WorkFolder` — **parked, not dead.** Unmounted from the home page but retained, along
-  with its placeholder cards in `public/folder-demo/`, as the intended centrepiece of the
-  future `/work` page. Its `items[]` config (aspect ratios that stagger the fan, `span`
-  values that reproduce the 39/61 row split) was tuned against a reference recording and
-  is preserved as a commented block in `src/app/work/page.tsx` — reuse it, don't re-derive
-  it. Its stylesheet is a JS template literal injected via React 19's hoisted `<style>`,
-  so **never put a backtick inside its CSS comments** — it silently ends the literal and
-  the file stops parsing. It defaults `--wf-font-title` (Times, italic) / `--wf-font-label` to the site font tokens, so it
-  needs no per-instance font overrides.
+- `WorkFolder` — the `/work` hero (`Work-hero-section.jpeg`): overlapping file folders.
+  Hovering one fades the rest to paper and fans its cards (`public/folder-demo/`
+  placeholders) up from behind its tab.
+  - The layout is a flex-wrap of `span` fractions. The staggered rows come from
+    `{ blank: true }` items. A blank is an inert, paper-coloured folder that cuts its
+    row's tab into the folder above and pushes the next folder along. Blanks are dropped
+    at ≤700px, where every folder gets its own row.
+  - Length props take a number (px) or any CSS length. The work page passes
+    `calc(N * var(--u))`, where `--u` is `100cqw/1400`: one pixel of the 1400px mockup.
+    It scales without a floor, because the folder widths are percentages and the tabs have
+    to stay in proportion with them.
+  - Its stylesheet is a JS template literal injected via React 19's hoisted `<style>`, so
+    **never put a backtick inside its CSS comments** — it silently ends the literal and
+    the file stops parsing. The rules are unlayered and beat Tailwind: `margin: 0` on
+    `.wf` wins over a `mt-*` class, so put spacing on a neighbour instead.
+  - The ≤700px block uses `!important`, since props arrive as inline styles.
+  - `--wf-font-title` / `--wf-font-label` default to the site font tokens.
 
 ## Stack facts
 
