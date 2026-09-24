@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Montserrat, Tinos } from "next/font/google";
+import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import "./globals.css";
 
@@ -42,10 +43,11 @@ export default function RootLayout({
       className={`${montserrat.variable} ${tinos.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-paper text-ink">
+        {/* Both bars are sticky, so every page scrolls between them. */}
         <Header />
-        {/* Pages supply their own <main>; the footer comes from src/app/(pages)/layout.tsx,
-            or from the home page's first screen. */}
+        {/* Pages supply their own <main>. */}
         {children}
+        <Footer />
       </body>
     </html>
   );

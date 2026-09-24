@@ -7,13 +7,21 @@
   --rule: rgba(26, 22, 19, 0.14);
   /* Fill for image holders until real photos land. */
   --placeholder: #d9d3ca;
-  /* Full-bleed sections subtract this, so it has to be a token rather than a class. */
+  /* The header and footer are sticky, so every page scrolls inside a frame between them.
+     These are tokens rather than classes because full-screen sections size themselves to
+     the space left over: min-h-[var(--view-h)]. */
   --header-h: 76px;
+  /* The header shrinks to this once the page scrolls. --view-h keeps the at-rest height,
+     so nothing resizes mid-scroll. */
+  --header-h-compact: 76px;
+  --footer-h: 84px;
+  --view-h: calc(100svh - var(--header-h) - var(--footer-h));
 }
 
 @media (min-width: 640px) {
   :root {
     --header-h: 140px;
+    --footer-h: 120px;
   }
 }
 

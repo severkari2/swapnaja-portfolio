@@ -1,6 +1,6 @@
 import Link from "next/link";
+import { Fragment } from "react";
 import { AboutMe } from "@/components/AboutMe";
-import { Footer } from "@/components/Footer";
 import { ImageHolder } from "@/components/ImageHolder";
 import { MagnifyText } from "@/components/MagnifyText";
 
@@ -9,24 +9,21 @@ const tools = ["Illustrator", "Photoshop", "InDesign", "Figma", "Procreate"];
 export default function Home() {
   return (
     <main className="flex flex-1 flex-col">
-      {/* First screen: the hero takes whatever the header and footer leave, so the three
-          land together as one screen (Home.png). */}
-      <div className="flex min-h-[calc(100svh-var(--header-h))] flex-col">
-        <section className="flex flex-1 items-center justify-center px-6">
-          <MagnifyText
-            text="-hello."
-            className="font-sans font-medium tracking-[-0.01em] text-burgundy text-[clamp(4rem,15vw,15rem)]"
-          />
-        </section>
-        <Footer />
-      </div>
+      {/* First screen: the hero takes whatever the sticky header and footer leave, so the
+          three land together as one screen (Home.png). */}
+      <section className="flex min-h-[var(--view-h)] items-center justify-center px-6">
+        <MagnifyText
+          text="-hello."
+          className="font-sans font-medium tracking-[-0.01em] text-burgundy text-[clamp(4rem,15vw,15rem)]"
+        />
+      </section>
 
       {/* About teaser (Home-section-2.png). Everything is measured in --u: one pixel of the
           1400px-wide mockup. It grows past 1400px viewports and bottoms out at 1px below,
           so the text never shrinks under its drawn size. */}
       <section
         aria-labelledby="about-teaser"
-        className="relative min-h-svh bg-burgundy pb-[calc(192*var(--u))] [--u:max(1px,0.07143vw)]"
+        className="relative min-h-[var(--view-h)] bg-burgundy pb-[calc(192*var(--u))] [--u:max(1px,0.07143vw)]"
       >
         <ImageHolder
           label="landscape photo"
@@ -60,12 +57,15 @@ export default function Home() {
 
             <p className="mt-[calc(13*var(--u))] font-times text-[calc(17*var(--u))] italic leading-none text-paper">
               {/* Each separator stays glued to the tool before it, so a narrow screen
-                  never starts a line with one. */}
+                  never starts a line with one. The space between tools sits outside the
+                  nowrap span, or the whole row would refuse to wrap. */}
               {tools.map((tool, i) => (
-                <span key={tool} className="whitespace-nowrap">
-                  {tool}
-                  {i < tools.length - 1 && " |"}{" "}
-                </span>
+                <Fragment key={tool}>
+                  <span className="whitespace-nowrap">
+                    {tool}
+                    {i < tools.length - 1 && " |"}
+                  </span>{" "}
+                </Fragment>
               ))}
             </p>
 

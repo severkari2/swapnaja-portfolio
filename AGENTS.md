@@ -25,7 +25,10 @@ exposes them as Tailwind utilities. **Never hardcode a hex or a font stack in a 
 | `--burgundy` | `bg-burgundy` | `#74070e` — hero only |
 | `--rule` | `border-rule` | 14% ink — hairlines |
 | `--placeholder` | `bg-placeholder` | `#d9d3ca` — fill for `ImageHolder` until real photos land |
-| `--header-h` | — | `76px`, `140px` from `sm:` up. Full-bleed sections use `min-h-[calc(100svh-var(--header-h))]`, so change it in `globals.css` only — never hardcode the bar height. |
+| `--header-h` | — | `76px`, `140px` from `sm:` up. Height of the header at the top of the page. |
+| `--header-h-compact` | — | `76px`. The header's height whenever it reappears away from the top of the page. |
+| `--footer-h` | — | `84px`, `120px` from `sm:` up. Height of the sticky footer. |
+| `--view-h` | — | `100svh` minus both bars: the visible frame. Full-screen sections use `min-h-[var(--view-h)]`. Change bar heights in `globals.css` only — never hardcode them. |
 
 `MagnifyText` takes its text colour from `className` (`text-burgundy`) and its container
 background from a `backgroundColor` prop that defaults to `transparent`, so it sits on the
@@ -67,15 +70,14 @@ dropped for the two-family rule; don't bring them back without a reference image
 
 ## Structure
 
-`src/app/layout.tsx` owns `<Header />`. Everything except home lives in the `(pages)` route
-group (URLs are unaffected), whose layout supplies `<main>` and `<Footer />`. Home supplies
-its own `<main>` and renders `<Footer />` at the bottom of its first screen, because the
-mockups put the contact row there. Pages never
-draw their own nav.
+`src/app/layout.tsx` owns `<Header />` and `<Footer />`. Both are wrapped in `AutoHideBar`,
+so they get out of the way while you read and come back as soon as you might want them.
+Pages never draw their own nav or footer. Everything except home lives in the `(pages)` route group
+(URLs are unaffected), whose layout supplies `<main>`; home supplies its own.
 
 | Route | State |
 |---|---|
-| `/` | Built. Screen 1 matches `Home.png`: the `-hello.` `MagnifyText` hero (Montserrat, `text-burgundy`, on paper) with the footer at the bottom of the screen. Screen 2 matches `Home-section-2.png`: a full-bleed landscape photo, and a burgundy about card (Times italic + Montserrat) with a portrait beneath it. Both photos are `ImageHolder` placeholders. Screen 3 is `AboutMe` on paper. |
+| `/` | Built. Screen 1 matches `Home.png`: the `-hello.` `MagnifyText` hero (Montserrat, `text-burgundy`, on paper) filling `--view-h`, so it lands between the header and footer. Screen 2 matches `Home-section-2.png`: a full-bleed landscape photo, and a burgundy about card (Times italic + Montserrat) with a portrait beneath it. Both photos are `ImageHolder` placeholders. Screen 3 is `AboutMe` on paper. |
 | `/work` | Placeholder awaiting content. |
 | `/about` | Placeholder awaiting content. |
 
@@ -85,13 +87,24 @@ inspect).
 
 ## Components
 
+- `AutoHideBar` — client wrapper that pins a bar to the top or bottom edge. It hides the bar
+  while scrolling down (6px jitter threshold) and shows it again on:
+  - any scroll up;
+  - reaching the very top or bottom of the page;
+  - keyboard focus inside the bar;
+  - on mouse devices only (`hover: hover` and `pointer: fine`), the pointer coming within
+    48px of that edge. Once shown, the whole bar counts as the reveal zone.
+
+  An in-flow spacer (`spacerClassName`) keeps the at-rest height, so hiding or resizing the
+  fixed bar never moves the page. It sets `data-scrolled` once the page leaves the top; the
+  header styles that as `data-scrolled:h-[var(--header-h-compact)]`. Hiding uses
+  `translate`, so `--view-h` never changes.
 - `Header` / `Footer` — server components, laid out as in `Home.png`. Header is a 3-column
-  grid: *home*, *works* centred, *about*. It is **not sticky**: the home page's second
-  section is a full-bleed photo that the mockup shows with no bar over it. Each link is a
+  grid: *home*, *works* centred, *about*. Each link is a
   `NavLink` (client, `usePathname`) that turns `text-burgundy` and sets `aria-current` on
   the page it points to. Footer
   has *e-mail* on the left and *ig* / *in* on the right, with no top rule. `<main>` is a flex
-  column, so a page section with `flex-1` fills exactly the space between them.
+  column, so a page section with `flex-1` fills exactly the space between the bars.
 - `AboutMe` — client component; a burgundy index card with three folder tabs
   (`myself-component-*.jpeg`). Exactly three sections, enforced by a tuple type; headings and
   copy live in `defaultSections` at the top of the file (or pass `sections`). Nothing is open

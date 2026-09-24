@@ -1,3 +1,5 @@
+import { AutoHideBar } from "./AutoHideBar";
+
 // Placeholders until the real handles and contact details land.
 const email = "hello@swapnaja.com";
 
@@ -8,8 +10,13 @@ const socials = [
 
 export function Footer() {
   return (
-    <footer className="bg-paper">
-      <div className="flex items-end justify-between px-6 pb-10 pt-6 sm:px-[7vw] sm:pb-16">
+    // Pinned to the bottom of the viewport on every page; rendered once, by the root layout.
+    <AutoHideBar
+      edge="bottom"
+      spacerClassName="h-[var(--footer-h)]"
+      className="h-[var(--footer-h)]"
+    >
+      <footer className="flex h-full items-end justify-between bg-paper px-6 pb-10 sm:px-[7vw] sm:pb-16">
         <a
           href={`mailto:${email}`}
           className="nav-link transition-opacity hover:opacity-60"
@@ -29,7 +36,7 @@ export function Footer() {
             </a>
           ))}
         </nav>
-      </div>
-    </footer>
+      </footer>
+    </AutoHideBar>
   );
 }
