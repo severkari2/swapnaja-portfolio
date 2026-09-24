@@ -1,19 +1,30 @@
 "use client";
 
+import Link from "next/link";
 import React from "react";
 
 export interface WorkFolderImage {
   src: string;
-  /** Empty by default: the cards duplicate the folder title, so they are decorative. */
+  /**
+   * Empty by default: the cards duplicate the folder title, so they are decorative. A card
+   * with a `title` is named by it instead.
+   */
   alt?: string;
+  /** Makes the card a link. Pointing at it also keeps the fan open. */
+  href?: string;
+  /** Shown above the card while it is pointed at or focused. */
+  title?: string;
   /** width / height. Drives how far the card travels, since it hides behind the folder by exactly its own height. */
   aspectRatio?: number;
   /** Degrees. Overrides the angle this card would get from the fan. */
   rotate?: number;
   /** Multiples of `photoGap`. Nudges the card off the even spacing. */
   offsetX?: number;
-  /** px of extra lift once the card is out. Use to break a too-regular fan. */
-  offsetY?: number;
+  /**
+   * Extra lift once the card is out. Use to break a too-regular fan, or pass the tab's rise
+   * to bring a card fully clear of the tab.
+   */
+  offsetY?: WorkFolderLength;
 }
 
 /** px when a number; any CSS length otherwise, e.g. "calc(120 * var(--u))". */
@@ -98,6 +109,12 @@ const CSS = `
   --wf-ease: cubic-bezier(0.33, 1, 0.68, 1);
   --wf-title-size: 50px;
   --wf-label-size: 13px;
+  --wf-caption-size: 20px;
+  /* The card caption sits on the page above the folder, not on the panel, so it keeps the
+     page's own text colour. */
+  --wf-caption-ink: currentColor;
+  /* How far a pointed-at card rises out of the fan. */
+  --wf-card-lift: 8px;
   /* Defaults to the site type system; override per instance only to break from it. */
   --wf-font-title: var(--font-times);
   --wf-font-label: var(--font-sans);
@@ -210,10 +227,12 @@ a.wf-panel { cursor: pointer; }
   position: absolute;
   left: 50%;
   bottom: 0;
+  z-index: var(--wf-z);
+  display: block;
   width: var(--wf-photo-w);
-  height: auto;
   aspect-ratio: var(--wf-ar);
-  object-fit: cover;
+  color: inherit;
+  text-decoration: none;
   /* Fan out around the base of each card, so their bottom edges stay on one line. */
   transform-origin: 50% 100%;
   transform:
@@ -223,37 +242,103 @@ a.wf-panel { cursor: pointer; }
   transition: transform var(--wf-dur) var(--wf-ease);
 }
 
-/* Engaging any folder repaints all of them … */
-.wf:has(.wf-panel:hover) .wf-panel,
-.wf:has(.wf-panel:focus-visible) .wf-panel {
+.wf-card-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: translate var(--wf-dur) var(--wf-ease);
+}
+
+/* Cards with a link or a title take the pointer; plain ones stay see-through, as before.
+   A parked card is outside the photo box's clip, so it can only be hit once it is out. */
+.wf-card-live { pointer-events: auto; }
+a.wf-card { cursor: pointer; }
+
+/* Bridges the gap an offsetY lift opens under a card, so the pointer can travel up from the
+   folder to the card without the fan closing on the way. */
+.wf-card-live::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: var(--wf-oy);
+}
+
+.wf-card-title {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  margin-bottom: calc(var(--wf-caption-size) * 0.5);
+  font-family: var(--wf-font-title);
+  font-size: var(--wf-caption-size);
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--wf-caption-ink);
+  opacity: 0;
+  translate: -50% 4px;
+  /* Never part of the hit area: the card alone decides when it shows. */
+  pointer-events: none;
+  transition:
+    opacity var(--wf-dur) var(--wf-ease),
+    translate var(--wf-dur) var(--wf-ease);
+}
+
+/* A folder is engaged while its panel, or one of its cards, is pointed at or focused. The
+   cards count so the fan stays open as the pointer moves up onto them.
+   Engaging any folder repaints all of them … */
+.wf:has(:is(.wf-panel, .wf-card-live):hover, :is(.wf-panel, .wf-card):focus-visible) .wf-panel {
   background-color: var(--wf-dim-bg);
   color: var(--wf-dim-ink);
 }
 
 /* … except the engaged one, which keeps its colour and rises. */
-.wf:has(.wf-panel:hover) .wf-panel:hover,
-.wf:has(.wf-panel:focus-visible) .wf-panel:focus-visible {
+.wf-item:has(:is(.wf-panel, .wf-card-live):hover, :is(.wf-panel, .wf-card):focus-visible) .wf-panel {
   background-color: var(--wf-color);
   color: var(--wf-ink);
   transform: translateY(calc(-1 * var(--wf-lift)));
 }
 
-.wf-panel:hover ~ .wf-photos,
-.wf-panel:focus-visible ~ .wf-photos {
+.wf-item:has(:is(.wf-panel, .wf-card-live):hover, :is(.wf-panel, .wf-card):focus-visible) .wf-photos {
   transform: translateY(calc(-1 * var(--wf-lift)));
 }
 
-.wf-panel:hover ~ .wf-photos .wf-card,
-.wf-panel:focus-visible ~ .wf-photos .wf-card {
+.wf-item:has(:is(.wf-panel, .wf-card-live):hover, :is(.wf-panel, .wf-card):focus-visible) .wf-card {
   transform:
     translateX(calc(-50% + var(--wf-photo-gap) * var(--wf-x)))
     translateY(calc(-1 * var(--wf-oy)))
     rotate(var(--wf-r));
 }
 
+/* The pointed-at card comes to the front of the fan and rises. Only the picture and its
+   caption move: the link itself stays put, so the card cannot slide out from under the
+   pointer and flicker. */
+.wf-card-live:hover,
+.wf-card:focus-visible { z-index: 100; }
+
+.wf-card-live:hover .wf-card-img,
+.wf-card:focus-visible .wf-card-img {
+  translate: 0 calc(-1 * var(--wf-card-lift));
+}
+
+.wf-card-live:hover .wf-card-title,
+.wf-card:focus-visible .wf-card-title {
+  opacity: 1;
+  translate: -50% calc(-1 * var(--wf-card-lift));
+}
+
 .wf-panel:focus-visible {
   outline: 2px solid var(--wf-ink);
   outline-offset: -6px;
+}
+
+.wf-card:focus-visible { outline: none; }
+.wf-card:focus-visible .wf-card-img {
+  outline: 2px solid var(--wf-caption-ink);
+  outline-offset: 3px;
 }
 
 @media (max-width: 700px) {
@@ -269,6 +354,7 @@ a.wf-panel { cursor: pointer; }
     --wf-title-size: 34px !important;
     --wf-photo-w: 108px !important;
     --wf-photo-gap: 95px !important;
+    --wf-caption-size: 17px !important;
   }
   .wf-label + .wf-title { margin-top: 8px; }
   /* One folder per row: spans stop meaning anything once there is only one column. */
@@ -279,7 +365,9 @@ a.wf-panel { cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   .wf-panel,
   .wf-photos,
-  .wf-card {
+  .wf-card,
+  .wf-card-img,
+  .wf-card-title {
     transition-duration: 0.01ms;
   }
 }
@@ -303,7 +391,8 @@ const length = (value: WorkFolderLength) =>
 
 /**
  * A stack of overlapping file folders. Hovering one dims the rest and fans that
- * folder's images up from behind its top edge.
+ * folder's images up from behind its top edge. A card with an href is a link, and one
+ * with a title shows it while pointed at; moving onto such a card keeps its fan open.
  *
  * Everything the interaction needs lives in CSS, so pointing at a folder never
  * re-renders React.
@@ -407,30 +496,45 @@ export const WorkFolder: React.FC<WorkFolderProps> = ({
                       : -maxTilt + (2 * maxTilt * j) / (images.length - 1));
                   const offsetX =
                     image.offsetX ?? j - (images.length - 1) / 2;
+                  const live = Boolean(image.href || image.title);
+                  const cardProps = {
+                    className: `wf-card${live ? " wf-card-live" : ""}`,
+                    style: {
+                      "--wf-z": `${j}`,
+                      "--wf-ar": `${aspectRatio}`,
+                      "--wf-r": `${rotate}deg`,
+                      "--wf-x": `${offsetX}`,
+                      "--wf-oy": length(image.offsetY ?? 0),
+                      "--wf-hidden": `${hiddenOffset(aspectRatio, rotate)}`,
+                    } as React.CSSProperties,
+                  };
+                  const content = (
+                    <>
+                      {/* Sources are arbitrary consumer strings, and next/image refuses
+                          SVG without images.dangerouslyAllowSVG. */}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        className="wf-card-img"
+                        src={image.src}
+                        alt={image.alt ?? ""}
+                        loading="lazy"
+                        decoding="async"
+                        draggable={false}
+                      />
+                      {image.title && (
+                        <span className="wf-card-title">{image.title}</span>
+                      )}
+                    </>
+                  );
 
-                  return (
-                    // Sources are arbitrary consumer strings, and next/image refuses
-                    // SVG without images.dangerouslyAllowSVG.
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      key={`${image.src}-${j}`}
-                      className="wf-card"
-                      src={image.src}
-                      alt={image.alt ?? ""}
-                      loading="lazy"
-                      decoding="async"
-                      draggable={false}
-                      style={
-                        {
-                          zIndex: j,
-                          "--wf-ar": `${aspectRatio}`,
-                          "--wf-r": `${rotate}deg`,
-                          "--wf-x": `${offsetX}`,
-                          "--wf-oy": `${image.offsetY ?? 0}px`,
-                          "--wf-hidden": `${hiddenOffset(aspectRatio, rotate)}`,
-                        } as React.CSSProperties
-                      }
-                    />
+                  return image.href ? (
+                    <Link key={`${image.src}-${j}`} href={image.href} {...cardProps}>
+                      {content}
+                    </Link>
+                  ) : (
+                    <span key={`${image.src}-${j}`} {...cardProps}>
+                      {content}
+                    </span>
                   );
                 })}
               </div>

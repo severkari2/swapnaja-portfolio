@@ -2,26 +2,37 @@ import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { WorkFolder, type WorkFolderProps } from "@/components/WorkFolder";
 import { WorkSwitch } from "@/components/WorkSwitch";
+import { projectHref, projects, type ProjectFolder } from "./projects";
 
 export const metadata: Metadata = {
   title: "Work — Swapnaja",
   description: "Selected graphic design work by Swapnaja.",
 };
 
-// The aspect ratios stagger the fan: a card hides behind its folder by exactly its own
-// height. They were tuned against the original reference recording; keep them when the
-// real projects land.
+// One card per project filed in the folder: its cover, named on hover, linking to its page.
+// Each rises by the tab's height on top of the usual reveal, so the whole cover clears the
+// tab instead of the bottom of it hiding behind the folder.
+const projectCards = (folder: ProjectFolder) =>
+  projects
+    .filter((project) => project.folder === folder)
+    .map((project) => ({
+      src: project.cover.src,
+      aspectRatio: project.cover.aspectRatio,
+      title: project.title,
+      href: projectHref(project),
+      offsetY: "var(--wf-tab-rise)",
+    }));
+
+// Folders without projects yet still show the demo cards. Their aspect ratios stagger the
+// fan (a card hides behind its folder by exactly its own height) and were tuned against
+// the original reference recording.
 const folders: WorkFolderProps["items"] = [
   {
     title: "branding",
     href: "#branding",
     color: "var(--burgundy)",
     ink: "var(--paper)",
-    images: [
-      { src: "/folder-demo/branding-1.svg", aspectRatio: 208 / 156 },
-      { src: "/folder-demo/branding-3.svg", aspectRatio: 168 / 224 },
-      { src: "/folder-demo/branding-2.svg", aspectRatio: 196 / 196 },
-    ],
+    images: projectCards("branding"),
   },
   // Fills the rest of row one, so "branding" keeps to the left half.
   { blank: true },
@@ -81,6 +92,7 @@ export default function Work() {
             "--wf-pad": u(56),
             "--wf-pad-top": u(40),
             "--wf-title-size": u(63),
+            "--wf-caption-size": u(28),
           } as CSSProperties
         }
       />

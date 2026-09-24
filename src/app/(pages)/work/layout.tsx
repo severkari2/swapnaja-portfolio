@@ -1,4 +1,5 @@
-// Shared by /work and everything under /work/archive.
+// Shared by /work, the project pages (/work/[slug]) and everything under /work/archive.
+// Project pages measure their own unit against the same container: one point of their PDF.
 //
 // --u is one pixel of the 1400px-wide mockups (Work-hero-section.jpeg, archive-section*.jpeg),
 // measured against this container so it matches the percentage widths inside it.

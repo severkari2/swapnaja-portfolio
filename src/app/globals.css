@@ -40,6 +40,8 @@
   /* Headings, nav links, emphasis. The system Times comes first; Tinos (metric-compatible with
      Times New Roman) is self-hosted for platforms that ship neither. */
   --font-times: "Times New Roman", Times, var(--font-tinos), serif;
+  /* Project pages only: the face the designer's PDFs use for headings and labels. */
+  --font-outfit: var(--font-outfit-face), ui-sans-serif, system-ui, sans-serif;
 }
 
 body {

@@ -46,6 +46,7 @@ as the fallback).
 |---|---|---|---|
 | Times italic | `--font-times` | `font-times italic`, `nav-link` | Headings, tab labels, nav links, and emphasised words inside Montserrat copy. Always italic. System `Times New Roman`/`Times` first; Tinos italic (self-hosted, not preloaded) is the fallback, and it ships **italic only**. |
 | Montserrat | `--font-montserrat` | `font-sans` | Body copy, the home hero (`-hello.`), labels, buttons. Also the `body` default. Variable 100–900. |
+| Outfit | `--font-outfit` | `font-outfit` | **Project pages only**, because the designer's project PDFs set their uppercase headings and small labels in it. Not preloaded, so no other page fetches it. Don't use it elsewhere. |
 
 The recurring gesture is a Montserrat sentence with a few words in Times italic, as in the
 home about teaser and `AboutMe`. Times italic has a smaller x-height, so where the mockups
@@ -79,7 +80,8 @@ Pages never draw their own nav or footer. Everything except home lives in the `(
 | Route | State |
 |---|---|
 | `/` | Built. Screen 1 matches `Home.png`: the `-hello.` `MagnifyText` hero (Montserrat, `text-burgundy`, on paper) filling `--view-h`, so it lands between the header and footer. Screen 2 matches `Home-section-2.png`: a full-bleed landscape photo, and a burgundy about card (Times italic + Montserrat) with a portrait beneath it. Both photos are `ImageHolder` placeholders. Screen 3 is `AboutMe` on paper. |
-| `/work` | Hero built to match `Work-hero-section.jpeg`: the *works* / *archive* switch (`WorkSwitch`, Montserrat; the current view is in ink, the other is dimmed), then `WorkFolder` with *branding*, *packaging* and *editorial* (burgundy / stone / burgundy). Folder cards and links (`#branding`, …) are placeholders. `work/layout.tsx` defines `--u` (one pixel of the 1400px mockups, from `100cqw`) for everything under `/work`. The footer stays hidden here. |
+| `/work` | Hero built to match `Work-hero-section.jpeg`: the *works* / *archive* switch (`WorkSwitch`, Montserrat; the current view is in ink, the other is dimmed), then `WorkFolder` with *branding*, *packaging* and *editorial* (burgundy / stone / burgundy). A folder's cards are the projects filed under it in `work/projects.ts`: each is a link to the project page, captioned with its title on hover. *branding* holds Brew For You. Folders with no project yet keep the `public/folder-demo/` placeholder cards, and the folder links themselves (`#branding`, …) are still placeholders. `work/layout.tsx` defines `--u` (one pixel of the 1400px mockups, from `100cqw`) for everything under `/work`. The footer stays hidden here. |
+| `/work/[slug]` | Project pages, e.g. `/work/brew-for-you`, rebuilt from the designer's PDF. The PDFs themselves are far too heavy to ship (Brew for You's is 288MB). Everything lives in `work/projects.ts`: a list of image, text and hairline blocks, each with its position in PDF points. From `lg` up, the page is the PDF 1:1, with `--p` as one PDF point (`100cqw / page width`). Below `lg`, the blocks stack in list order in a two-column grid, using each block's `stack` (`full` / `half` / `bleed`), because the PDF's 12pt type is unreadable once scaled that small. Assets live in `public/work/<slug>/`: each image's visible crop is rendered out of the PDF, and vector art is exported as SVG. The paper background replaces the PDF's white. Only listed slugs exist (`dynamicParams = false`). |
 | `/work/archive` | Matches `archive-section.jpeg`: *archives* (Times italic) and three captioned photos linking to the entries. No header or footer. Both are hidden here and come back at their screen edge. |
 | `/work/archive/[slug]` | *i model*, *i document*, *behind the scenes* (`archive-section-*.jpeg`). One page layout, fed by `archive/entries.ts`. Each entry has its copy with hand-set line breaks, plus the positions measured off its own mockup, which differ slightly between them. The collage is one `ImageHolder` (603×819 mockup px), because each mockup's collage is a single composed image. Only the listed slugs exist (`dynamicParams = false`). |
 | `/about` | Matches `about-page.jpeg` and `about-second-section.jpeg`, two 1400×842 frames in `--u` from `md:` up, stacked below. Hero: *about* (Times italic) centred, then Montserrat copy with Times italic burgundy words at the **same** size (`0.99em`, not the `AboutMe` `1.18em`), and an `ImageHolder` portrait. Second screen: *what i contribute to the ~~table~~?* with *team* above it, the table drawing, and four burgundy Montserrat labels around it. The drawing is `public/about/team-table.svg`, traced from the mockup, so it is crisp at any size. The heading carries `0.016em` tracking because the mockup's Times sets wider than Times New Roman. No header or footer. |
@@ -142,8 +144,15 @@ inspect).
   - It no-ops (renders plain text) under `prefers-reduced-motion: reduce` or without
     WebGL2 — so the fallback `<span>` styling has to look right on its own.
 - `WorkFolder` — the `/work` hero (`Work-hero-section.jpeg`): overlapping file folders.
-  Hovering one fades the rest to paper and fans its cards (`public/folder-demo/`
-  placeholders) up from behind its tab.
+  Hovering one fades the rest to paper and fans its cards up from behind its tab.
+  - A card with `href` is a link (`next/link`), and one with `title` shows it in Times
+    italic above the card while the card is pointed at. Both kinds take the pointer, and
+    pointing at one keeps its folder engaged, so the fan stays open as you move onto it.
+    Plain cards stay pointer-transparent.
+  - `offsetY` takes any length. Project cards pass `var(--wf-tab-rise)` so the whole cover
+    clears the tab. An invisible bridge under each live card, `--wf-oy` tall, covers the
+    gap the lift opens, so the pointer can travel up from the folder without the fan
+    closing.
   - The layout is a flex-wrap of `span` fractions. The staggered rows come from
     `{ blank: true }` items. A blank is an inert, paper-coloured folder that cuts its
     row's tab into the folder above and pushes the next folder along. Blanks are dropped

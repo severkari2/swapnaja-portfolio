@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Montserrat, Tinos } from "next/font/google";
+import { Montserrat, Outfit, Tinos } from "next/font/google";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import "./globals.css";
 
-// Two families site-wide: Times italic and Montserrat. Nothing else is loaded.
+// Two families site-wide: Times italic and Montserrat. The only other face is Outfit, which
+// the project PDFs set their headings and labels in.
 
 // Body copy, labels, buttons and the home hero. Variable 100-900, and it holds up under the
 // wide letterspaced caps this design leans on.
@@ -26,6 +27,15 @@ const tinos = Tinos({
   preload: false,
 });
 
+// Project pages only (/work/[slug]), so not preloaded: nothing else ever fetches it.
+const outfit = Outfit({
+  variable: "--font-outfit-face",
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+  preload: false,
+});
+
 export const metadata: Metadata = {
   title: "Swapnaja — Graphic Designer",
   description:
@@ -40,7 +50,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${montserrat.variable} ${tinos.variable} h-full antialiased`}
+      className={`${montserrat.variable} ${tinos.variable} ${outfit.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-paper text-ink">
         {/* Both bars are sticky, so every page scrolls between them. */}
