@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AboutMe } from "@/components/AboutMe";
 import { Footer } from "@/components/Footer";
 import { ImageHolder } from "@/components/ImageHolder";
 import { MagnifyText } from "@/components/MagnifyText";
@@ -78,6 +79,14 @@ export default function Home() {
 
           <ImageHolder label="portrait" className="h-[calc(214*var(--u))]" />
         </div>
+      </section>
+
+      {/* The folder card (myself-component-*.jpeg): 936 of the mockup's 1400px, on paper. */}
+      <section
+        aria-label="About me"
+        className="bg-paper px-6 py-[calc(120*var(--u))] [--u:max(1px,0.07143vw)]"
+      >
+        <AboutMe className="mx-auto w-full max-w-[calc(936*var(--u))]" />
       </section>
     </main>
   );

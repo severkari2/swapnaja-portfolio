@@ -79,7 +79,7 @@ const CSS = `
   --wf-title-size: 50px;
   --wf-label-size: 13px;
   /* Defaults to the site type system; override per instance only to break from it. */
-  --wf-font-title: var(--font-display);
+  --wf-font-title: var(--font-times);
   --wf-font-label: var(--font-sans);
   /* Clamped so a folder narrower than the tab cannot have its notch overrun its own edge. */
   --wf-tab: min(var(--wf-tab-w), 55%);
@@ -151,6 +151,7 @@ a.wf-panel { cursor: pointer; }
   margin-top: 12px;
   font-family: var(--wf-font-title);
   font-size: var(--wf-title-size);
+  font-style: italic;
   font-weight: 400;
   line-height: 1;
   letter-spacing: -0.01em;

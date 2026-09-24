@@ -1,42 +1,19 @@
 import type { Metadata } from "next";
-import {
-  Bodoni_Moda,
-  Libre_Baskerville,
-  Montserrat,
-  Tinos,
-} from "next/font/google";
+import { Montserrat, Tinos } from "next/font/google";
 import { Header } from "@/components/Header";
 import "./globals.css";
 
-// Three families, one per role, drawn from three of the pairings on
-// public/Font Family.png. Bodoni Moda is the freely licensable stand-in for the sheet's
-// Bodoni FLF.
+// Two families site-wide: Times italic and Montserrat. Nothing else is loaded.
 
-// Display: headings and the wordmark only.
-const bodoni = Bodoni_Moda({
-  variable: "--font-bodoni",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-// Prose: drawn for screen reading at text sizes, where Bodoni's hairlines go fragile.
-// Static family, so weights are named. It ships no bold italic, hence no `style` array.
-const baskerville = Libre_Baskerville({
-  variable: "--font-baskerville",
-  weight: ["400", "700"],
-  subsets: ["latin"],
-  display: "swap",
-});
-
-// Chrome: nav, labels, buttons. Variable 100-900, and it holds up under the wide
-// letterspaced caps this design leans on.
+// Body copy, labels, buttons and the home hero. Variable 100-900, and it holds up under the
+// wide letterspaced caps this design leans on.
 const montserrat = Montserrat({
   variable: "--font-montserrat",
   subsets: ["latin"],
   display: "swap",
 });
 
-// Header and footer links are set in Times italic. The system Times is preferred (see
+// Headings, nav links and emphasis are set in Times italic. The system Times is preferred (see
 // --font-times); Tinos is the fallback for platforms without it. Not preloaded, since on
 // Windows and macOS the browser never needs to fetch it.
 const tinos = Tinos({
@@ -62,7 +39,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${bodoni.variable} ${baskerville.variable} ${montserrat.variable} ${tinos.variable} h-full antialiased`}
+      className={`${montserrat.variable} ${tinos.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-paper text-ink">
         <Header />

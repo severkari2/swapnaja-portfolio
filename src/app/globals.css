@@ -23,12 +23,10 @@
   --color-burgundy: var(--burgundy);
   --color-rule: var(--rule);
   --color-placeholder: var(--placeholder);
-  /* One family per role: Didone for display, a text serif for prose, a geometric sans
-     for chrome. See AGENTS.md for which goes where. */
-  --font-display: var(--font-bodoni), ui-serif, Georgia, "Times New Roman", serif;
-  --font-serif: var(--font-baskerville), Georgia, "Times New Roman", serif;
+  /* Two families, site-wide: Montserrat and Times italic. See AGENTS.md for which goes
+     where. */
   --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
-  /* Header and footer links. The system Times comes first; Tinos (metric-compatible with
+  /* Headings, nav links, emphasis. The system Times comes first; Tinos (metric-compatible with
      Times New Roman) is self-hosted for platforms that ship neither. */
   --font-times: "Times New Roman", Times, var(--font-tinos), serif;
 }

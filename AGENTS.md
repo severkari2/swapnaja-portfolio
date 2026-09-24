@@ -10,8 +10,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 # Swapnaja — portfolio site
 
 Personal portfolio for Swapnaja, a graphic designer. The brief is **minimalist + old money**:
-warm ivory paper, a deep oxblood hero, a Didone display serif against a quiet geometric
-sans, generous whitespace, hairline rules. When in doubt, remove something and add air.
+warm ivory paper, deep oxblood panels, Times italic against a quiet geometric sans,
+generous whitespace, hairline rules. When in doubt, remove something and add air.
 
 ## Design tokens
 
@@ -33,25 +33,26 @@ paper. The WebGL canvas itself always clears to transparent.
 
 ## Typography
 
-Four families, **one per role**. Loaded in `src/app/layout.tsx` via `next/font/google`
-and self-hosted (Times is the system face, with Tinos as the fallback). Pick by role, not by taste.
+**Two families, site-wide: Times italic and Montserrat.** Nothing else is loaded, unless a
+reference image supplied by the designer shows another face. Loaded in `src/app/layout.tsx`
+(Montserrat via `next/font/google`; Times is the system face, with self-hosted Tinos italic
+as the fallback).
 
 | Family | Token | Utility | Role |
 |---|---|---|---|
-| Bodoni Moda | `--font-bodoni` | `font-display` | Headings, the wordmark, the hero. Nothing else. |
-| Libre Baskerville | `--font-baskerville` | `font-serif` | Prose. Static family — weights named in the loader; it ships **no bold italic**, so never pass a `style` array with `700`. |
-| Montserrat | `--font-montserrat` | `font-sans` | The home hero (`-hello.`), labels, buttons. Also the `body` default. Variable 100–900. |
-| Times italic | `--font-times` | `nav-link` | Header and footer links only, lowercase: *works*, *about*, *e-mail*, *ig*, *in*. System `Times New Roman`/`Times` first; Tinos italic (self-hosted, not preloaded) is the fallback. |
+| Times italic | `--font-times` | `font-times italic`, `nav-link` | Headings, tab labels, nav links, and emphasised words inside Montserrat copy. Always italic. System `Times New Roman`/`Times` first; Tinos italic (self-hosted, not preloaded) is the fallback, and it ships **italic only**. |
+| Montserrat | `--font-montserrat` | `font-sans` | Body copy, the home hero (`-hello.`), labels, buttons. Also the `body` default. Variable 100–900. |
 
-Three tiers, applied everywhere:
-1. **Display** — `font-display`, `clamp(2.25rem,4vw,3.5rem)` for section headings up to
-   `clamp(3rem,9vw,7rem)` for page titles. Set section headings in **caps** with
-   `tracking-[0.02em]`; Didone capitals are the strongest gesture the face offers.
-2. **Prose** — `font-serif`, `clamp(1.125rem,1.8vw,1.75rem)`, `leading-[1.6]`,
-   `max-w-[60ch]`. Libre Baskerville has a large x-height and needs the extra leading.
+The recurring gesture is a Montserrat sentence with a few words in Times italic, as in the
+home about teaser and `AboutMe`. Times italic has a smaller x-height, so where the mockups
+show those words matching the sans, scale them up (`AboutMe` uses `1.18em`).
+
+Tiers:
+1. **Headings** — `font-times italic`, `clamp(3rem,9vw,7rem)` for page titles.
+2. **Prose** — `font-sans`, `clamp(1.125rem,1.8vw,1.75rem)`, `leading-[1.6]`, `max-w-[60ch]`.
 3. **Micro-caps** — the `label` utility (custom `@utility` in `globals.css`): Montserrat,
-   uppercase, 15px / `0.22em` by default. Every nav item, section eyebrow, footer link and
-   text button uses it, apart from the header and footer. Use `label`; don't respell it as a utility chain.
+   uppercase, 15px / `0.22em` by default. Section eyebrows and text buttons. Use `label`;
+   don't respell it as a utility chain.
 4. **Nav links** — the `nav-link` utility: Times italic, lowercase copy,
    `clamp(1.25rem,2.2vw,2rem)` via `--nav-size`. Header and footer only.
 
@@ -59,29 +60,22 @@ Three tiers, applied everywhere:
 sites tune it with arbitrary properties — `label [--label-size:13px] sm:[--label-size:17px]`
 — rather than fighting the utility layer with a competing `text-*` class. Variants work.
 
-**Keep headings well above the prose they introduce.** A section heading should land at
-roughly 2× its own body copy; an earlier revision set `WHO AM I?` with `label` beside
-40px prose and it read as a caption, not a question.
+**Keep headings well above the prose they introduce** — roughly 2× the body size.
 
-The families come from `public/Font Family.png`, the reference sheet supplied by the
-designer — Bodoni FLF (pairing #2), Libre Baskerville (#4) and Montserrat (#3). Bodoni
-Moda is the Google-hosted equivalent of Bodoni FLF. The sheet's other display faces (The
-Seasons, Sloop Script, Symphony, Pfrandory, Burgues Script, Safira March) are commercial
-and cannot be self-hosted without licensed files, so they are not options. Didact Gothic
-(the sheet's partner to Bodoni) was tried and dropped: single weight, no italic, nothing
-to build hierarchy with.
+Bodoni Moda and Libre Baskerville (from `public/Font Family.png`) were used earlier and
+dropped for the two-family rule; don't bring them back without a reference image asking for them.
 
 ## Structure
 
 `src/app/layout.tsx` owns `<Header />`. Everything except home lives in the `(pages)` route
 group (URLs are unaffected), whose layout supplies `<main>` and `<Footer />`. Home supplies
 its own `<main>` and renders `<Footer />` at the bottom of its first screen, because the
-mockups put the contact row there and show nothing after the second section. Pages never
+mockups put the contact row there. Pages never
 draw their own nav.
 
 | Route | State |
 |---|---|
-| `/` | Built. Screen 1 matches `Home.png`: the `-hello.` `MagnifyText` hero (Montserrat, `text-burgundy`, on paper) with the footer at the bottom of the screen. Screen 2 matches `Home-section-2.png`: a full-bleed landscape photo, and a burgundy about card (Times italic + Montserrat) with a portrait beneath it. Both photos are `ImageHolder` placeholders. |
+| `/` | Built. Screen 1 matches `Home.png`: the `-hello.` `MagnifyText` hero (Montserrat, `text-burgundy`, on paper) with the footer at the bottom of the screen. Screen 2 matches `Home-section-2.png`: a full-bleed landscape photo, and a burgundy about card (Times italic + Montserrat) with a portrait beneath it. Both photos are `ImageHolder` placeholders. Screen 3 is `AboutMe` on paper. |
 | `/work` | Placeholder awaiting content. |
 | `/about` | Placeholder awaiting content. |
 
@@ -98,6 +92,15 @@ inspect).
   the page it points to. Footer
   has *e-mail* on the left and *ig* / *in* on the right, with no top rule. `<main>` is a flex
   column, so a page section with `flex-1` fills exactly the space between them.
+- `AboutMe` — client component; a burgundy index card with three folder tabs
+  (`myself-component-*.jpeg`). Exactly three sections, enforced by a tuple type; headings and
+  copy live in `defaultSections` at the top of the file (or pass `sections`). Nothing is open
+  on load; a tab's heading goes from `text-paper/55` to `text-paper` when active and its
+  copy appears. `<em>` in the copy is set in Times italic at `1.18em`. Everything is sized in
+  `cqw` against the card's own width, so it scales as one piece; the tab silhouette is an
+  SVG path in 936×76 mockup pixels. WAI-ARIA tabs with arrow/Home/End keys. The watermarks
+  in the reference images ("The February Recap", the cursor, the ghost tab captions) are
+  not part of the design.
 - `ImageHolder` — filler block for a photo not yet supplied. Swap for `next/image` with the
   same sizing classes.
 - Home's second section is measured in `--u` (one pixel of the 1400px-wide mockup,
@@ -119,7 +122,7 @@ inspect).
   is preserved as a commented block in `src/app/work/page.tsx` — reuse it, don't re-derive
   it. Its stylesheet is a JS template literal injected via React 19's hoisted `<style>`,
   so **never put a backtick inside its CSS comments** — it silently ends the literal and
-  the file stops parsing. It defaults `--wf-font-title` / `--wf-font-label` to the site font tokens, so it
+  the file stops parsing. It defaults `--wf-font-title` (Times, italic) / `--wf-font-label` to the site font tokens, so it
   needs no per-instance font overrides.
 
 ## Stack facts
