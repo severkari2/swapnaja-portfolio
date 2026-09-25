@@ -14,6 +14,12 @@
   --header-h: 76px;
   --header-h-compact: 64px;
   --footer-h: 84px;
+  /* The type scale for headings and body copy (text-h1, text-h2, text-p). Mobile here,
+     desktop from md up. Display text (the about statement, captions, nav links, folder
+     titles) keeps its mockup size. */
+  --size-h1: 38px;
+  --size-h2: 26px;
+  --size-p: 16px;
 }
 
 @media (min-width: 640px) {
@@ -24,6 +30,14 @@
   }
 }
 
+@media (min-width: 768px) {
+  :root {
+    --size-h1: 64px;
+    --size-h2: 36px;
+    --size-p: 18px;
+  }
+}
+
 @theme inline {
   --color-paper: var(--paper);
   --color-ink: var(--ink);
@@ -31,6 +45,9 @@
   --color-rule: var(--rule);
   --color-placeholder: var(--placeholder);
   --color-stone: var(--stone);
+  --text-h1: var(--size-h1);
+  --text-h2: var(--size-h2);
+  --text-p: var(--size-p);
   /* Two families, site-wide: Montserrat and Times italic. See AGENTS.md for which goes
      where. */
   --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;

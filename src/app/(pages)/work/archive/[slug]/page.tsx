@@ -67,23 +67,33 @@ export default async function ArchiveEntryPage(
         style={
           {
             "--title-top": entry.titleTop,
-            "--subtitle-top": entry.subtitleTop,
             "--collage-left": entry.collageLeft,
             "--collage-top": entry.collageTop,
+            // Where the mockup puts the collage, unless that leaves the text column (45
+            // mockup px in, 32 short of the collage) narrower than a 64px title needs. Then
+            // the collage moves right, into the mockup's empty space.
+            "--collage-x":
+              "max(calc(var(--collage-left) * var(--u)), calc(77 * var(--u) + 19rem))",
           } as CSSProperties
         }
       >
-        {/* The offsets turn each glyph top from the mockup into the top of its line box. */}
-        <h1 className="font-times text-[2.75rem] italic leading-[1.247] lg:absolute lg:left-[calc(45*var(--u))] lg:top-[calc((var(--title-top)-11.4)*var(--u))] lg:text-[calc(46.5*var(--u))]">
-          {lines(entry.title)}
-        </h1>
-        <p className="mt-2 font-sans text-lg leading-[1.2] lg:absolute lg:left-[calc(45*var(--u))] lg:top-[calc((var(--subtitle-top)-5.4)*var(--u))] lg:mt-0 lg:text-[calc(28.3*var(--u))]">
-          {lines(entry.subtitle)}
-        </p>
+        {/* From lg up, title and subtitle share one column left of the collage, at the
+            site's h1 and paragraph sizes. Those are fixed, not scaled with the mockup, so
+            the subtitle follows the title in flow rather than at a measured top. The
+            offset turns the title's glyph top from the mockup into the top of its line
+            box. */}
+        <div className="lg:absolute lg:left-[calc(45*var(--u))] lg:top-[calc((var(--title-top)-11.4)*var(--u))] lg:w-[calc(var(--collage-x)-77*var(--u))]">
+          <h1 className="font-times text-h1 italic leading-[1.1]">
+            {lines(entry.title)}
+          </h1>
+          <p className="mt-2 font-sans text-p leading-[1.4] lg:mt-4">
+            {lines(entry.subtitle)}
+          </p>
+        </div>
 
         <ImageHolder
           label={`${entry.caption} collage`}
-          className="mt-10 aspect-[603/819] w-full max-w-[480px] lg:absolute lg:max-w-none lg:left-[calc(var(--collage-left)*var(--u))] lg:top-[calc(var(--collage-top)*var(--u))] lg:mt-0 lg:w-[calc(603*var(--u))]"
+          className="mt-10 aspect-[603/819] w-full max-w-[480px] lg:absolute lg:max-w-none lg:left-(--collage-x) lg:top-[calc(var(--collage-top)*var(--u))] lg:mt-0 lg:w-[calc(603*var(--u))]"
         />
       </div>
     </>

@@ -32,15 +32,15 @@ export default function About() {
       <div className="[--u:calc(100cqw/1400)]">
         <SiteNav />
 
-        <section className="relative flex flex-col px-6 pb-20 pt-10 md:block md:h-[calc(842*var(--u))] md:p-0">
-          <h1 className="text-center font-times text-[1.75rem] italic leading-none md:absolute md:inset-x-0 md:-translate-x-[calc(2.5*var(--u))] md:top-[calc(51.6*var(--u))] md:text-[calc(35.5*var(--u))]">
-            about
-          </h1>
+        {/* The mockup's "about" heading is gone (the header already says where you are), and
+            the frame moves up by the 120 mockup pixels it took. */}
+        <section className="relative flex flex-col px-6 pb-20 pt-10 md:block md:h-[calc(722*var(--u))] md:p-0">
+          <h1 className="sr-only">about</h1>
 
           {/* The mockup breaks these lines by hand; below md the copy wraps freely. The
               Times words are the same size as the Montserrat around them, and leading-none
               keeps their taller line box from pushing the lines apart. */}
-          <p className="mt-12 font-sans text-[1.625rem] leading-[1.23] md:absolute md:left-[calc(95*var(--u))] md:top-[calc(179.9*var(--u))] md:mt-0 md:whitespace-nowrap md:text-[calc(52*var(--u))] md:leading-[calc(64*var(--u))] [&_em]:font-times [&_em]:text-[0.99em] [&_em]:leading-none [&_em]:text-burgundy">
+          <p className="font-sans text-[1.625rem] leading-[1.23] md:absolute md:left-[calc(95*var(--u))] md:top-[calc(59.9*var(--u))] md:whitespace-nowrap md:text-[calc(52*var(--u))] md:leading-[calc(64*var(--u))] [&_em]:font-times [&_em]:text-[0.99em] [&_em]:leading-none [&_em]:text-burgundy">
             I&rsquo;m <em>Swapnaja, a Communication Designer</em>{" "}
             <br className="hidden md:block" />
             working across <em>branding, packaging,</em> editorial,{" "}
@@ -54,7 +54,7 @@ export default function About() {
 
           <ImageHolder
             label="portrait at work"
-            className="mt-10 aspect-[473/334] w-full max-w-[480px] self-end md:absolute md:left-[calc(765*var(--u))] md:top-[calc(458*var(--u))] md:mt-0 md:w-[calc(473*var(--u))] md:max-w-none"
+            className="mt-10 aspect-[473/334] w-full max-w-[480px] self-end md:absolute md:left-[calc(765*var(--u))] md:top-[calc(338*var(--u))] md:mt-0 md:w-[calc(473*var(--u))] md:max-w-none"
           />
         </section>
 
@@ -64,11 +64,12 @@ export default function About() {
         >
           {/* "table" is struck through and "team" written above it. Both hang off the
               "table?" span in em, so they follow it when the heading wraps; screen readers
-              get the corrected question instead. Below md the heading wraps, and the
-              span's top margin opens a gap above its line for "team". */}
+              get the corrected question instead. Set at the site's h2 size, it is centred
+              over the table rather than spanning it as in the mockup. Below md the heading
+              wraps, and the span's top margin opens a gap above its line for "team". */}
           <h2
             id="contribute"
-            className="text-center font-times text-[2.5rem] italic leading-none md:absolute md:left-[calc(255*var(--u))] md:top-[calc(128.2*var(--u))] md:whitespace-nowrap md:text-left md:text-[calc(68*var(--u))] md:tracking-[0.016em]"
+            className="text-center font-times text-h2 italic leading-none md:absolute md:inset-x-0 md:top-[calc(160*var(--u))] md:whitespace-nowrap md:tracking-[0.016em]"
           >
             what i contribute to the <span className="sr-only">team?</span>
             <span aria-hidden="true" className="relative mt-[0.9em] inline-block md:mt-0">

@@ -96,6 +96,12 @@ export interface WorkFolderProps {
   /** Horizontal space between folders in a row. The reference butts them together. */
   gap?: WorkFolderLength;
   palette?: string[];
+  /**
+   * Runs the last folder's panel a full screen further down, so it can fill the rest of the
+   * page. The host clips it where the page ends (overflow-y: clip), which also keeps the
+   * extra length out of the scroll height.
+   */
+  fill?: boolean;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -189,6 +195,12 @@ const CSS = `
 }
 
 a.wf-panel { cursor: pointer; }
+
+/* The fill prop: the last panel runs on for a full screen and the host clips it. It is still
+   the panel, so it dims and rises with the rest. */
+.wf-fill > .wf-item:last-child .wf-panel {
+  height: calc(var(--wf-panel-h) + 100lvh);
+}
 
 .wf-blank::before { content: ""; }
 
@@ -439,6 +451,7 @@ export const WorkFolder: React.FC<WorkFolderProps> = ({
   duration = 220,
   gap = 0,
   palette = PALETTE,
+  fill = false,
   className = "",
   style,
 }) => {
@@ -463,7 +476,7 @@ export const WorkFolder: React.FC<WorkFolderProps> = ({
       <style href="work-folder" precedence="default">
         {CSS}
       </style>
-      <ul className={`wf ${className}`.trim()} style={rootVars}>
+      <ul className={`wf ${fill ? "wf-fill " : ""}${className}`.trim()} style={rootVars}>
         {items.map((item, i) => {
           const frac = `${(item.span ?? 1) / columns}`;
 

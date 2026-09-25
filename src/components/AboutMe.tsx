@@ -1,15 +1,16 @@
 "use client";
 
 import { useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { email, external, phone, resumeHref } from "./contact";
 
 type Section = { heading: string; body: ReactNode };
 
 // Exactly three: the folder is drawn with three tabs, so the tuple refuses any other count.
 type Sections = readonly [Section, Section, Section];
 
-const phone = "+91-8208763017";
-// The mockup reads "gamil.com", taken to be a typo for gmail.
-const email = "swapnajasevekari@gmail.com";
+// The contact tab's two outlined buttons.
+const button =
+  "inline-block rounded-[0.85cqw] border border-paper px-[1.5cqw] py-[0.6cqw] font-times text-[max(1.125rem,3.6cqw)] italic leading-none transition-colors hover:bg-paper hover:text-burgundy";
 
 // Edit the copy here, or pass `sections` to override it. <em> is set in Times italic by the
 // panel; the <br>s reproduce the mockup's hand-set line breaks from sm: up.
@@ -42,17 +43,19 @@ const defaultSections: Sections = [
     heading: "contact",
     body: (
       <>
-        <p className="text-[max(1.5rem,4.9cqw)] leading-[1.4]">
+        <p className="text-h2 leading-[1.4]">
           ready to <em>build</em> a brand <br className="hidden sm:block" />
           that feels like <em>you</em>?
         </p>
-        <a
-          href={`mailto:${email}`}
-          className="mt-[3.5cqw] inline-block rounded-[0.85cqw] border border-paper px-[1.5cqw] py-[0.6cqw] font-times text-[max(1.125rem,3.6cqw)] italic leading-none transition-colors hover:bg-paper hover:text-burgundy"
-        >
-          connect with us
-        </a>
-        <address className="mt-[3.2cqw] flex flex-col items-start text-[max(1rem,3.5cqw)] not-italic leading-[1.33]">
+        <div className="mt-[3.5cqw] flex flex-wrap gap-[2cqw]">
+          <a href={`mailto:${email}`} className={button}>
+            connect with us
+          </a>
+          <a href={resumeHref} {...external} className={button}>
+            resume
+          </a>
+        </div>
+        <address className="mt-[3.2cqw] flex flex-col items-start not-italic leading-[1.33]">
           <a href={`tel:${phone.replaceAll("-", "")}`} className="transition-opacity hover:opacity-60">
             {phone}
           </a>
@@ -151,7 +154,7 @@ export function AboutMe({
             id={`${id}-panel-${i}`}
             aria-labelledby={`${id}-tab-${i}`}
             hidden={active !== i}
-            className="text-[max(1rem,3.2cqw)] leading-[1.45] text-paper [&_em]:font-times [&_em]:text-[1.18em] [&_em]:leading-none"
+            className="text-p leading-[1.45] text-paper [&_em]:font-times [&_em]:text-[1.18em] [&_em]:leading-none"
           >
             {section.body}
           </div>

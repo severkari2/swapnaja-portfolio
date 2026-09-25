@@ -10,21 +10,18 @@ export function Header({ compact = false }: { compact?: boolean }) {
         compact ? "h-[var(--header-h-compact)]" : "h-[var(--header-h)]"
       }`}
     >
-      {/* Three equal columns rather than justify-between: "works" stays optically centred
-          no matter how wide the outer links get. */}
+      {/* Four links spread edge to edge. "works" excludes the archive, which has its own
+          link, so only one of the two lights up there. */}
       <nav
         aria-label="Main"
-        className="grid h-full grid-cols-3 items-center px-6 sm:px-[7vw]"
+        className="flex h-full items-center justify-between px-6 sm:px-[7vw]"
       >
-        <NavLink href="/" className="justify-self-start">
-          home
-        </NavLink>
-        <NavLink href="/work" className="justify-self-center">
+        <NavLink href="/">home</NavLink>
+        <NavLink href="/work" exclude="/work/archive">
           works
         </NavLink>
-        <NavLink href="/about" className="justify-self-end">
-          about
-        </NavLink>
+        <NavLink href="/work/archive">archive</NavLink>
+        <NavLink href="/about">about</NavLink>
       </nav>
     </header>
   );

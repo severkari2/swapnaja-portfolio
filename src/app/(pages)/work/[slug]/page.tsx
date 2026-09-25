@@ -40,10 +40,10 @@ const stackClass: Record<ProjectStack, string> = {
 // The type in the stacked layout. From lg up every size comes from the PDF instead.
 // Headings and labels take their face from the project (faceClass).
 const roleClass: Record<ProjectTextRole, string> = {
-  title: "mt-6 font-times text-[2rem] italic leading-[1.2]",
-  heading: "mt-10 text-[1.375rem] leading-[1.2]",
+  title: "mt-6 font-times text-h1 italic leading-[1.2]",
+  heading: "mt-10 text-h2 leading-[1.2]",
   label: "mt-2 text-xs",
-  body: "mb-2 max-w-[60ch] font-sans text-[0.9375rem] font-medium leading-[1.6]",
+  body: "mb-2 max-w-[60ch] font-sans text-p font-medium leading-[1.6]",
   display: "my-4 font-sans text-[2rem] font-medium leading-[1.2]",
 };
 

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { SiteNav } from "@/components/SiteNav";
 import { WorkFolder, type WorkFolderProps } from "@/components/WorkFolder";
-import { WorkSwitch } from "@/components/WorkSwitch";
 import { projectHref, projects, type ProjectFolder } from "./projects";
 
 export const metadata: Metadata = {
@@ -62,33 +61,39 @@ const folders: WorkFolderProps["items"] = [
 // titles in proportion. Below 700px WorkFolder stacks them at fixed sizes.
 const u = (px: number) => `calc(${px} * var(--u))`;
 
+// The page fills at least one screen, and the last folder runs on down past it: the page's
+// overflow clip cuts it off at the bottom, so no paper shows below the folders.
 export default function Work() {
   return (
-    <div className="pb-[calc(74*var(--u))]">
+    <div className="flex min-h-dvh flex-col overflow-y-clip">
       <SiteNav />
       <h1 className="sr-only">works</h1>
-      <WorkSwitch />
-      <WorkFolder
-        items={folders}
-        labels={false}
-        rowHeight={u(120)}
-        panelHeight={u(156)}
-        tabWidth={u(322)}
-        photoWidth={u(155)}
-        photoGap={u(137)}
-        lift={u(12)}
-        dimColor="color-mix(in srgb, var(--ink) 5%, var(--paper))"
-        dimInk="var(--placeholder)"
-        style={
-          {
-            "--wf-tab-rise": u(36),
-            "--wf-pad": u(56),
-            "--wf-pad-top": u(40),
-            "--wf-title-size": u(63),
-            "--wf-caption-size": u(28),
-          } as CSSProperties
-        }
-      />
+      {/* Headroom for the first folder's card fan and its captions. At 700px and below the
+          folders switch to fixed sizes, so it gets a fixed floor there. */}
+      <div className="pt-[max(6rem,calc(233*var(--u)))] max-[700px]:pt-48">
+        <WorkFolder
+          items={folders}
+          fill
+          labels={false}
+          rowHeight={u(120)}
+          panelHeight={u(156)}
+          tabWidth={u(322)}
+          photoWidth={u(155)}
+          photoGap={u(137)}
+          lift={u(12)}
+          dimColor="color-mix(in srgb, var(--ink) 5%, var(--paper))"
+          dimInk="var(--placeholder)"
+          style={
+            {
+              "--wf-tab-rise": u(36),
+              "--wf-pad": u(56),
+              "--wf-pad-top": u(40),
+              "--wf-title-size": u(63),
+              "--wf-caption-size": u(28),
+            } as CSSProperties
+          }
+        />
+      </div>
     </div>
   );
 }

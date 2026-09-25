@@ -9,20 +9,18 @@ export const metadata: Metadata = {
   description: "Archive of past work by Swapnaja.",
 };
 
-// archive-section.jpeg. From md up everything sits where the 1400×842 mockup draws it, in
-// --u (one mockup pixel, from the work layout); below md it stacks. The frame starts below
-// the SiteNav row.
+// archive-section.jpeg, without its "archives" heading (the header says where you are). From
+// md up the photos keep the mockup's sizes and margins in --u (one mockup pixel, from the
+// work layout) and sit in the page flow; below md they stack.
 export default function Archive() {
   return (
     <>
       <SiteNav />
-      <div className="relative px-6 pb-16 pt-10 md:h-[calc(842*var(--u))] md:p-0">
-        <h1 className="font-times text-[2.75rem] italic leading-none md:absolute md:left-[calc(44*var(--u))] md:top-[calc(50*var(--u))] md:text-[calc(60*var(--u))]">
-          archives
-        </h1>
+      <div className="px-6 pb-16 pt-10 md:pb-[calc(120*var(--u))] md:pl-[calc(79*var(--u))] md:pr-[calc(36*var(--u))] md:pt-[calc(80*var(--u))]">
+        <h1 className="sr-only">archives</h1>
 
         {/* The mockup's margins are uneven (79 left, 36 right), so they are kept as drawn. */}
-        <ul className="mt-10 grid gap-10 md:absolute md:inset-x-0 md:top-[calc(294*var(--u))] md:mt-0 md:grid-cols-3 md:gap-[calc(32*var(--u))] md:pl-[calc(79*var(--u))] md:pr-[calc(36*var(--u))]">
+        <ul className="grid gap-10 md:grid-cols-3 md:gap-[calc(32*var(--u))]">
           {archiveEntries.map((entry) => (
             <li key={entry.slug}>
               <Link href={archiveHref(entry)} className="group block">

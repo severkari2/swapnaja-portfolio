@@ -29,6 +29,7 @@ exposes them as Tailwind utilities. **Never hardcode a hex or a font stack in a 
 | `--header-h` | — | `76px`, `140px` from `sm:` up. Height of home's `Header`. |
 | `--header-h-compact` | — | `64px`, `80px` from `sm:` up. Height of `Header compact`, on every other page. |
 | `--footer-h` | — | `84px`, `120px` from `sm:` up. Height of `Footer` (home, end of `/about`). Change bar heights in `globals.css` only — never hardcode them. |
+| `--size-h1` / `--size-h2` / `--size-p` | `text-h1` / `text-h2` / `text-p` | `38px` / `26px` / `16px`, and `64px` / `36px` / `18px` from `md:` (768px) up. The type scale for headings and body copy. |
 
 `MagnifyText` takes its text colour from `className` (`text-burgundy`) and its container
 background from a `backgroundColor` prop that defaults to `transparent`, so it sits on the
@@ -52,8 +53,15 @@ The recurring gesture is a Montserrat sentence with a few words in Times italic,
 show those words matching the sans, scale them up (`AboutMe` uses `1.18em`).
 
 Tiers:
-1. **Headings** — `font-times italic`, `clamp(3rem,9vw,7rem)` for page titles.
-2. **Prose** — `font-sans`, `clamp(1.125rem,1.8vw,1.75rem)`, `leading-[1.6]`, `max-w-[60ch]`.
+1. **Headings** — `font-times italic`, `text-h1` (64 / 38px) for page titles and `text-h2`
+   (36 / 26px) for section headings. The sizes are fixed, not scaled in `--u`, so in a
+   mockup-measured layout set text that follows a heading in flow, not at a measured top.
+2. **Prose** — `font-sans`, `text-p` (18 / 16px), `max-w-[60ch]`. Don't hand-set line
+   breaks in it.
+
+Display text keeps its mockup size and is outside the scale: the `-hello.` hero, the `/about`
+statement, the archive captions, the table labels on `/about`, `WorkFolder` titles, the
+`AboutMe` tab labels and the project pages from `lg` up (sized from their PDFs).
 3. **Micro-caps** — the `label` utility (custom `@utility` in `globals.css`): Montserrat,
    uppercase, 15px / `0.22em` by default. Section eyebrows and text buttons. Use `label`;
    don't respell it as a utility chain.
@@ -64,7 +72,6 @@ Tiers:
 sites tune it with arbitrary properties — `label [--label-size:13px] sm:[--label-size:17px]`
 — rather than fighting the utility layer with a competing `text-*` class. Variants work.
 
-**Keep headings well above the prose they introduce** — roughly 2× the body size.
 
 Bodoni Moda and Libre Baskerville (from `public/Font Family.png`) were used earlier and
 dropped for the two-family rule; don't bring them back without a reference image asking for them.
@@ -81,19 +88,23 @@ same markup serves phones and desktops (no hamburger).
   own links as children (`QuietLink`s in a labelled `<nav>`), shown in a thin row under the
   header, right-aligned with *about*. Each page renders `SiteNav` itself, so it can pass
   those links. On archive and about the mockup frames therefore start below the header.
-- **Contact** (`Footer`: *e-mail*, *ig*, *in*) appears on home and at the end of `/about`.
+- **Contact** (`Footer`: *e-mail*, *resume*, *ig*, *in*) appears on home and at the end of
+  `/about`. The CV (`public/resume/cv main.pdf`) is also linked from the home about card and
+  the `AboutMe` contact tab. Contact details live in `src/components/contact.ts`.
+- Pages have no visible title where the header already says where you are (`/work`,
+  `/work/archive`, `/about`); they keep an `sr-only` h1.
 
 The root layout renders only `children`. Everything except home lives in the `(pages)` route
 group (URLs are unaffected), whose layout supplies `<main>`; home supplies its own.
 
 | Route | State |
 |---|---|
-| `/` | Built. Screen 1 matches `Home.png`: the `-hello.` `MagnifyText` hero (Montserrat, `text-burgundy`, on paper) between `Header` and `Footer`, the three filling one `min-h-svh` screen and scrolling away together. Screen 2 matches `Home-section-2.png`: a full-bleed landscape photo, and a burgundy about card with a portrait beneath it. The card's heading *about* is Times italic at 32u, well above the body; everything else (copy, tools line, *more*) is Montserrat at 12u, with the emphasised words in medium weight. Both photos are `ImageHolder` placeholders. Screen 3 is `AboutMe` on paper. |
-| `/work` | Hero built to match `Work-hero-section.jpeg`: the *works* / *archive* switch (`WorkSwitch`, Montserrat; the current view is in ink, the other is dimmed), then `WorkFolder` with *branding*, *packaging* and *editorial* (burgundy / stone / burgundy). A folder's cards are the projects filed under it in `work/projects.ts`. A project lists its `folders`, so it can sit in more than one. Each card is a link to the project page, captioned with its title on hover. *branding* holds Brew For You, Surahi and Raya, and *packaging* holds Nektar and Raya. Folders with no project yet keep the `public/folder-demo/` placeholder cards, and the folder links themselves (`#branding`, …) are still placeholders. `work/layout.tsx` defines `--u` (one pixel of the 1400px mockups, from `100cqw`) for everything under `/work`. |
+| `/` | Built. Screen 1 matches `Home.png`: the `-hello.` `MagnifyText` hero (Montserrat, `text-burgundy`, on paper) between `Header` and `Footer`, the three filling one `min-h-svh` screen and scrolling away together. Screen 2 matches `Home-section-2.png`: a full-bleed landscape photo, and a burgundy about card with a portrait beneath it. The card's heading *about* is Times italic `text-h2`; everything else (copy, tools line, *resume* and *more*) is Montserrat `text-p`, wrapping freely, with the emphasised words in medium weight. Both photos are `ImageHolder` placeholders. Screen 3 is `AboutMe` on paper. |
+| `/work` | Hero built to match `Work-hero-section.jpeg`, minus its *works* / *archive* switch (archive is in the header): headroom for the first folder's card fan, then `WorkFolder` with *branding*, *packaging* and *editorial* (burgundy / stone / burgundy). A folder's cards are the projects filed under it in `work/projects.ts`. A project lists its `folders`, so it can sit in more than one. Each card is a link to the project page, captioned with its title on hover. *branding* holds Brew For You, Surahi and Raya, and *packaging* holds Nektar and Raya. Folders with no project yet keep the `public/folder-demo/` placeholder cards, and the folder links themselves (`#branding`, …) are still placeholders. The page fills at least one screen (`min-h-dvh`, `overflow-y-clip`) and `WorkFolder fill` runs *editorial* down to its bottom, so no paper shows under the folders. `work/layout.tsx` defines `--u` (one pixel of the 1400px mockups, from `100cqw`) for everything under `/work`. |
 | `/work/[slug]` | Project pages, `/work/brew-for-you`, `/work/nektar`, `/work/surahi` and `/work/raya`, rebuilt from the designer's PDFs. The PDFs themselves are far too heavy to ship (288MB, 302MB, 294MB and 324MB, almost all of it Illustrator's private editing data). Everything lives in `work/projects.ts`: a list of image, text and rule blocks, each with its position in PDF points. A rule is a hairline or, with `color`, a plain block of colour; rules are only drawn from `lg` up. Text can carry the PDF's own `color`, and a line can mix Montserrat and Times italic runs. It is drawn above any photo it overlaps. A project's `face` sets its headings and labels: Outfit (Brew For You, the default) or Montserrat Medium (Nektar, Surahi, Raya). From `lg` up, the page is the PDF 1:1, with `--p` as one PDF point (`100cqw / page width`). Below `lg`, the blocks stack in list order in a two-column grid, using each block's `stack` (`full` / `half` / `bleed`), because the PDF's 12pt type is unreadable once scaled that small. Assets live in `public/work/<slug>/`: each image's visible crop is rendered out of the PDF, with any text or vector art the PDF draws over it redacted first, since those are separate blocks. Vector art without text is exported as SVG path data. Vector art that contains text is rasterized: JPG when opaque, WebP when it needs transparency. So is any text in a face the site doesn't load (Raya's Samarkan wordmarks, its Baskervville and Outfit banner lines): it stays in its picture, and only Montserrat and Times italic lines become text blocks. The paper background replaces the PDF's white. Previous / next run in `projects.ts` order and wrap around: under the header (*← previous*, *next: Title →*), and in a pager after the page (hairline, micro-caps, Times italic titles). Only listed slugs exist (`dynamicParams = false`). |
-| `/work/archive` | Matches `archive-section.jpeg`: *archives* (Times italic) and three captioned photos linking to the entries. *works* is in the header, so the page adds no links of its own. |
-| `/work/archive/[slug]` | *i model*, *i document*, *behind the scenes* (`archive-section-*.jpeg`). One page layout, fed by `archive/entries.ts`. Each entry has its copy with hand-set line breaks, plus the positions measured off its own mockup, which differ slightly between them. The collage is one `ImageHolder` (603×819 mockup px), because each mockup's collage is a single composed image. *← archives* and *next: caption →* (wrapping around) sit under the header. Only the listed slugs exist (`dynamicParams = false`). |
-| `/about` | Matches `about-page.jpeg` and `about-second-section.jpeg`, two 1400×842 frames in `--u` from `md:` up, stacked below. Hero: *about* (Times italic) centred, then Montserrat copy with Times italic burgundy words at the **same** size (`0.99em`, not the `AboutMe` `1.18em`), and an `ImageHolder` portrait. Second screen: *what i contribute to the ~~table~~?* with *team* above it, the table drawing, and four burgundy Montserrat labels around it. The drawing is `public/about/team-table.svg`, traced from the mockup, so it is crisp at any size. The heading carries `0.016em` tracking because the mockup's Times sets wider than Times New Roman. The page ends with `Footer`, for contact. |
+| `/work/archive` | Matches `archive-section.jpeg` without its *archives* heading: three captioned photos linking to the entries, in the page flow with the mockup's sizes and uneven 79/36 margins in `--u`. The header links here, so the page adds no links of its own. |
+| `/work/archive/[slug]` | *i model*, *i document*, *behind the scenes* (`archive-section-*.jpeg`). One page layout, fed by `archive/entries.ts`. Each entry has its copy with hand-set line breaks, plus the title top and collage position measured off its own mockup, which differ slightly between them. Title (`text-h1`) and subtitle (`text-p`) form one column; from `lg` up the collage moves right of its mockup spot when the column would be narrower than 19rem. The collage is one `ImageHolder` (603×819 mockup px), because each mockup's collage is a single composed image. *← archives* and *next: caption →* (wrapping around) sit under the header. Only the listed slugs exist (`dynamicParams = false`). |
+| `/about` | Matches `about-page.jpeg` and `about-second-section.jpeg`, two 1400×842 frames in `--u` from `md:` up, stacked below. The mockup's *about* heading is dropped and the hero frame shortened to 722u to close its gap. Hero: Montserrat copy with Times italic burgundy words at the **same** size (`0.99em`, not the `AboutMe` `1.18em`), and an `ImageHolder` portrait. Second screen: *what i contribute to the ~~table~~?* (`text-h2`, centred) with *team* above it, the table drawing, and four burgundy Montserrat labels around it. The drawing is `public/about/team-table.svg`, traced from the mockup, so it is crisp at any size. The heading carries `0.016em` tracking because the mockup's Times sets wider than Times New Roman. The page ends with `Footer`, for contact. |
 
 Design inspiration reference: `https://swapnajasevekari.framer.website/` (client-rendered
 Framer site — plain fetching returns only the bio copy, so it needs a real browser to
@@ -106,20 +117,22 @@ inspect).
   like the header so they line up with *about*.
 - `NavLink` — client (`usePathname`); a header link that turns `text-burgundy` and sets
   `aria-current` on the page it points to (home matches only `/`, the rest also match
-  sub-pages).
+  sub-pages, except those under its `exclude`: *works* excludes `/work/archive`).
 - `QuietLink` — faint micro-caps link for a page's own navigation (previous / next, back to
   an index), passed into `SiteNav`. Wrap a page's `QuietLink`s in a `<nav aria-label>`.
 - `Header` / `Footer` — server components, laid out as in `Home.png`, in the page flow.
-  Header is a 3-column grid of `NavLink`s: *home*, *works* centred, *about*. It is the same
-  on every page; `compact` only swaps `--header-h` for `--header-h-compact`. Footer has
-  *e-mail* on the left and *ig* / *in* on the right, with no top rule. Home renders both
+  Header is four `NavLink`s spread edge to edge: *home*, *works*, *archive*, *about*. It is
+  the same on every page; `compact` only swaps `--header-h` for `--header-h-compact`. Footer
+  has *e-mail* / *resume* on the left and *ig* / *in* on the right, with no top rule; resume
+  and socials open in a new tab. Home renders both
   around its hero; `/about` ends with `Footer`.
 - `AboutMe` — client component; a burgundy index card with three folder tabs
   (`myself-component-*.jpeg`). Exactly three sections, enforced by a tuple type; headings and
   copy live in `defaultSections` at the top of the file (or pass `sections`). Nothing is open
   on load; a tab's heading goes from `text-paper/55` to `text-paper` when active and its
-  copy appears. `<em>` in the copy is set in Times italic at `1.18em`. Everything is sized in
-  `cqw` against the card's own width, so it scales as one piece; the tab silhouette is an
+  copy appears. Copy is `text-p` (the contact lead line `text-h2`), and `<em>` in it is set
+  in Times italic at `1.18em`. The contact tab has *connect with us* and *resume* buttons.
+  The rest is sized in `cqw` against the card's own width, so it scales as one piece; the tab silhouette is an
   SVG path in 936×76 mockup pixels. WAI-ARIA tabs with arrow/Home/End keys. The watermarks
   in the reference images ("The February Recap", the cursor, the ghost tab captions) are
   not part of the design.
@@ -173,6 +186,9 @@ inspect).
     `.wf` wins over a `mt-*` class, so put spacing on a neighbour instead.
   - The ≤700px block uses `!important`, since props arrive as inline styles.
   - `--wf-font-title` / `--wf-font-label` default to the site font tokens.
+  - `fill` runs the last folder's panel a full screen (`100lvh`) further down. The host has
+    to clip it with `overflow-y: clip` where the page ends (`clip-path` would still add the
+    overflow to the scroll height).
 
 ## Stack facts
 
