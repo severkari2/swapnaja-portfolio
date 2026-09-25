@@ -137,16 +137,28 @@ inspect).
   not part of the design.
 - `PrintCollage` — client component; the archive collage, rebuilt from the designer's
   `Archive Collage.mp4`: a stop-motion pile of photo prints (warm white border, contact
-  shadow, faint sheen) laid down, shuffled and peeled back off, as hard cuts.
+  shadow, faint sheen) laid down, shuffled and lifted back off, animated on twos.
   - `SHEETS` holds each print's pose, measured off the video's frames (centre and width in %
-    of the collage, rotation). A nudged print is a separate sheet per pose. `STATES` is the
-    video's complete play, state by state: frames held, and the pile bottom to top.
-  - A video frame lasts `FRAME_MS` (100ms, the 30fps video slowed 3×), so the video's uneven
-    rhythm is kept. Tune the pace there, not per state.
+    of the collage, rotation). A later pose of the same print is its own sheet with `of`
+    naming the first, and is rendered as one element that moves. `STATES` is the video's
+    complete play, loosened (no one- or two-frame flashes, fewer simultaneous moves): holds
+    in stop-motion frames, and the pile bottom to top.
+  - A stop-motion frame is `FRAME_MS` (12fps). Each move is a CSS transition whose `linear()`
+    easing is a staircase, so the print holds a pose per frame: `LAY` (in from `AWAY`, turned
+    and raised), `NUDGE` and `LIFT`. Tune the pace in `FRAME_MS` and the holds, the spacing
+    in those arrays.
   - One pass of the choreography lays down 14 items (`slot` 0–13). A longer set runs it again
-    with the next 14, cut straight on. A last pass short of 14 plays only the states its items
-    fill (`scriptFor`), so nothing repeats; only its pile's edges borrow from the first pass.
-    After the last pass the pile fades out and back in (`FADE_MS`).
+    with the next 14: its first print is laid onto the last pass's pile (`carry`), which is
+    cleared from under it once it lands. A last pass short of 14 plays only the states its
+    items fill (`scriptFor`), so nothing repeats; only its pile's edges borrow from the first
+    pass. After the last pass the loop cuts straight back to the opening pile through a reel
+    change (`reel`, `REEL_FRAMES`): the film slips in the gate and the lamp flares.
+  - The projector look is layered over the pile, all in the component's hoisted stylesheet
+    (`CSS`, a template literal: no backticks in it): a sepia grade on the prints, a lamp
+    hotspot that flickers, edge falloff, multiplied grain, the odd scratch and fleck of dust,
+    and a shake of the whole frame (`pc-weave`, in cqw). The projector runs at 24fps; its
+    keyframes are generated from a seeded random, so server and client agree. Everything
+    pauses off-screen (`data-running`) and stops under `prefers-reduced-motion`.
   - Items (`CollageItem`) are pre-cropped to 3:4, or 4:3 with `landscape` (a landscape inset
     is widened ×1.25). An item with `video` plays muted on its print when it lands on top, and
     the pile waits for it to end. Any stop-motion rate is baked into the file, at 5fps in real
@@ -155,8 +167,8 @@ inspect).
     the *behind the scenes* clips keep every 6th of their 30fps, after dropping the frames
     the phone duplicated. Put a video in slot 13 (`o`, the last print of a pass, alone on
     the pile) so nothing covers it while it plays.
-  - Every sheet of the pass on show, and of the next pass, stays mounted at `opacity: 0` when
-    off the pile, so each photo is loaded before it's cut to. The loop waits for the first
+  - Every print of the pass on show, and of the next pass, stays mounted at `opacity: 0` when
+    off the pile, so each photo is loaded before it's laid down. The loop waits for the first
     pass (or 4s), and pauses off-screen. Under `prefers-reduced-motion` it holds one full pile
     (`STILL`) and videos show their poster.
 - `ImageHolder` — filler block for a photo not yet supplied. Swap for `next/image` with the
