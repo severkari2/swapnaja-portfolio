@@ -3,7 +3,6 @@ import type { CSSProperties } from "react";
 import Image from "next/image";
 import { Fragment } from "react";
 import { Footer } from "@/components/Footer";
-import { ImageHolder } from "@/components/ImageHolder";
 import { SiteNav } from "@/components/SiteNav";
 
 export const metadata: Metadata = {
@@ -52,9 +51,13 @@ export default function About() {
             with people.
           </p>
 
-          <ImageHolder
-            label="portrait at work"
-            className="mt-10 aspect-[473/334] w-full max-w-[480px] self-end md:absolute md:left-[calc(765*var(--u))] md:top-[calc(338*var(--u))] md:mt-0 md:w-[calc(473*var(--u))] md:max-w-none"
+          <Image
+            src="/about/portrait-at-work.jpg"
+            alt="Swapnaja in a sage denim jacket, curled up in an armchair, working on a laptop."
+            width={1600}
+            height={1130}
+            sizes="(min-width: 768px) 34vw, (min-width: 528px) 480px, 100vw"
+            className="mt-10 aspect-[473/334] w-full max-w-[480px] self-end object-cover md:absolute md:left-[calc(765*var(--u))] md:top-[calc(338*var(--u))] md:mt-0 md:w-[calc(473*var(--u))] md:max-w-none"
           />
         </section>
 

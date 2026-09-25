@@ -1,10 +1,10 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Fragment } from "react";
 import { AboutMe } from "@/components/AboutMe";
 import { external, resumeHref } from "@/components/contact";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
-import { ImageHolder } from "@/components/ImageHolder";
 import { MagnifyText } from "@/components/MagnifyText";
 
 const tools = ["Illustrator", "Photoshop", "InDesign", "Figma", "Procreate"];
@@ -32,10 +32,17 @@ export default function Home() {
         aria-labelledby="about-teaser"
         className="relative min-h-svh bg-burgundy pb-[calc(192*var(--u))] [--u:max(1px,0.07143vw)]"
       >
-        <ImageHolder
-          label="landscape photo"
-          className="absolute inset-x-0 top-0 h-[calc(420*var(--u))]"
-        />
+        {/* Misty sage ridges under an ivory sky: the green sits opposite the burgundy card
+            and picks up the denim jacket on /about. Decorative, so it has no alt text. */}
+        <div className="absolute inset-x-0 top-0 h-[calc(420*var(--u))]">
+          <Image
+            src="/home/landscape.jpg"
+            alt=""
+            fill
+            sizes="100vw"
+            className="object-cover"
+          />
+        </div>
 
         <div className="relative mx-auto flex w-[min(100%_-_3rem,calc(504*var(--u)))] flex-col gap-[calc(4*var(--u))] pt-[calc(221*var(--u))]">
           <div className="bg-burgundy px-[calc(24*var(--u))] pb-[calc(8*var(--u))] pt-[calc(60*var(--u))]">
@@ -82,7 +89,16 @@ export default function Home() {
             </div>
           </div>
 
-          <ImageHolder label="portrait" className="h-[calc(214*var(--u))]" />
+          {/* A wide crop of a 4:3 photo, held on the face as the width changes. */}
+          <div className="relative h-[calc(214*var(--u))]">
+            <Image
+              src="/home/portrait.jpg"
+              alt="Swapnaja smiling in low winter sunlight, in a brown jacket over a black turtleneck."
+              fill
+              sizes="(min-width: 1400px) 36vw, (min-width: 552px) 504px, calc(100vw - 3rem)"
+              className="object-cover object-[60%_25%]"
+            />
+          </div>
         </div>
       </section>
 
