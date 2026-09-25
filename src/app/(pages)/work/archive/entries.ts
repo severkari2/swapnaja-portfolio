@@ -12,6 +12,9 @@ export interface ArchiveEntry {
   // subtitle follows the title in flow; across, every entry is centred the same way.
   titleTop: number;
   collageTop: number;
+  /** The photos for its `PrintCollage`, in the order the collage first lays them down.
+   *  Without them the entry shows a placeholder. */
+  collage?: string[];
 }
 
 export const archiveEntries: ArchiveEntry[] = [
@@ -22,6 +25,10 @@ export const archiveEntries: ArchiveEntry[] = [
     subtitle: ["off the Design Board"],
     titleTop: 80,
     collageTop: 9,
+    collage: Array.from(
+      { length: 14 },
+      (_, i) => `/archive/i-model/${String(i + 1).padStart(2, "0")}.jpg`,
+    ),
   },
   {
     slug: "i-document",

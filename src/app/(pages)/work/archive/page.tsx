@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { Fragment } from "react";
 import { ImageHolder } from "@/components/ImageHolder";
+import { PrintCollage } from "@/components/PrintCollage";
 import { SiteNav } from "@/components/SiteNav";
 import { archiveEntries } from "./entries";
 
@@ -24,6 +25,9 @@ const lines = (text: string[]) =>
     </Fragment>
   ));
 
+const collageBox =
+  "mt-10 aspect-[603/819] w-(--collage-w) shrink-0 lg:mt-[calc(var(--collage-top)*var(--a))]";
+
 // Every entry in one column, each after its own mockup (archive-section-i-model.jpeg,
 // -i-document.jpeg and -behind the scenes.jpeg). From lg up the collage is centred on the
 // page, between two equal columns, with the text in the left one, set against the
@@ -40,7 +44,7 @@ export default function Archive() {
       <h1 className="sr-only">archives</h1>
 
       <div className="[--a:min(var(--u),calc(100svh/922))]">
-        {archiveEntries.map((entry) => (
+        {archiveEntries.map((entry, index) => (
           <section
             key={entry.slug}
             id={entry.slug}
@@ -71,10 +75,19 @@ export default function Archive() {
               </p>
             </div>
 
-            <ImageHolder
-              label={`${entry.caption} collage`}
-              className="mt-10 aspect-[603/819] w-(--collage-w) shrink-0 lg:mt-[calc(var(--collage-top)*var(--a))]"
-            />
+            {entry.collage ? (
+              <PrintCollage
+                photos={entry.collage}
+                label={`${entry.caption} collage`}
+                eager={index === 0}
+                className={collageBox}
+              />
+            ) : (
+              <ImageHolder
+                label={`${entry.caption} collage`}
+                className={collageBox}
+              />
+            )}
           </section>
         ))}
       </div>
