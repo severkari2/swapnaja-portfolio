@@ -137,12 +137,19 @@ inspect).
 - `ArrowUpRight` — the shared hairline diagonal arrow (currently unused). Put `group` on the parent link to
   get the hover nudge. **There is no icon library, by design** — inline SVG only. Brand
   logos would fight the aesthetic; don't add `react-icons` or `lucide`.
-- `MagnifyText` — WebGL2 lens over canvas-rasterized text. Two things bite:
+- `MagnifyText` — WebGL2 warp over canvas-rasterized text, playing a 98-frame (30fps) loop
+  on its own, with no pointer input. The loop is baked from the designer's
+  `Animation Loop.mp4`: each video frame was registered against the resting word, and the
+  per-frame displacement grids live in `magnifyTextLoop.ts` (generated, don't hand-edit),
+  in ink-box units so they fit any size. It was traced from `-hello.`, so other text
+  still warps, but won't match the reference. The loop pauses while off-screen. Three things bite:
   - It rasterizes `getComputedStyle(span)` at `document.fonts.ready`, so **all styling
     must arrive through `className`**, and any new prop that affects appearance must be
     added to the effect's dependency array or the texture keeps the stale type.
   - It no-ops (renders plain text) under `prefers-reduced-motion: reduce` or without
     WebGL2 — so the fallback `<span>` styling has to look right on its own.
+  - The canvas is padded by `0.6×` the ink height on every side, the furthest the loop
+    throws ink. Changing the loop data means re-checking that reach.
 - `WorkFolder` — the `/work` hero (`Work-hero-section.jpeg`): overlapping file folders.
   Hovering one fades the rest to paper and fans its cards up from behind its tab.
   - A card with `href` is a link (`next/link`), and one with `title` shows it in Times
