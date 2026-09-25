@@ -1,5 +1,5 @@
-// Every page except home, which supplies its own <main>. The header and footer come from
-// the root layout.
+// Every page except home, which supplies its own <main>. Each page starts with SiteNav,
+// rendered by the page itself so it can add its own links (previous / next).
 export default function PagesLayout({
   children,
 }: Readonly<{

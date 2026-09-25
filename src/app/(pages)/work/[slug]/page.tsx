@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { QuietLink } from "@/components/QuietLink";
+import { SiteNav } from "@/components/SiteNav";
 import {
+  projectHref,
   projects,
   type ProjectBlock,
   type ProjectFace,
@@ -180,34 +184,74 @@ function Block({
 // A project page, rebuilt from the designer's PDF (see projects.ts). From lg up it is the
 // PDF page 1:1, scaled to the viewport's width. Below lg the same blocks stack in a
 // two-column flow, since the PDF's 12pt type would be too small to read at that scale.
+//
+// Previous / next run in projects.ts order and wrap around. They sit in the SiteNav row, to
+// skip ahead, and again in a pager after the page, where a reader lands.
 export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
   const { slug } = await props.params;
-  const project = projects.find((p) => p.slug === slug);
-  if (!project) notFound();
+  const index = projects.findIndex((p) => p.slug === slug);
+  if (index < 0) notFound();
 
+  const project = projects[index];
+  const prev = projects[(index - 1 + projects.length) % projects.length];
+  const next = projects[(index + 1) % projects.length];
   const { page, blocks } = project;
 
   return (
-    <article
-      className="grid grid-cols-2 items-start gap-3 px-4 pb-20 sm:px-6 lg:relative lg:block lg:h-[calc(var(--page-h)*var(--p))] lg:p-0"
-      style={
-        {
-          // Measured against the work layout's container, so it tracks the page width.
-          "--p": `calc(100cqw / ${page.width})`,
-          "--page-h": page.height,
-        } as CSSProperties
-      }
-    >
-      <h1 className="sr-only">{project.title}</h1>
-      {blocks.map((block, i) => (
-        <Block
-          key={block.kind === "image" ? block.src : `${block.kind}-${i}`}
-          block={block}
-          pageWidth={page.width}
-          face={project.face ?? "outfit"}
-          first={i === 0}
-        />
-      ))}
-    </article>
+    <>
+      <SiteNav>
+        <nav aria-label="Projects" className="flex gap-6 sm:gap-8">
+          <QuietLink href={projectHref(prev)}>&larr; previous</QuietLink>
+          <QuietLink href={projectHref(next)}>
+            next<span className="hidden sm:inline">: {next.title}</span>{" "}&rarr;
+          </QuietLink>
+        </nav>
+      </SiteNav>
+
+      <article
+        className="grid grid-cols-2 items-start gap-3 px-4 pb-20 sm:px-6 lg:relative lg:block lg:h-[calc(var(--page-h)*var(--p))] lg:p-0"
+        style={
+          {
+            // Measured against the work layout's container, so it tracks the page width.
+            "--p": `calc(100cqw / ${page.width})`,
+            "--page-h": page.height,
+          } as CSSProperties
+        }
+      >
+        <h1 className="sr-only">{project.title}</h1>
+        {blocks.map((block, i) => (
+          <Block
+            key={block.kind === "image" ? block.src : `${block.kind}-${i}`}
+            block={block}
+            pageWidth={page.width}
+            face={project.face ?? "outfit"}
+            first={i === 0}
+          />
+        ))}
+      </article>
+
+      <nav
+        aria-label="More projects"
+        className="mx-4 grid grid-cols-2 gap-6 border-t border-rule pb-16 pt-8 sm:mx-6 md:mx-[3.2vw] lg:mt-16"
+      >
+        {[
+          { rel: "prev", project: prev, label: <>&larr; previous</>, align: "" },
+          { rel: "next", project: next, label: <>next &rarr;</>, align: "justify-self-end text-right" },
+        ].map(({ rel, project: neighbour, label, align }) => (
+          <Link
+            key={rel}
+            href={projectHref(neighbour)}
+            className={`group ${align}`}
+          >
+            <span className="label block text-ink/40 transition-colors [--label-size:12px] group-hover:text-ink">
+              {label}
+            </span>
+            <span className="mt-3 block font-times text-[clamp(1.75rem,4vw,3rem)] italic leading-none transition-opacity group-hover:opacity-60">
+              {neighbour.title}
+            </span>
+          </Link>
+        ))}
+      </nav>
+    </>
   );
 }

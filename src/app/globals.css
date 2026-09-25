@@ -9,20 +9,17 @@
   --placeholder: #d9d3ca;
   /* Cool neutral grey: the packaging folder on the work page (Work-hero-section.jpeg). */
   --stone: #aaabaa;
-  /* The header and footer are sticky, so every page scrolls inside a frame between them.
-     These are tokens rather than classes because full-screen sections size themselves to
-     the space left over: min-h-[var(--view-h)]. */
+  /* The header and footer sit in the page flow. On home they frame the first screen
+     (Home.png); every other page has the same header at the compact height. */
   --header-h: 76px;
-  /* The header shrinks to this once the page scrolls. --view-h keeps the at-rest height,
-     so nothing resizes mid-scroll. */
-  --header-h-compact: 76px;
+  --header-h-compact: 64px;
   --footer-h: 84px;
-  --view-h: calc(100svh - var(--header-h) - var(--footer-h));
 }
 
 @media (min-width: 640px) {
   :root {
     --header-h: 140px;
+    --header-h-compact: 80px;
     --footer-h: 120px;
   }
 }

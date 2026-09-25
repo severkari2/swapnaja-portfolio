@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
+import { SiteNav } from "@/components/SiteNav";
 import { WorkFolder, type WorkFolderProps } from "@/components/WorkFolder";
 import { WorkSwitch } from "@/components/WorkSwitch";
 import { projectHref, projects, type ProjectFolder } from "./projects";
@@ -64,6 +65,7 @@ const u = (px: number) => `calc(${px} * var(--u))`;
 export default function Work() {
   return (
     <div className="pb-[calc(74*var(--u))]">
+      <SiteNav />
       <h1 className="sr-only">works</h1>
       <WorkSwitch />
       <WorkFolder

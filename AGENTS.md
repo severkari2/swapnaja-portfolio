@@ -26,10 +26,9 @@ exposes them as Tailwind utilities. **Never hardcode a hex or a font stack in a 
 | `--rule` | `border-rule` | 14% ink — hairlines |
 | `--placeholder` | `bg-placeholder` | `#d9d3ca` — fill for `ImageHolder` until real photos land |
 | `--stone` | `bg-stone` | `#aaabaa` — cool grey, the *packaging* folder on `/work` |
-| `--header-h` | — | `76px`, `140px` from `sm:` up. Height of the header at the top of the page. |
-| `--header-h-compact` | — | `76px`. The header's height whenever it reappears away from the top of the page. |
-| `--footer-h` | — | `84px`, `120px` from `sm:` up. Height of the sticky footer. |
-| `--view-h` | — | `100svh` minus both bars: the visible frame. Full-screen sections use `min-h-[var(--view-h)]`. Change bar heights in `globals.css` only — never hardcode them. |
+| `--header-h` | — | `76px`, `140px` from `sm:` up. Height of home's `Header`. |
+| `--header-h-compact` | — | `64px`, `80px` from `sm:` up. Height of `Header compact`, on every other page. |
+| `--footer-h` | — | `84px`, `120px` from `sm:` up. Height of `Footer` (home, end of `/about`). Change bar heights in `globals.css` only — never hardcode them. |
 
 `MagnifyText` takes its text colour from `className` (`text-burgundy`) and its container
 background from a `backgroundColor` prop that defaults to `transparent`, so it sits on the
@@ -49,7 +48,7 @@ as the fallback).
 | Outfit | `--font-outfit` | `font-outfit` | **Project pages only**, because some of the designer's project PDFs (Brew For You) set their uppercase headings and small labels in it. Not preloaded, so no other page fetches it. Don't use it elsewhere. |
 
 The recurring gesture is a Montserrat sentence with a few words in Times italic, as in the
-home about teaser and `AboutMe`. Times italic has a smaller x-height, so where the mockups
+`AboutMe` and the `/about` hero. Times italic has a smaller x-height, so where the mockups
 show those words matching the sans, scale them up (`AboutMe` uses `1.18em`).
 
 Tiers:
@@ -59,7 +58,7 @@ Tiers:
    uppercase, 15px / `0.22em` by default. Section eyebrows and text buttons. Use `label`;
    don't respell it as a utility chain.
 4. **Nav links** — the `nav-link` utility: Times italic, lowercase copy,
-   `clamp(1.25rem,2.2vw,2rem)` via `--nav-size`. Header and footer only.
+   `clamp(1.25rem,2.2vw,2rem)` via `--nav-size`. `Header` (every page) and `Footer` only.
 
 `label` reads its size and tracking from `--label-size` / `--label-tracking`, so call
 sites tune it with arbitrary properties — `label [--label-size:13px] sm:[--label-size:17px]`
@@ -72,19 +71,29 @@ dropped for the two-family rule; don't bring them back without a reference image
 
 ## Structure
 
-`src/app/layout.tsx` owns `<Header />` and `<Footer />`. Both are wrapped in `AutoHideBar`,
-so they get out of the way while you read and come back as soon as you might want them.
-Pages never draw their own nav or footer. Everything except home lives in the `(pages)` route group
-(URLs are unaffected), whose layout supplies `<main>`; home supplies its own.
+Navigation is plain in-flow markup: nothing is fixed, sticky or hidden on scroll, and the
+same markup serves phones and desktops (no hamburger).
+
+- **Home** draws the big `Header` and `Footer` itself. Together with the `-hello.` hero they
+  fill one `min-h-svh` screen (Home.png), and then scroll away with the page.
+- **Every other page** starts with `SiteNav`: the same `Header`, at the compact height
+  (`--header-h-compact`), so the navigation looks identical everywhere. A page passes its
+  own links as children (`QuietLink`s in a labelled `<nav>`), shown in a thin row under the
+  header, right-aligned with *about*. Each page renders `SiteNav` itself, so it can pass
+  those links. On archive and about the mockup frames therefore start below the header.
+- **Contact** (`Footer`: *e-mail*, *ig*, *in*) appears on home and at the end of `/about`.
+
+The root layout renders only `children`. Everything except home lives in the `(pages)` route
+group (URLs are unaffected), whose layout supplies `<main>`; home supplies its own.
 
 | Route | State |
 |---|---|
-| `/` | Built. Screen 1 matches `Home.png`: the `-hello.` `MagnifyText` hero (Montserrat, `text-burgundy`, on paper) filling `--view-h`, so it lands between the header and footer. Screen 2 matches `Home-section-2.png`: a full-bleed landscape photo, and a burgundy about card (Times italic + Montserrat) with a portrait beneath it. Both photos are `ImageHolder` placeholders. Screen 3 is `AboutMe` on paper. |
-| `/work` | Hero built to match `Work-hero-section.jpeg`: the *works* / *archive* switch (`WorkSwitch`, Montserrat; the current view is in ink, the other is dimmed), then `WorkFolder` with *branding*, *packaging* and *editorial* (burgundy / stone / burgundy). A folder's cards are the projects filed under it in `work/projects.ts`. A project lists its `folders`, so it can sit in more than one. Each card is a link to the project page, captioned with its title on hover. *branding* holds Brew For You, Surahi and Raya, and *packaging* holds Nektar and Raya. Folders with no project yet keep the `public/folder-demo/` placeholder cards, and the folder links themselves (`#branding`, …) are still placeholders. `work/layout.tsx` defines `--u` (one pixel of the 1400px mockups, from `100cqw`) for everything under `/work`. The footer stays hidden here. |
-| `/work/[slug]` | Project pages, `/work/brew-for-you`, `/work/nektar`, `/work/surahi` and `/work/raya`, rebuilt from the designer's PDFs. The PDFs themselves are far too heavy to ship (288MB, 302MB, 294MB and 324MB, almost all of it Illustrator's private editing data). Everything lives in `work/projects.ts`: a list of image, text and rule blocks, each with its position in PDF points. A rule is a hairline or, with `color`, a plain block of colour; rules are only drawn from `lg` up. Text can carry the PDF's own `color`, and a line can mix Montserrat and Times italic runs. It is drawn above any photo it overlaps. A project's `face` sets its headings and labels: Outfit (Brew For You, the default) or Montserrat Medium (Nektar, Surahi, Raya). From `lg` up, the page is the PDF 1:1, with `--p` as one PDF point (`100cqw / page width`). Below `lg`, the blocks stack in list order in a two-column grid, using each block's `stack` (`full` / `half` / `bleed`), because the PDF's 12pt type is unreadable once scaled that small. Assets live in `public/work/<slug>/`: each image's visible crop is rendered out of the PDF, with any text or vector art the PDF draws over it redacted first, since those are separate blocks. Vector art without text is exported as SVG path data. Vector art that contains text is rasterized: JPG when opaque, WebP when it needs transparency. So is any text in a face the site doesn't load (Raya's Samarkan wordmarks, its Baskervville and Outfit banner lines): it stays in its picture, and only Montserrat and Times italic lines become text blocks. The paper background replaces the PDF's white. Only listed slugs exist (`dynamicParams = false`). |
-| `/work/archive` | Matches `archive-section.jpeg`: *archives* (Times italic) and three captioned photos linking to the entries. No header or footer. Both are hidden here and come back at their screen edge. |
-| `/work/archive/[slug]` | *i model*, *i document*, *behind the scenes* (`archive-section-*.jpeg`). One page layout, fed by `archive/entries.ts`. Each entry has its copy with hand-set line breaks, plus the positions measured off its own mockup, which differ slightly between them. The collage is one `ImageHolder` (603×819 mockup px), because each mockup's collage is a single composed image. Only the listed slugs exist (`dynamicParams = false`). |
-| `/about` | Matches `about-page.jpeg` and `about-second-section.jpeg`, two 1400×842 frames in `--u` from `md:` up, stacked below. Hero: *about* (Times italic) centred, then Montserrat copy with Times italic burgundy words at the **same** size (`0.99em`, not the `AboutMe` `1.18em`), and an `ImageHolder` portrait. Second screen: *what i contribute to the ~~table~~?* with *team* above it, the table drawing, and four burgundy Montserrat labels around it. The drawing is `public/about/team-table.svg`, traced from the mockup, so it is crisp at any size. The heading carries `0.016em` tracking because the mockup's Times sets wider than Times New Roman. No header or footer. |
+| `/` | Built. Screen 1 matches `Home.png`: the `-hello.` `MagnifyText` hero (Montserrat, `text-burgundy`, on paper) between `Header` and `Footer`, the three filling one `min-h-svh` screen and scrolling away together. Screen 2 matches `Home-section-2.png`: a full-bleed landscape photo, and a burgundy about card with a portrait beneath it. The card's heading *about* is Times italic at 32u, well above the body; everything else (copy, tools line, *more*) is Montserrat at 12u, with the emphasised words in medium weight. Both photos are `ImageHolder` placeholders. Screen 3 is `AboutMe` on paper. |
+| `/work` | Hero built to match `Work-hero-section.jpeg`: the *works* / *archive* switch (`WorkSwitch`, Montserrat; the current view is in ink, the other is dimmed), then `WorkFolder` with *branding*, *packaging* and *editorial* (burgundy / stone / burgundy). A folder's cards are the projects filed under it in `work/projects.ts`. A project lists its `folders`, so it can sit in more than one. Each card is a link to the project page, captioned with its title on hover. *branding* holds Brew For You, Surahi and Raya, and *packaging* holds Nektar and Raya. Folders with no project yet keep the `public/folder-demo/` placeholder cards, and the folder links themselves (`#branding`, …) are still placeholders. `work/layout.tsx` defines `--u` (one pixel of the 1400px mockups, from `100cqw`) for everything under `/work`. |
+| `/work/[slug]` | Project pages, `/work/brew-for-you`, `/work/nektar`, `/work/surahi` and `/work/raya`, rebuilt from the designer's PDFs. The PDFs themselves are far too heavy to ship (288MB, 302MB, 294MB and 324MB, almost all of it Illustrator's private editing data). Everything lives in `work/projects.ts`: a list of image, text and rule blocks, each with its position in PDF points. A rule is a hairline or, with `color`, a plain block of colour; rules are only drawn from `lg` up. Text can carry the PDF's own `color`, and a line can mix Montserrat and Times italic runs. It is drawn above any photo it overlaps. A project's `face` sets its headings and labels: Outfit (Brew For You, the default) or Montserrat Medium (Nektar, Surahi, Raya). From `lg` up, the page is the PDF 1:1, with `--p` as one PDF point (`100cqw / page width`). Below `lg`, the blocks stack in list order in a two-column grid, using each block's `stack` (`full` / `half` / `bleed`), because the PDF's 12pt type is unreadable once scaled that small. Assets live in `public/work/<slug>/`: each image's visible crop is rendered out of the PDF, with any text or vector art the PDF draws over it redacted first, since those are separate blocks. Vector art without text is exported as SVG path data. Vector art that contains text is rasterized: JPG when opaque, WebP when it needs transparency. So is any text in a face the site doesn't load (Raya's Samarkan wordmarks, its Baskervville and Outfit banner lines): it stays in its picture, and only Montserrat and Times italic lines become text blocks. The paper background replaces the PDF's white. Previous / next run in `projects.ts` order and wrap around: under the header (*← previous*, *next: Title →*), and in a pager after the page (hairline, micro-caps, Times italic titles). Only listed slugs exist (`dynamicParams = false`). |
+| `/work/archive` | Matches `archive-section.jpeg`: *archives* (Times italic) and three captioned photos linking to the entries. *works* is in the header, so the page adds no links of its own. |
+| `/work/archive/[slug]` | *i model*, *i document*, *behind the scenes* (`archive-section-*.jpeg`). One page layout, fed by `archive/entries.ts`. Each entry has its copy with hand-set line breaks, plus the positions measured off its own mockup, which differ slightly between them. The collage is one `ImageHolder` (603×819 mockup px), because each mockup's collage is a single composed image. *← archives* and *next: caption →* (wrapping around) sit under the header. Only the listed slugs exist (`dynamicParams = false`). |
+| `/about` | Matches `about-page.jpeg` and `about-second-section.jpeg`, two 1400×842 frames in `--u` from `md:` up, stacked below. Hero: *about* (Times italic) centred, then Montserrat copy with Times italic burgundy words at the **same** size (`0.99em`, not the `AboutMe` `1.18em`), and an `ImageHolder` portrait. Second screen: *what i contribute to the ~~table~~?* with *team* above it, the table drawing, and four burgundy Montserrat labels around it. The drawing is `public/about/team-table.svg`, traced from the mockup, so it is crisp at any size. The heading carries `0.016em` tracking because the mockup's Times sets wider than Times New Roman. The page ends with `Footer`, for contact. |
 
 Design inspiration reference: `https://swapnajasevekari.framer.website/` (client-rendered
 Framer site — plain fetching returns only the bio copy, so it needs a real browser to
@@ -92,34 +101,19 @@ inspect).
 
 ## Components
 
-- `AutoHideBar` — client wrapper that pins a bar to the top or bottom edge. It hides the bar
-  while scrolling down (6px jitter threshold) and shows it again on:
-  - any scroll up;
-  - reaching the very top or bottom of the page;
-  - keyboard focus inside the bar;
-  - on mouse devices only (`hover: hover` and `pointer: fine`), the pointer coming within
-    48px of that edge. Once shown, the whole bar counts as the reveal zone.
-
-  An in-flow spacer (`spacerClassName`) keeps the at-rest height, so hiding or resizing the
-  fixed bar never moves the page. It sets `data-scrolled` once the page leaves the top; the
-  header styles that as `data-scrolled:h-[var(--header-h-compact)]`. Hiding uses
-  `translate`, so `--view-h` never changes.
-
-  `hiddenOn` lists routes, sub-pages included. On those routes the bar starts hidden and
-  scrolling never shows it; only the pointer reveal and keyboard focus do. The spacer is
-  dropped there too. The footer uses it for `/work`, where it would cover the folders. The
-  header uses it for `/work/archive`, whose mockups fill the screen from the top edge. Both
-  use it for `/about`, whose mockups draw neither bar.
-- `QuietLink` — faint micro-caps link, for pages whose mockups draw no navigation (the
-  archive). Keep these out of the bars' reveal zones: the top and bottom 48px, plus the
-  whole bar once it shows. The archive keeps them top-right, on the title's baseline.
-  Bottom corners don't work: reaching for a link there pulls the footer up over it.
-- `Header` / `Footer` — server components, laid out as in `Home.png`. Header is a 3-column
-  grid: *home*, *works* centred, *about*. Each link is a
-  `NavLink` (client, `usePathname`) that turns `text-burgundy` and sets `aria-current` on
-  the page it points to. Footer
-  has *e-mail* on the left and *ig* / *in* on the right, with no top rule. `<main>` is a flex
-  column, so a page section with `flex-1` fills exactly the space between the bars.
+- `SiteNav` — server component, the first thing on every non-home page: `<Header compact />`,
+  plus its `children` (the page's own links) in a thin right-aligned row beneath it, padded
+  like the header so they line up with *about*.
+- `NavLink` — client (`usePathname`); a header link that turns `text-burgundy` and sets
+  `aria-current` on the page it points to (home matches only `/`, the rest also match
+  sub-pages).
+- `QuietLink` — faint micro-caps link for a page's own navigation (previous / next, back to
+  an index), passed into `SiteNav`. Wrap a page's `QuietLink`s in a `<nav aria-label>`.
+- `Header` / `Footer` — server components, laid out as in `Home.png`, in the page flow.
+  Header is a 3-column grid of `NavLink`s: *home*, *works* centred, *about*. It is the same
+  on every page; `compact` only swaps `--header-h` for `--header-h-compact`. Footer has
+  *e-mail* on the left and *ig* / *in* on the right, with no top rule. Home renders both
+  around its hero; `/about` ends with `Footer`.
 - `AboutMe` — client component; a burgundy index card with three folder tabs
   (`myself-component-*.jpeg`). Exactly three sections, enforced by a tuple type; headings and
   copy live in `defaultSections` at the top of the file (or pass `sections`). Nothing is open

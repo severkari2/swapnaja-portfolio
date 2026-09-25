@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { Montserrat, Outfit, Tinos } from "next/font/google";
-import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
 import "./globals.css";
 
 // Two families site-wide: Times italic and Montserrat. The only other face is Outfit, which
@@ -53,11 +51,9 @@ export default function RootLayout({
       className={`${montserrat.variable} ${tinos.variable} ${outfit.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-paper text-ink">
-        {/* Both bars are sticky, so every page scrolls between them. */}
-        <Header />
-        {/* Pages supply their own <main>. */}
+        {/* Pages supply their own <main> and navigation: home draws the full header and
+            footer, every other page starts with SiteNav. */}
         {children}
-        <Footer />
       </body>
     </html>
   );

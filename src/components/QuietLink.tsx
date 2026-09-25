@@ -1,7 +1,8 @@
 import Link from "next/link";
 
-// Micro-caps link for moving between pages whose mockups draw no navigation (the archive).
-// Faint until hovered or focused, so it sits in a margin without joining the composition.
+// Micro-caps link for a page's own navigation (previous / next, back to an index), passed
+// into SiteNav, which sets them under the header. Faint until hovered or focused, so they
+// stay secondary to the header's links.
 export function QuietLink({
   href,
   className = "",
