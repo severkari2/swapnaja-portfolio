@@ -38,7 +38,7 @@ export const archiveEntries: ArchiveEntry[] = [
     subtitle: ["another way I express,", "create, and tell stories."],
     titleTop: 90,
     collageTop: 9,
-    // 39 items: three passes, the last borrowing three prints from the first.
+    // 39 items: two full passes, then a last pass of 11.
     collage: [
       { src: "/archive/i-document/01.jpg" },
       { src: "/archive/i-document/02.jpg" },
@@ -94,5 +94,47 @@ export const archiveEntries: ArchiveEntry[] = [
     subtitle: ["the everything", "in between"],
     titleTop: 59,
     collageTop: 11,
+    // 31 items: two full passes, then a last pass of 3.
+    collage: [
+      { src: "/archive/behind-the-scenes/01.jpg" },
+      { src: "/archive/behind-the-scenes/02.jpg" },
+      { src: "/archive/behind-the-scenes/03.jpg" },
+      { src: "/archive/behind-the-scenes/04.jpg", landscape: true },
+      { src: "/archive/behind-the-scenes/05.jpg" },
+      { src: "/archive/behind-the-scenes/06.jpg" },
+      { src: "/archive/behind-the-scenes/07.jpg" },
+      { src: "/archive/behind-the-scenes/08.jpg", landscape: true },
+      { src: "/archive/behind-the-scenes/09.jpg" },
+      { src: "/archive/behind-the-scenes/10.jpg" },
+      { src: "/archive/behind-the-scenes/11.jpg", landscape: true },
+      { src: "/archive/behind-the-scenes/12.jpg" },
+      { src: "/archive/behind-the-scenes/13.jpg" },
+      // Both videos are baked from the phone clips like the i document one, cropped to
+      // 3:4, with the phone's duplicated frames dropped first: every 6th frame at 5fps.
+      {
+        src: "/archive/behind-the-scenes/crew.jpg",
+        video: "/archive/behind-the-scenes/crew.mp4",
+      },
+      { src: "/archive/behind-the-scenes/14.jpg" },
+      { src: "/archive/behind-the-scenes/15.jpg" },
+      { src: "/archive/behind-the-scenes/16.jpg" },
+      { src: "/archive/behind-the-scenes/17.jpg", landscape: true },
+      { src: "/archive/behind-the-scenes/18.jpg" },
+      { src: "/archive/behind-the-scenes/19.jpg" },
+      { src: "/archive/behind-the-scenes/20.jpg" },
+      { src: "/archive/behind-the-scenes/21.jpg", landscape: true },
+      { src: "/archive/behind-the-scenes/22.jpg" },
+      { src: "/archive/behind-the-scenes/23.jpg" },
+      { src: "/archive/behind-the-scenes/24.jpg", landscape: true },
+      { src: "/archive/behind-the-scenes/25.jpg" },
+      { src: "/archive/behind-the-scenes/26.jpg" },
+      {
+        src: "/archive/behind-the-scenes/set.jpg",
+        video: "/archive/behind-the-scenes/set.mp4",
+      },
+      { src: "/archive/behind-the-scenes/27.jpg" },
+      { src: "/archive/behind-the-scenes/28.jpg" },
+      { src: "/archive/behind-the-scenes/29.jpg" },
+    ],
   },
 ];

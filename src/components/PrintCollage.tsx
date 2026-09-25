@@ -15,8 +15,9 @@ import {
 // back off again. Every change is a hard cut, held for as many frames as the video holds it,
 // but each frame lasts FRAME_MS instead of 1/30s, so a print can be seen before the next one
 // lands. The choreography lays down 14 prints; a longer set runs it again with the next 14
-// (a pass), cut straight on as the video cuts when it loops. After the last pass the pile
-// fades out and the loop starts again.
+// (a pass), cut straight on as the video cuts when it loops. A last pass of fewer than 14
+// plays only the states its items fill. After the last pass the pile fades out and the loop
+// starts again.
 
 /** One frame of the 30fps video, slowed 3×. The holds keep the video's uneven rhythm. */
 const FRAME_MS = 100;
@@ -87,7 +88,12 @@ const PILE: SheetId[] = ["base1", "base2", "base3"];
 
 // Each state of the video's second (complete) play, frames 178–338: how many frames it
 // holds, and the prints on the pile, bottom to top.
-const STATES: { hold: number; top: SheetId[] }[] = [
+interface State {
+  hold: number;
+  top: SheetId[];
+}
+
+const STATES: State[] = [
   { hold: 6, top: ["a"] },
   { hold: 6, top: ["a", "b"] },
   { hold: 9, top: ["a", "b", "c"] },
@@ -114,9 +120,6 @@ const STATES: { hold: number; top: SheetId[] }[] = [
   { hold: 20, top: ["o"] },
 ];
 
-/** Shown, without motion, under prefers-reduced-motion: the fullest pile of the first pass. */
-const STILL = 8;
-
 const SHEET_IDS = Object.keys(SHEETS) as SheetId[];
 const OPENING: SheetId[] = [...PILE, ...STATES[0].top];
 
@@ -126,14 +129,41 @@ interface Position {
   fading: boolean;
 }
 
-function next(at: Position, passes: number): Position {
+function next(at: Position, scripts: State[][]): Position {
   if (at.fading) return { pass: 0, step: 0, fading: false };
-  if (at.step < STATES.length - 1) return { ...at, step: at.step + 1 };
-  if (at.pass < passes - 1) return { pass: at.pass + 1, step: 0, fading: false };
+  if (at.step < scripts[at.pass].length - 1) return { ...at, step: at.step + 1 };
+  if (at.pass < scripts.length - 1) return { pass: at.pass + 1, step: 0, fading: false };
   return { ...at, fading: true };
 }
 
-// A pass short of 14 items borrows the rest from the first pass, which is the longest ago.
+// The part of the choreography that `count` items fill: the states whose prints all have an
+// item, with a state that repeats the one before it merged into it.
+function scriptFor(count: number): State[] {
+  const script: State[] = [];
+  for (const state of STATES) {
+    if (state.top.some((id) => SHEETS[id].slot >= count)) continue;
+    const last = script[script.length - 1];
+    if (last && last.top.join() === state.top.join()) last.hold += state.hold;
+    else script.push({ ...state });
+  }
+  return script;
+}
+
+// One script per pass for a set of `total` items, cached so a collage gets the same arrays
+// on every render.
+const scriptCache = new Map<number, State[][]>();
+function scriptsFor(total: number) {
+  let scripts = scriptCache.get(total);
+  if (!scripts) {
+    scripts = Array.from({ length: Math.ceil(total / SLOTS) }, (_, pass) =>
+      scriptFor(Math.min(SLOTS, total - pass * SLOTS)),
+    );
+    scriptCache.set(total, scripts);
+  }
+  return scripts;
+}
+
+// The pile's edges in a short pass borrow from the first pass.
 function itemAt(items: CollageItem[], pass: number, slot: number) {
   const i = pass * SLOTS + slot;
   return items[i < items.length ? i : slot % items.length];
@@ -181,7 +211,18 @@ export function PrintCollage({
   className?: string;
 }) {
   const root = useRef<HTMLDivElement>(null);
-  const passes = Math.ceil(items.length / SLOTS);
+  const scripts = scriptsFor(items.length);
+  const passes = scripts.length;
+  // The sheets a pass can show: its pile, and every print it has an item for.
+  const sheetsOf = (pass: number) =>
+    SHEET_IDS.filter(
+      (id) => PILE.includes(id) || pass * SLOTS + SHEETS[id].slot < items.length,
+    );
+  // Shown, without motion, under prefers-reduced-motion: the first pass's fullest pile.
+  const fullest = scripts[0].reduce(
+    (best, state, i) => (state.top.length > scripts[0][best].top.length ? i : best),
+    0,
+  );
   const [at, advance] = useReducer(next, { pass: 0, step: 0, fading: false });
   const [onScreen, setOnScreen] = useState(false);
   const [loaded, setLoaded] = useState(0);
@@ -193,11 +234,11 @@ export function PrintCollage({
   );
 
   // Only the first pass is waited for: each later one loads while the one before it plays.
-  const ready = loaded >= SHEET_IDS.length || timedOut;
+  const ready = loaded >= sheetsOf(0).length || timedOut;
   const running = onScreen && ready && !still;
 
-  const shown: Position = still ? { pass: 0, step: STILL, fading: false } : at;
-  const stack = [...PILE, ...STATES[shown.step].top];
+  const shown: Position = still ? { pass: 0, step: fullest, fading: false } : at;
+  const stack = [...PILE, ...scripts[shown.pass][shown.step].top];
   const top = itemAt(items, shown.pass, SHEETS[stack[stack.length - 1]].slot);
   // A video on top holds the pile until it has played through.
   const waitForVideo = Boolean(top.video) && !shown.fading;
@@ -222,11 +263,11 @@ export function PrintCollage({
     if (!running || waitForVideo) return;
     // A paused hold starts over when the collage comes back into view.
     const timer = setTimeout(
-      () => advance(passes),
-      at.fading ? FADE_MS : STATES[at.step].hold * FRAME_MS,
+      () => advance(scripts),
+      at.fading ? FADE_MS : scripts[at.pass][at.step].hold * FRAME_MS,
     );
     return () => clearTimeout(timer);
-  }, [running, waitForVideo, at, passes]);
+  }, [running, waitForVideo, at, scripts]);
 
   const countLoad = () => setLoaded((n) => n + 1);
 
@@ -250,7 +291,7 @@ export function PrintCollage({
         }}
       >
         {mounted.flatMap((pass) =>
-          SHEET_IDS.map((id) => {
+          sheetsOf(pass).map((id) => {
             const sheet: Sheet = SHEETS[id];
             const item = itemAt(items, pass, sheet.slot);
             const layer = pass === shown.pass ? stack.indexOf(id) : -1;
@@ -283,7 +324,7 @@ export function PrintCollage({
                       playing={layer === stack.length - 1 && !shown.fading}
                       running={running}
                       onLoad={onLoad}
-                      onEnded={() => advance(passes)}
+                      onEnded={() => advance(scripts)}
                     />
                   ) : (
                     <Image
