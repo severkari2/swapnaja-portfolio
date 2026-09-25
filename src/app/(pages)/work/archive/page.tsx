@@ -77,7 +77,7 @@ export default function Archive() {
 
             {entry.collage ? (
               <PrintCollage
-                photos={entry.collage}
+                items={entry.collage}
                 label={`${entry.caption} collage`}
                 eager={index === 0}
                 className={collageBox}

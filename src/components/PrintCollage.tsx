@@ -2,13 +2,21 @@
 
 import Image from "next/image";
 import type { CSSProperties } from "react";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import {
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 // A stop-motion pile of photo prints, after the designer's "Archive Collage.mp4": prints are
 // laid on the pile one at a time, full size or as a smaller tilted print, nudged, and peeled
 // back off again. Every change is a hard cut, held for as many frames as the video holds it,
 // but each frame lasts FRAME_MS instead of 1/30s, so a print can be seen before the next one
-// lands. After the last state the pile fades out and the loop starts again.
+// lands. The choreography lays down 14 prints; a longer set runs it again with the next 14
+// (a pass), cut straight on as the video cuts when it loops. After the last pass the pile
+// fades out and the loop starts again.
 
 /** One frame of the 30fps video, slowed 3×. The holds keep the video's uneven rhythm. */
 const FRAME_MS = 100;
@@ -16,14 +24,25 @@ const FRAME_MS = 100;
 const FADE_MS = 600;
 /** Start anyway if some photo never reports loaded. */
 const READY_TIMEOUT_MS = 4000;
+/** The distinct prints in one pass of the choreography. */
+const SLOTS = 14;
+
+export interface CollageItem {
+  /** A photo, or a video's poster frame. 3:4, or 4:3 when `landscape`. */
+  src: string;
+  landscape?: boolean;
+  /** A video, played through on its print before the collage moves on. Bake any
+   *  stop-motion frame rate into the file itself. */
+  video?: string;
+}
 
 // Measured off the video's frames: centre x and width in % of the collage's width, centre y
-// in % of its height, rotation in degrees. Every print is 3:4.
+// in % of its height, rotation in degrees. Prints are 3:4, or 4:3 for a landscape item.
 type Pose = readonly [x: number, y: number, width: number, rotate: number];
 
 interface Sheet {
-  /** Index into `photos`, wrapped when a set has fewer photos. */
-  photo: number;
+  /** Which of the pass's 14 items it shows. */
+  slot: number;
   pose: Pose;
   /** A smaller print laid on the pile, with a wider white border. */
   inset?: boolean;
@@ -33,33 +52,33 @@ interface Sheet {
 
 const SHEETS = {
   // The pile the video starts on: only its edges ever show.
-  base1: { photo: 8, pose: [51, 50.5, 88, 0.6] },
-  base2: { photo: 6, pose: [50, 51.5, 88, -0.9] },
-  base3: { photo: 2, pose: [51.5, 50.8, 88, 1.5] },
-  a: { photo: 0, pose: [52, 47, 88, 0] },
-  b: { photo: 1, pose: [63, 61, 55, -1], inset: true },
-  c: { photo: 2, pose: [48.7, 51, 89, -3.5] },
-  c2: { photo: 2, pose: [49, 50.6, 90, -6] },
-  d: { photo: 3, pose: [32, 35, 50, -5], inset: true, clip: true },
-  e: { photo: 4, pose: [49, 49.5, 88, 1] },
-  f: { photo: 5, pose: [58, 57, 52, 8.3], inset: true },
-  g: { photo: 6, pose: [52, 50.5, 89, 3] },
-  h: { photo: 7, pose: [54, 53.5, 88, 0] },
-  i: { photo: 8, pose: [51.5, 53.5, 88, 0.3] },
+  base1: { slot: 8, pose: [51, 50.5, 88, 0.6] },
+  base2: { slot: 6, pose: [50, 51.5, 88, -0.9] },
+  base3: { slot: 2, pose: [51.5, 50.8, 88, 1.5] },
+  a: { slot: 0, pose: [52, 47, 88, 0] },
+  b: { slot: 1, pose: [63, 61, 55, -1], inset: true },
+  c: { slot: 2, pose: [48.7, 51, 89, -3.5] },
+  c2: { slot: 2, pose: [49, 50.6, 90, -6] },
+  d: { slot: 3, pose: [32, 35, 50, -5], inset: true, clip: true },
+  e: { slot: 4, pose: [49, 49.5, 88, 1] },
+  f: { slot: 5, pose: [58, 57, 52, 8.3], inset: true },
+  g: { slot: 6, pose: [52, 50.5, 89, 3] },
+  h: { slot: 7, pose: [54, 53.5, 88, 0] },
+  i: { slot: 8, pose: [51.5, 53.5, 88, 0.3] },
   // j and k are shuffled around on top of i: each pose is a separate sheet.
-  j1: { photo: 9, pose: [42.7, 43.5, 54, -4], inset: true },
-  j2: { photo: 9, pose: [46, 47, 54, -9], inset: true },
-  j3: { photo: 9, pose: [49, 48, 54, -1], inset: true },
-  k1: { photo: 10, pose: [63.6, 60.6, 54, 6], inset: true },
-  k2: { photo: 10, pose: [64, 64, 54, 17], inset: true },
-  k3: { photo: 10, pose: [60, 59, 54, 6], inset: true },
-  k4: { photo: 10, pose: [54, 54.6, 54, 7], inset: true },
-  k5: { photo: 10, pose: [52.8, 54.3, 52, -4], inset: true },
-  l: { photo: 11, pose: [52, 47, 89, 1] },
+  j1: { slot: 9, pose: [42.7, 43.5, 54, -4], inset: true },
+  j2: { slot: 9, pose: [46, 47, 54, -9], inset: true },
+  j3: { slot: 9, pose: [49, 48, 54, -1], inset: true },
+  k1: { slot: 10, pose: [63.6, 60.6, 54, 6], inset: true },
+  k2: { slot: 10, pose: [64, 64, 54, 17], inset: true },
+  k3: { slot: 10, pose: [60, 59, 54, 6], inset: true },
+  k4: { slot: 10, pose: [54, 54.6, 54, 7], inset: true },
+  k5: { slot: 10, pose: [52.8, 54.3, 52, -4], inset: true },
+  l: { slot: 11, pose: [52, 47, 89, 1] },
   // A one-frame flash in the video.
-  m: { photo: 5, pose: [53, 48, 88, 0.5] },
-  n: { photo: 12, pose: [52.6, 48, 88, 1] },
-  o: { photo: 13, pose: [49, 49.5, 88, -0.5] },
+  m: { slot: 5, pose: [53, 48, 88, 0.5] },
+  n: { slot: 12, pose: [52.6, 48, 88, 1] },
+  o: { slot: 13, pose: [49, 49.5, 88, -0.5] },
 } satisfies Record<string, Sheet>;
 
 type SheetId = keyof typeof SHEETS;
@@ -95,11 +114,30 @@ const STATES: { hold: number; top: SheetId[] }[] = [
   { hold: 20, top: ["o"] },
 ];
 
-/** Shown, without motion, under prefers-reduced-motion: the fullest pile. */
+/** Shown, without motion, under prefers-reduced-motion: the fullest pile of the first pass. */
 const STILL = 8;
 
 const SHEET_IDS = Object.keys(SHEETS) as SheetId[];
 const OPENING: SheetId[] = [...PILE, ...STATES[0].top];
+
+interface Position {
+  pass: number;
+  step: number;
+  fading: boolean;
+}
+
+function next(at: Position, passes: number): Position {
+  if (at.fading) return { pass: 0, step: 0, fading: false };
+  if (at.step < STATES.length - 1) return { ...at, step: at.step + 1 };
+  if (at.pass < passes - 1) return { pass: at.pass + 1, step: 0, fading: false };
+  return { ...at, fading: true };
+}
+
+// A pass short of 14 items borrows the rest from the first pass, which is the longest ago.
+function itemAt(items: CollageItem[], pass: number, slot: number) {
+  const i = pass * SLOTS + slot;
+  return items[i < items.length ? i : slot % items.length];
+}
 
 // The shadow is in cqw of the collage, so it scales with the prints.
 const sheetStyle: CSSProperties = {
@@ -119,6 +157,9 @@ const sheenStyle: CSSProperties = {
   boxShadow: "inset 0 0 0 0.5px color-mix(in srgb, var(--ink) 12%, transparent)",
 };
 
+// A full-size print is 88% of the collage, 603/1400 of the page from lg up.
+const SIZES = "(min-width: 1024px) 38vw, 425px";
+
 const reducedMotion = "(prefers-reduced-motion: reduce)";
 
 function subscribeReducedMotion(onChange: () => void) {
@@ -128,20 +169,20 @@ function subscribeReducedMotion(onChange: () => void) {
 }
 
 export function PrintCollage({
-  photos,
+  items,
   label,
   eager = false,
   className = "",
 }: {
-  photos: string[];
+  items: CollageItem[];
   label: string;
   /** Load the opening pile at once, for a collage above the fold. */
   eager?: boolean;
   className?: string;
 }) {
   const root = useRef<HTMLDivElement>(null);
-  const [step, setStep] = useState(0);
-  const [fading, setFading] = useState(false);
+  const passes = Math.ceil(items.length / SLOTS);
+  const [at, advance] = useReducer(next, { pass: 0, step: 0, fading: false });
   const [onScreen, setOnScreen] = useState(false);
   const [loaded, setLoaded] = useState(0);
   const [timedOut, setTimedOut] = useState(false);
@@ -151,8 +192,15 @@ export function PrintCollage({
     () => false,
   );
 
+  // Only the first pass is waited for: each later one loads while the one before it plays.
   const ready = loaded >= SHEET_IDS.length || timedOut;
   const running = onScreen && ready && !still;
+
+  const shown: Position = still ? { pass: 0, step: STILL, fading: false } : at;
+  const stack = [...PILE, ...STATES[shown.step].top];
+  const top = itemAt(items, shown.pass, SHEETS[stack[stack.length - 1]].slot);
+  // A video on top holds the pile until it has played through.
+  const waitForVideo = Boolean(top.video) && !shown.fading;
 
   useEffect(() => {
     const el = root.current;
@@ -171,22 +219,21 @@ export function PrintCollage({
   }, [onScreen, ready]);
 
   useEffect(() => {
-    if (!running) return;
+    if (!running || waitForVideo) return;
     // A paused hold starts over when the collage comes back into view.
-    const timer = fading
-      ? setTimeout(() => {
-          setStep(0);
-          setFading(false);
-        }, FADE_MS)
-      : setTimeout(() => {
-          if (step < STATES.length - 1) setStep(step + 1);
-          else setFading(true);
-        }, STATES[step].hold * FRAME_MS);
+    const timer = setTimeout(
+      () => advance(passes),
+      at.fading ? FADE_MS : STATES[at.step].hold * FRAME_MS,
+    );
     return () => clearTimeout(timer);
-  }, [running, step, fading]);
+  }, [running, waitForVideo, at, passes]);
 
-  const shown = still ? STILL : step;
-  const stack = [...PILE, ...STATES[shown].top];
+  const countLoad = () => setLoaded((n) => n + 1);
+
+  // The pass on show, plus the next one mounted out of sight so its photos are loaded
+  // before the cut to it.
+  const upcoming = (shown.pass + 1) % passes;
+  const mounted = upcoming === shown.pass ? [shown.pass] : [shown.pass, upcoming];
 
   return (
     <div
@@ -198,50 +245,132 @@ export function PrintCollage({
       <div
         className="absolute inset-0 transition-opacity ease-in-out"
         style={{
-          opacity: fading ? 0 : 1,
+          opacity: shown.fading ? 0 : 1,
           transitionDuration: `${FADE_MS}ms`,
         }}
       >
-        {SHEET_IDS.map((id) => {
-          const sheet: Sheet = SHEETS[id];
-          const [x, y, width, rotate] = sheet.pose;
-          const layer = stack.indexOf(id);
-          return (
-            <div
-              key={id}
-              className="@container absolute aspect-[3/4]"
-              style={{
-                ...sheetStyle,
-                left: `${x}%`,
-                top: `${y}%`,
-                width: `${width}%`,
-                transform: `translate(-50%, -50%) rotate(${rotate}deg)`,
-                zIndex: layer + 1,
-                // Hidden rather than unmounted, so every photo is loaded before it's cut to.
-                opacity: layer < 0 ? 0 : 1,
-              }}
-            >
+        {mounted.flatMap((pass) =>
+          SHEET_IDS.map((id) => {
+            const sheet: Sheet = SHEETS[id];
+            const item = itemAt(items, pass, sheet.slot);
+            const layer = pass === shown.pass ? stack.indexOf(id) : -1;
+            const [x, y, width, rotate] = sheet.pose;
+            const onLoad = pass === 0 ? countLoad : undefined;
+            return (
               <div
-                className={`absolute overflow-hidden ${sheet.inset ? "inset-[3.4cqw]" : "inset-[1.6cqw]"}`}
+                key={`${pass}:${id}`}
+                className="@container absolute"
+                style={{
+                  ...sheetStyle,
+                  left: `${x}%`,
+                  top: `${y}%`,
+                  // A landscape inset is widened to keep about the same area.
+                  width: `${item.landscape && sheet.inset ? Math.min(width * 1.25, 80) : width}%`,
+                  aspectRatio: item.landscape ? "4 / 3" : "3 / 4",
+                  transform: `translate(-50%, -50%) rotate(${rotate}deg)`,
+                  zIndex: layer + 1,
+                  // Hidden rather than unmounted, so every photo is loaded before it's cut to.
+                  opacity: layer < 0 ? 0 : 1,
+                }}
               >
-                <Image
-                  src={photos[sheet.photo % photos.length]}
-                  alt=""
-                  fill
-                  // A full-size print is 88% of the collage, 603/1400 of the page from lg up.
-                  sizes="(min-width: 1024px) 38vw, 425px"
-                  loading={eager && OPENING.includes(id) ? "eager" : "lazy"}
-                  onLoad={() => setLoaded((n) => n + 1)}
-                  className="object-cover"
-                />
-                <span aria-hidden className="absolute inset-0" style={sheenStyle} />
+                <div
+                  className={`absolute overflow-hidden ${sheet.inset ? "inset-[3.4cqw]" : "inset-[1.6cqw]"}`}
+                >
+                  {item.video ? (
+                    <VideoPrint
+                      src={item.video}
+                      poster={item.src}
+                      playing={layer === stack.length - 1 && !shown.fading}
+                      running={running}
+                      onLoad={onLoad}
+                      onEnded={() => advance(passes)}
+                    />
+                  ) : (
+                    <Image
+                      src={item.src}
+                      alt=""
+                      fill
+                      sizes={SIZES}
+                      loading={
+                        eager && pass === 0 && OPENING.includes(id)
+                          ? "eager"
+                          : "lazy"
+                      }
+                      onLoad={onLoad}
+                      className="object-cover"
+                    />
+                  )}
+                  <span aria-hidden className="absolute inset-0" style={sheenStyle} />
+                </div>
+                {sheet.clip && <PaperClip />}
               </div>
-              {sheet.clip && <PaperClip />}
-            </div>
-          );
-        })}
+            );
+          }),
+        )}
       </div>
     </div>
+  );
+}
+
+// A video print: plays from the start when it lands on top of the pile, pauses with the
+// collage, and rewinds once covered or lifted off. If the browser refuses to play it, the
+// poster holds for as long as the video would have run.
+function VideoPrint({
+  src,
+  poster,
+  playing,
+  running,
+  onLoad,
+  onEnded,
+}: {
+  src: string;
+  poster: string;
+  playing: boolean;
+  running: boolean;
+  onLoad?: () => void;
+  onEnded: () => void;
+}) {
+  const ref = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = ref.current;
+    if (!video) return;
+    if (!playing) {
+      video.pause();
+      video.currentTime = 0;
+      return;
+    }
+    if (!running) {
+      video.pause();
+      return;
+    }
+    if (video.ended) return;
+    let cancelled = false;
+    let fallback: ReturnType<typeof setTimeout> | undefined;
+    video.muted = true;
+    video.play().catch(() => {
+      if (cancelled) return;
+      const left = (video.duration || 0) - video.currentTime;
+      fallback = setTimeout(onEnded, Number.isFinite(left) ? left * 1000 : 0);
+    });
+    return () => {
+      cancelled = true;
+      clearTimeout(fallback);
+    };
+  }, [playing, running, onEnded]);
+
+  return (
+    <video
+      ref={ref}
+      src={src}
+      poster={poster}
+      muted
+      playsInline
+      preload="auto"
+      onLoadedData={onLoad}
+      onEnded={playing ? onEnded : undefined}
+      className="absolute inset-0 size-full object-cover"
+    />
   );
 }
 
