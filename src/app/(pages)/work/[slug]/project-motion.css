@@ -1,0 +1,434 @@
+/* The motion on the project pages (/work/[slug]), loaded by that page only.
+
+   Two kinds, kept apart:
+   - Played by the scroll (CSS scroll-driven animations): the opening title sequence,
+     the wipes and zooms that open each picture, parallax, hairlines and the slogan band.
+     They follow the scrollbar exactly, and run backwards when you scroll back up.
+   - Timed, once: the type, and the pictures that are dealt, stamped or written. Reveals
+     sets data-shown on each data-reveal element as it comes into view, and a transition
+     plays it in. Type reads better arriving whole than half-scrubbed.
+
+   Nothing moves under prefers-reduced-motion. Without scroll timelines only the timed
+   entrances play, and the opener is simply the name over the photo.
+
+   Longhands only for scroll-driven animations: the animation shorthand resets
+   animation-timeline. Keyframes read their start and end from custom properties set per
+   block by the page (--pp-lag, --pp-delay, --pp-tilt, --pp-depth). */
+
+:root {
+  /* Expo out: quick to start, long to settle. */
+  --pp-out: cubic-bezier(0.19, 1, 0.22, 1);
+  /* The ease of a scrubbed wipe, over the stretch of scroll it plays across. */
+  --pp-scrub: cubic-bezier(0.3, 0.55, 0.25, 1);
+}
+
+/* Layout that holds with or without motion. */
+
+/* A mask a word or line rises out of. The padding leaves room for descenders and an
+   italic's overhang, and the negative margin gives it back to the layout. */
+.pp-mask {
+  overflow: clip;
+  padding: 0 0.1em 0.16em;
+  margin: 0 -0.1em -0.16em;
+}
+.pp-mask-word,
+.pp-rise {
+  display: inline-block;
+}
+
+/* The opener without motion: the name over the full-width photo. */
+.pp-opener-stage {
+  display: flex;
+  flex-direction: column;
+}
+.pp-opener-frame {
+  position: relative;
+  aspect-ratio: var(--pp-hero-ratio);
+}
+.pp-opener-wipe {
+  position: absolute;
+  inset: 0;
+}
+.pp-opener-cue {
+  display: none;
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+  /* The opener's arrival: its name rises word by word, and the photo opens up beneath. */
+  .pp-opener .pp-rise {
+    animation: pp-rise-in 1.4s var(--pp-out) both;
+    animation-delay: calc(0.15s + var(--i, 0) * 0.1s);
+  }
+  .pp-opener-head .label {
+    animation: pp-fade-in 1.2s ease-out 0.7s both;
+  }
+  .pp-opener-wipe {
+    animation: pp-open-up 1.6s var(--pp-out) 0.35s both;
+  }
+
+  /* Everything else waits to be seen. A hidden state takes effect at once; only the way
+     back in is a transition, so nothing plays out as the page wakes up. */
+  [data-reveals] [data-reveal]:not([data-shown]) .pp-rise {
+    translate: 0 108%;
+    opacity: 0;
+  }
+  [data-reveals] [data-reveal][data-shown] .pp-rise {
+    transition:
+      translate 1.3s var(--pp-out),
+      opacity 1.3s var(--pp-out);
+    transition-delay: calc(var(--pp-delay, 0ms) + var(--i, 0) * 90ms);
+  }
+
+  /* Body copy, line by line. Below lg its lines are inline, so they only fade. */
+  [data-reveals] [data-reveal]:not([data-shown]) .pp-line {
+    translate: 0 0.9em;
+    opacity: 0;
+  }
+  [data-reveals] [data-reveal][data-shown] .pp-line {
+    transition:
+      translate 1.2s var(--pp-out),
+      opacity 1s ease-out;
+    transition-delay: calc(var(--pp-delay, 0ms) + 150ms + var(--i, 0) * 60ms);
+  }
+
+  /* Labels draw their letters together. */
+  [data-reveals] .pp-track:not([data-shown]) {
+    letter-spacing: 0.55em;
+    opacity: 0;
+  }
+  [data-reveals] .pp-track[data-shown] {
+    transition:
+      letter-spacing 1.6s var(--pp-out),
+      opacity 1.1s ease-out;
+    transition-delay: var(--pp-delay, 0ms);
+  }
+
+  /* Cards and swatches are dealt: in from below with a turn, landing with a little give. */
+  [data-reveals] .pp-deal:not([data-shown]) {
+    translate: 0 24%;
+    rotate: var(--pp-tilt, -6deg);
+    scale: 0.86;
+    opacity: 0;
+  }
+  [data-reveals] .pp-deal[data-shown] {
+    transition:
+      translate 1.2s cubic-bezier(0.2, 1.2, 0.4, 1),
+      rotate 1.3s cubic-bezier(0.2, 1.2, 0.4, 1),
+      scale 1.2s var(--pp-out),
+      opacity 0.5s ease-out;
+    transition-delay: var(--pp-delay, 0ms);
+  }
+
+  /* Stamps come down from above and press in, just past flat before they settle. */
+  [data-reveals] .pp-stamp:not([data-shown]) {
+    scale: 1.6;
+    rotate: -9deg;
+    opacity: 0;
+  }
+  [data-reveals] .pp-stamp[data-shown] {
+    transition:
+      scale 0.75s cubic-bezier(0.3, 1.4, 0.5, 1),
+      rotate 0.75s cubic-bezier(0.3, 1.4, 0.5, 1),
+      opacity 0.3s ease-out;
+    transition-delay: var(--pp-delay, 0ms);
+  }
+
+  /* A block of colour springs up from its centre. */
+  [data-reveals] .pp-grow:not([data-shown]) {
+    scale: 0;
+    rotate: -45deg;
+  }
+  [data-reveals] .pp-grow[data-shown] {
+    transition:
+      scale 1.3s cubic-bezier(0.34, 1.5, 0.64, 1),
+      rotate 1.5s var(--pp-out);
+    transition-delay: var(--pp-delay, 0ms);
+  }
+
+  /* Wordmarks and line drawings are drawn out from the left, like a pen. clip-path can't
+     ease to none, so the shown state names its own end. */
+  [data-reveals] .pp-write {
+    clip-path: inset(0);
+  }
+  [data-reveals] .pp-write:not([data-shown]) {
+    clip-path: inset(0 100% 0 0);
+  }
+  [data-reveals] .pp-write[data-shown] {
+    transition: clip-path 1.9s cubic-bezier(0.65, 0, 0.35, 1);
+    transition-delay: calc(var(--pp-delay, 0ms) + 200ms);
+  }
+
+  @supports (animation-timeline: view()) {
+    /* The title sequence. The section is a screen taller than its stage, which holds
+       still for that screen of scroll: the window opens out to the full photo while the
+       photo pulls back, and the name lifts away. On arrival the SiteNav sits above the
+       stage (--pp-below), so the window stops short of the fold by that much. */
+    .pp-opener {
+      --pp-below: calc(var(--header-h-compact) + 28px);
+      --pp-win-top: 30%;
+      --pp-win-x: 6vw;
+      --pp-win-bottom: calc(var(--pp-below) + 8svh);
+      view-timeline: --pp-opener;
+      height: 200svh;
+    }
+    @media (min-width: 1024px) {
+      .pp-opener {
+        --pp-win-top: 33%;
+        --pp-win-x: 21vw;
+      }
+    }
+    .pp-opener-stage {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      overflow: clip;
+    }
+    .pp-opener-head {
+      position: relative;
+      z-index: 1;
+      animation-name: pp-opener-head;
+      animation-timing-function: ease-in;
+      animation-fill-mode: both;
+      animation-timeline: --pp-opener;
+      animation-range: contain 0% contain 40%;
+    }
+    .pp-opener-frame {
+      position: absolute;
+      inset: 0;
+      aspect-ratio: auto;
+      animation-name: pp-opener-window;
+      animation-timing-function: cubic-bezier(0.5, 0, 0.2, 1);
+      animation-fill-mode: both;
+      animation-timeline: --pp-opener;
+      animation-range: contain 0% contain 62%;
+    }
+    .pp-opener-wipe > img {
+      animation-name: pp-opener-zoom;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --pp-opener;
+      animation-range: contain 0% contain 100%;
+    }
+    .pp-opener-cue {
+      position: absolute;
+      bottom: calc(var(--pp-below) + 1.6svh);
+      left: 50%;
+      translate: -50% 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      animation-name: pp-fade-out;
+      animation-fill-mode: both;
+      animation-timeline: --pp-opener;
+      animation-range: contain 0% contain 8%;
+    }
+    /* A hairline that keeps running down, as a hint to follow it. */
+    .pp-opener-cue::after {
+      content: "";
+      width: 1px;
+      height: 26px;
+      background: currentColor;
+      transform-origin: top;
+      animation: pp-cue 2.2s cubic-bezier(0.65, 0, 0.35, 1) 1.6s infinite both;
+    }
+
+    /* A picture opens as it comes up: a wipe from its own side (left, right, or from below
+       in the middle; a window for the full-width ones; doors for the menu panels), while
+       the picture inside settles out of a zoom. Each finishes 55vh after its top enters,
+       plus its --pp-lag, so a row plays out left to right. */
+    .pp-wipe {
+      view-timeline: --pp-block;
+      animation-name: pp-wipe;
+    }
+    .pp-wipe,
+    .pp-wipe > img,
+    .pp-zoom > img {
+      animation-timing-function: var(--pp-scrub);
+      animation-fill-mode: both;
+      animation-timeline: --pp-block;
+      animation-range: entry var(--pp-lag, 0vh) entry calc(var(--pp-lag, 0vh) + 55vh);
+    }
+    .pp-wipe > img,
+    .pp-zoom > img {
+      animation-name: pp-settle;
+    }
+    .pp-from-left {
+      --pp-from: inset(0 100% 0 0);
+      --pp-shift: -8%, 0;
+    }
+    .pp-from-right {
+      --pp-from: inset(0 0 0 100%);
+      --pp-shift: 8%, 0;
+    }
+    .pp-from-bottom {
+      --pp-from: inset(100% 0 0 0);
+      --pp-shift: 0, 10%;
+    }
+    .pp-window {
+      --pp-from: inset(16% 24%);
+    }
+    .pp-doors {
+      --pp-from: inset(0 50%);
+    }
+
+    /* Parallax, from lg up (in the stacked layout blocks have neighbours to collide
+       with): a block with --pp-depth drifts against the scroll across the whole time it's
+       on screen, and sits where the PDF draws it at the middle. */
+    @media (min-width: 1024px) {
+      .pp-wipe.pp-float {
+        animation-name: pp-wipe, pp-float;
+        animation-timing-function: var(--pp-scrub), linear;
+        animation-range:
+          entry var(--pp-lag, 0vh) entry calc(var(--pp-lag, 0vh) + 55vh),
+          cover 0% cover 100%;
+      }
+    }
+
+    /* Hairline callouts draw themselves, from the top or from the left, just behind the
+       words they point at. */
+    .pp-draw-down,
+    .pp-draw-across {
+      animation-timing-function: var(--pp-scrub);
+      animation-fill-mode: both;
+      animation-timeline: view();
+      animation-range: entry calc(var(--pp-lag, 0vh) + 12vh) entry calc(var(--pp-lag, 0vh) + 45vh);
+    }
+    .pp-draw-down {
+      animation-name: pp-draw-down;
+    }
+    .pp-draw-across {
+      animation-name: pp-draw-across;
+    }
+
+    /* The slogan band: its line slides one way and the name the other, the whole time
+       the band is on screen. Each row runs well past both edges, so no end shows. */
+    .pp-slogan-row {
+      animation-name: pp-slide;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+    .pp-slogan-back {
+      animation-name: pp-slide-back;
+    }
+  }
+}
+
+@keyframes pp-rise-in {
+  from {
+    translate: 0 108%;
+  }
+}
+@keyframes pp-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes pp-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+/* clip-path can't interpolate to none, so every clip names both ends. */
+@keyframes pp-open-up {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+@keyframes pp-opener-head {
+  to {
+    translate: 0 -14svh;
+    opacity: 0;
+  }
+}
+@keyframes pp-opener-window {
+  from {
+    clip-path: inset(var(--pp-win-top) var(--pp-win-x) var(--pp-win-bottom) var(--pp-win-x));
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+@keyframes pp-opener-zoom {
+  from {
+    transform: scale(1.15);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes pp-cue {
+  0% {
+    transform: scaleY(0);
+    opacity: 1;
+  }
+  60% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleY(1);
+    opacity: 0;
+  }
+}
+@keyframes pp-wipe {
+  from {
+    clip-path: var(--pp-from);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+@keyframes pp-settle {
+  from {
+    transform: translate(var(--pp-shift, 0, 0)) scale(1.3);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes pp-float {
+  from {
+    transform: translateY(calc(var(--pp-depth, 0) * 10vh));
+  }
+  to {
+    transform: translateY(calc(var(--pp-depth, 0) * -10vh));
+  }
+}
+@keyframes pp-draw-down {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+@keyframes pp-draw-across {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+@keyframes pp-slide {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: -80vw 0;
+  }
+}
+@keyframes pp-slide-back {
+  from {
+    translate: -80vw 0;
+  }
+  to {
+    translate: 0 0;
+  }
+}
