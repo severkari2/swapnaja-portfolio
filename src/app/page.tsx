@@ -82,7 +82,7 @@ export default function Home() {
                 ))}
               </p>
 
-              <div className="mt-[calc(10*var(--u))] flex justify-end gap-[calc(20*var(--u))] text-p leading-none text-paper *:underline *:decoration-1 *:underline-offset-[0.15em] *:transition-opacity *:hover:opacity-60">
+              <div className="mt-[calc(32*var(--u))] flex justify-end gap-[calc(20*var(--u))] text-p leading-none text-paper *:underline *:decoration-1 *:underline-offset-[0.15em] *:transition-opacity *:hover:opacity-60">
                 <a href={resumeHref} {...external}>
                   resume
                 </a>
