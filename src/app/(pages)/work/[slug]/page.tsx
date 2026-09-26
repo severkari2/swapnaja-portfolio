@@ -43,12 +43,13 @@ const stackClass: Record<ProjectStack, string> = {
 };
 
 // The type in the stacked layout. From lg up every size comes from the PDF instead.
-// Headings and labels take their face from the project (faceClass).
+// Headings and labels take their face from the project, body copy from its block, in
+// Montserrat Medium unless it says otherwise (faceClass).
 const roleClass: Record<ProjectTextRole, string> = {
   title: "mt-6 font-times text-h1 italic leading-[1.2]",
   heading: "mt-10 text-h2 leading-[1.2]",
   label: "mt-2 text-xs",
-  body: "mb-2 max-w-[60ch] font-sans text-p font-medium leading-[1.6]",
+  body: "mb-2 max-w-[60ch] text-p leading-[1.6]",
   display: "my-4 font-sans text-[2rem] font-medium leading-[1.2]",
 };
 
@@ -65,8 +66,14 @@ const baselineOffset = { sans: 0.9585, times: 0.9375, outfit: 0.97 };
 const isItalic = (run: ProjectRun): run is Exclude<ProjectRun, string> =>
   typeof run !== "string";
 
-function fontOf(role: ProjectTextRole, italic: boolean, face: ProjectFace) {
+function fontOf(
+  role: ProjectTextRole,
+  italic: boolean,
+  face: ProjectFace,
+  bodyFace: ProjectFace = "sans"
+) {
   if (italic || role === "title") return "times";
+  if (role === "body") return bodyFace;
   return role === "heading" || role === "label" ? face : "sans";
 }
 
@@ -288,8 +295,13 @@ function Block({
   const Tag = block.role === "title" || block.role === "heading" ? "h2" : "p";
   const firstLine = block.lines[0];
   const firstRun = Array.isArray(firstLine) ? firstLine[0] : firstLine;
-  const firstFont = fontOf(block.role, isItalic(firstRun), face);
-  const roleFace = block.role === "heading" || block.role === "label" ? faceClass[face] : "";
+  const firstFont = fontOf(block.role, isItalic(firstRun), face, block.face);
+  const roleFace =
+    block.role === "heading" || block.role === "label"
+      ? faceClass[face]
+      : block.role === "body"
+        ? faceClass[block.face ?? "sans"]
+        : "";
   // Titles rise word by word, headings and display lines line by line, each from behind
   // its own mask; body copy fades up line by line; labels close up their tracking.
   const masked = block.role === "heading" || block.role === "display";

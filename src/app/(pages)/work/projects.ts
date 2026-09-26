@@ -1,7 +1,7 @@
 // Project pages under /work/[slug], rebuilt from the designer's PDF layouts rather than
-// embedding the PDFs (Brew for You's is 288MB, Nektar's 302MB, Surahi's 294MB and Raya's
-// 324MB; their images come to about 2.5–3MB each, and Raya's, with twice the pictures, to
-// under 5MB).
+// embedding the PDFs (Brew for You's is 288MB, Nektar's 302MB, Surahi's 294MB, Raya's
+// 324MB and The Better Made's 310MB; their images come to about 2.5–3MB each, and Raya's,
+// with twice the pictures, to under 5MB).
 //
 // Every position is in PDF points from the page's top-left corner, measured off the PDF
 // itself. From lg up the page lays each block out at exactly that spot, scaled to the
@@ -70,6 +70,8 @@ export type ProjectBlock =
       lines: ProjectLine[];
       /** The PDF's own ink, where it isn't the page's. Drawn over any image it overlaps. */
       color?: string;
+      /** Body copy only: its face, where the PDF sets it in the project's instead of Montserrat. */
+      face?: ProjectFace;
       stack?: ProjectStack;
     }
   | {
@@ -138,10 +140,15 @@ const brew = (file: string) => `/work/brew-for-you/${file}`;
 const nektar = (file: string) => `/work/nektar/${file}`;
 const surahi = (file: string) => `/work/surahi/${file}`;
 const raya = (file: string) => `/work/raya/${file}`;
+const betterMade = (file: string) => `/work/the-better-made/${file}`;
 
 // Brew for You's navy and Raya's maroon, the grounds of their logo cards.
 const brewNavy = "#123c60";
 const rayaMaroon = "#36120c";
+
+// The Better Made's green, the ink of its wordmark, and the olive block behind its tags.
+const betterMadeGreen = "#425a2b";
+const betterMadeOlive = "#818653";
 
 // Nektar's own inks: its orange, and the rust it sets its Times italic lines in.
 const nektarOrange = "#ee6023";
@@ -627,6 +634,118 @@ export const projects: Project[] = [
       { kind: "image", src: raya("dhaaga-stamp.jpg"), alt: "A maroon card framing a group photo as a postage stamp under the Dhaaga wordmark", x: 758, y: 10768.39, w: 369.25, h: 369.25, motion: "stamp" },
 
       { kind: "image", src: raya("closing.jpg"), alt: "The Raya logo, “raya by Bhumi Goyanka”, in maroon on sand", x: 0, y: 11168.5, w: 1195.28, h: 429.1, stack: "bleed" },
+    ],
+  },
+  {
+    slug: "the-better-made",
+    title: "The Better Made",
+    folders: ["packaging"],
+    cover: { src: betterMade("logo.jpg"), aspectRatio: 328.67 / 246.5 },
+    page: { width: 1195.28, height: 6061.34 },
+    accent: betterMadeGreen,
+    hero: { src: betterMade("hero.jpg"), alt: "A beige food trailer carrying the Better Made logo and the line “label you can believe in”, parked outside a brick building", w: 1195.28, h: 705.97 },
+    // Its callouts are set in Outfit, like its headings, so they carry the project's face.
+    blocks: [
+      { kind: "image", src: betterMade("awning.jpg"), alt: "A green awning with the Better Made logomark in white", x: 228.04, y: 741.97, w: 739.19, h: 576 },
+
+      { kind: "image", src: betterMade("logo.jpg"), alt: "The Better Made logo, three stacked orange bowls beside the wordmark in green, on peach", x: 71.5, y: 1439.24, w: 328.67, h: 246.5, stack: "half" },
+      { kind: "image", src: betterMade("logomark.svg"), alt: "The Better Made logomark, three stacked bowls, in orange on peach", x: 800.41, y: 1439.24, w: 323.36, h: 198.79, stack: "half" },
+      { kind: "text", role: "label", x: 71.5, baseline: 1707.04, size: 12, lines: ["LOGO"], stack: "half" },
+      { kind: "text", role: "label", x: 800.41, baseline: 1661.45, size: 12, lines: ["LOGOMARK"], stack: "half" },
+      { kind: "image", src: betterMade("box-open.jpg"), alt: "An open Better Made box of instant organic oats, with a line drawing on its side", x: 438.61, y: 1439.24, w: 320.71, h: 490.35, depth: 0.6 },
+
+      { kind: "text", role: "heading", x: 85.12, baseline: 2096.02, size: 24, lines: ["THOUGHT BEHIND", "THE LOGO"] },
+      {
+        kind: "text",
+        role: "body",
+        face: "outfit",
+        x: 472.15,
+        baseline: 2078.06,
+        size: 12,
+        lines: [
+          "The surahi flows naturally into the",
+          "wordmark, making the symbol and",
+          "typography feel like one cohesive",
+          "mark rather than separate elements.",
+        ],
+      },
+      { kind: "rule", x: 481.75, y: 2134.54, w: 1, h: 44.52 },
+      {
+        kind: "text",
+        role: "body",
+        face: "outfit",
+        x: 211.55,
+        baseline: 2258.12,
+        size: 12,
+        lines: [
+          "The illustrated surahi",
+          "acts as the key visual",
+          "symbol, immediately",
+          "connecting the identity",
+          "to Indian culture, craft",
+          "and traditional vessels.",
+        ],
+      },
+      { kind: "rule", x: 359.71, y: 2257.62, w: 44.52, h: 1 },
+      { kind: "image", src: betterMade("wordmark.svg"), alt: "The Better Made logo in black", x: 434.52, y: 2203.26, w: 300.28, h: 161.69, motion: "write" },
+      { kind: "rule", x: 639, y: 2381.27, w: 1, h: 44.52 },
+      {
+        kind: "text",
+        role: "body",
+        face: "outfit",
+        x: 568.22,
+        baseline: 2443.24,
+        size: 12,
+        lines: [
+          "A bold, rounded serif typeface",
+          "gives the logo a soft, elegant",
+          "and handcrafted character,",
+          "balancing tradition with a",
+          "contemporary feel.",
+        ],
+      },
+      { kind: "image", src: betterMade("night-sign.jpg"), alt: "A lit sign of line-drawn figures over a shopfront at night", x: 824.8, y: 2050.81, w: 288, h: 423, depth: -0.4 },
+
+      { kind: "text", role: "label", x: 82.5, baseline: 2617.23, size: 12, lines: ["COLOR"] },
+      { kind: "image", src: betterMade("palette.svg"), alt: "The colour palette: sand, orange, green and black swatches", x: 76.8, y: 2650.55, w: 429.31, h: 245.66, motion: "deal" },
+      { kind: "text", role: "label", x: 625.71, baseline: 2617.23, size: 12, lines: ["TYPOGRAPHY"] },
+      {
+        kind: "text",
+        role: "display",
+        x: 625.71,
+        baseline: 2676.33,
+        size: 48,
+        lines: [
+          "Primary font",
+          { text: "Lilita One", italic: true },
+          "",
+          "Secondary font",
+          { text: "Forta", italic: true },
+        ],
+      },
+
+      { kind: "slogan", y: 2975, h: 300, text: "label you can believe in" },
+
+      { kind: "text", role: "heading", x: 83.06, baseline: 3067.69, size: 24, lines: ["THOUGHT BEHIND", "THE PACKAGING AND BRANDING"] },
+      // Listed in pairs of similar shape, which is how they stack below lg.
+      { kind: "image", src: betterMade("box-in-hand.jpg"), alt: "A hand holding the closed box, its lid fastened with a green tab", x: 75.25, y: 3203.33, w: 234, h: 180, stack: "half" },
+      { kind: "image", src: betterMade("box-and-sachets.jpg"), alt: "The box of instant organic oats beside a spread of sachets", x: 345.25, y: 3203.33, w: 414, h: 234, stack: "half" },
+      { kind: "image", src: betterMade("tote-aisle.jpg"), alt: "A woman carrying a Better Made tote reaches for a box on a cereal aisle shelf", x: 804.25, y: 3203.33, w: 315, h: 405, stack: "half" },
+      { kind: "image", src: betterMade("sachet-fan.jpg"), alt: "Sachets of instant organic oats fanned out, from maroon and green to brown and rust", x: 73.17, y: 3535.39, w: 326.44, h: 412.85, stack: "half" },
+      { kind: "text", role: "label", x: 414.79, baseline: 3915.39, size: 12, lines: ["INSTANT", "FRESH", "ON THE GO"] },
+      { kind: "image", src: betterMade("sachet-plate.jpg"), alt: "A rust sachet of instant organic oats on a gold-rimmed plate", x: 617.71, y: 3651.79, w: 505.72, h: 287.74 },
+      { kind: "image", src: betterMade("hanging-totes.jpg"), alt: "Two canvas bags printed with the logomark, hung on a white wall with dried flowers", x: 436.66, y: 4050.76, w: 236.2, h: 176.65, stack: "half" },
+      { kind: "image", src: betterMade("box-side.jpg"), alt: "The side of the box: a line-drawn figure walking a cat, and “the better made’s box of instant organic oats”", x: 712.14, y: 4034.88, w: 439.99, h: 331.44, stack: "half" },
+      { kind: "image", src: betterMade("box-nutrition.jpg"), alt: "The box turned to show its nutrition table and the line “it’s THAT good”", x: 73.17, y: 4513.39, w: 505.72, h: 361.5 },
+      { kind: "image", src: betterMade("sachet-in-bag.jpg"), alt: "Hands slipping a sachet of instant organic oats into a cream shoulder bag", x: 616.39, y: 4513.39, w: 505.72, h: 287.74 },
+      { kind: "rule", x: 435.33, y: 4912.35, w: 236.2, h: 176.66, color: betterMadeOlive, motion: "grow" },
+      // A cut-out, laid over the olive block.
+      { kind: "image", src: betterMade("blocks.webp"), alt: "Wooden blocks with a wrap in the logomark pattern, and two tags carrying the logo and “it’s THAT good”", x: 8.05, y: 4833.58, w: 731.03, h: 475.18, motion: "deal" },
+      { kind: "image", src: betterMade("sachets-and-box.jpg"), alt: "Sachets in maroon, brown and rust fanned out in front of the box", x: 74.5, y: 4050.76, w: 326.43, h: 412.85, stack: "half" },
+      { kind: "image", src: betterMade("box-flavours.jpg"), alt: "The back of the box, listing what goes into each of its seven flavours", x: 707.26, y: 4912.36, w: 414.85, h: 581.56, stack: "half" },
+      { kind: "text", role: "label", x: 619.65, baseline: 5461.06, size: 12, lines: ["With", "seven different", "flavours"] },
+      { kind: "image", src: betterMade("sachet-cut.jpg"), alt: "A hand cutting open a sachet on a wooden board", x: 73.17, y: 5565.96, w: 505.72, h: 361.5 },
+      { kind: "image", src: betterMade("box-front.jpg"), alt: "The box with sachets beside it, its front reading “it’s THAT good”", x: 616.39, y: 5565.96, w: 505.72, h: 287.74 },
     ],
   },
 ];
