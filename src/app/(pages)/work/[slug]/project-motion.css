@@ -45,7 +45,8 @@
   position: relative;
   aspect-ratio: var(--pp-hero-ratio);
 }
-.pp-opener-wipe {
+.pp-opener-wipe,
+.pp-opener-photo {
   position: absolute;
   inset: 0;
 }
@@ -202,12 +203,36 @@
       animation-timeline: --pp-opener;
       animation-range: contain 0% contain 62%;
     }
-    .pp-opener-wipe > img {
+    .pp-opener-photo > img {
       animation-name: pp-opener-zoom;
       animation-timing-function: linear;
       animation-fill-mode: both;
       animation-timeline: --pp-opener;
       animation-range: contain 0% contain 100%;
+    }
+    /* Below lg the stage is usually portrait, and the photo cropped to fill it would lose
+       most of its width. So its box is the whole photo, centred on the stage, and it starts
+       scaled up by --pp-fill to fill the stage as above; once the window is open it pulls
+       back to its own size and holds there until the page carries on. --pp-fill divides two
+       lengths into a number, which tan(atan2()) does. */
+    @media (max-width: 1023.98px) {
+      .pp-opener {
+        --pp-fill: max(
+          tan(atan2(100svh * var(--pp-hero-ratio), 100cqw)),
+          tan(atan2(100cqw, 100svh * var(--pp-hero-ratio)))
+        );
+      }
+      .pp-opener-photo {
+        inset: auto;
+        top: 50%;
+        left: 50%;
+        width: min(100%, 100svh * var(--pp-hero-ratio));
+        aspect-ratio: var(--pp-hero-ratio);
+        translate: -50% -50%;
+      }
+      .pp-opener-photo > img {
+        animation-name: pp-opener-pull-back;
+      }
     }
     .pp-opener-cue {
       position: absolute;
@@ -359,6 +384,20 @@
     transform: scale(1.15);
   }
   to {
+    transform: none;
+  }
+}
+/* 62% is where pp-opener-window finishes on the same timeline. */
+@keyframes pp-opener-pull-back {
+  0% {
+    transform: scale(calc(var(--pp-fill) * 1.15));
+  }
+  62% {
+    transform: scale(var(--pp-fill));
+    animation-timing-function: cubic-bezier(0.5, 0, 0.2, 1);
+  }
+  90%,
+  100% {
     transform: none;
   }
 }

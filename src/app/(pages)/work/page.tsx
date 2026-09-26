@@ -20,7 +20,6 @@ const projectCards = (folder: ProjectFolder) =>
       href: projectHref(project),
     }));
 
-// Folders without projects yet still show the demo cards.
 const folders: WorkFolderProps["items"] = [
   {
     title: "branding",
@@ -48,11 +47,7 @@ const folders: WorkFolderProps["items"] = [
     span: 2,
     color: "var(--burgundy)",
     ink: "var(--paper)",
-    images: [
-      { src: "/folder-demo/editorial-1.svg", aspectRatio: 240 / 180 },
-      { src: "/folder-demo/editorial-2.svg", aspectRatio: 170 / 226 },
-      { src: "/folder-demo/editorial-3.svg", aspectRatio: 216 / 162 },
-    ],
+    images: projectCards("editorial"),
   },
 ];
 

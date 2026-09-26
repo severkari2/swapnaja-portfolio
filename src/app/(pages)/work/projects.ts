@@ -1,7 +1,7 @@
 // Project pages under /work/[slug], rebuilt from the designer's PDF layouts rather than
 // embedding the PDFs (Brew for You's is 288MB, Nektar's 302MB, Surahi's 294MB, Raya's
-// 324MB and The Better Made's 310MB; their images come to about 2.5–3MB each, and Raya's,
-// with twice the pictures, to under 5MB).
+// 324MB, The Better Made's 297MB and Editorial's 296MB; their images come to about
+// 2–3MB each, and Raya's, with twice the pictures, to under 5MB).
 //
 // Every position is in PDF points from the page's top-left corner, measured off the PDF
 // itself. From lg up the page lays each block out at exactly that spot, scaled to the
@@ -90,6 +90,22 @@ export type ProjectBlock =
     }
   | {
       /**
+       * A block of `color` with a few lines set on it in Times italic, in `ink`. Unlike a
+       * rule it is drawn at every size, scaled as one piece like a picture, so the lines
+       * keep their place on it. The type's `x` and `baseline` are on the page, like any
+       * text's; `leading` is the distance between its baselines.
+       */
+      kind: "panel";
+      x: number;
+      y: number;
+      w: number;
+      h: number;
+      color: string;
+      ink: string;
+      type: { x: number; baseline: number; size: number; leading: number; lines: string[] };
+    }
+  | {
+      /**
        * Not in the PDF: a band that opens the page up at `y`, pushing everything below it
        * down by `h`, with the project's own line running across it as you scroll. The line
        * is one the designer set on a piece of the project.
@@ -141,6 +157,7 @@ const nektar = (file: string) => `/work/nektar/${file}`;
 const surahi = (file: string) => `/work/surahi/${file}`;
 const raya = (file: string) => `/work/raya/${file}`;
 const betterMade = (file: string) => `/work/the-better-made/${file}`;
+const editorial = (file: string) => `/work/editorial/${file}`;
 
 // Brew for You's navy and Raya's maroon, the grounds of their logo cards.
 const brewNavy = "#123c60";
@@ -154,9 +171,13 @@ const betterMadeOlive = "#818653";
 const nektarOrange = "#ee6023";
 const nektarRust = "#af4025";
 
-// Surahi's olive, which fills the two menu panels, and the near-black of its third panel.
+// Surahi's olive, which fills its two menu panels and the panel beside the Reserved card,
+// and the khaki of the line set on that panel.
 const surahiOlive = "#4f4c1f";
-const surahiBlack = "#231f20";
+const surahiKhaki = "#959176";
+
+// The brown of Indikalakriti's posts, whose kalamkari card carries Editorial's slogan.
+const indikalakritiBrown = "#332816";
 
 // The menus, rendered out of their PDFs (food menu final.pdf, beverage menu final.pdf) at
 // the trim box: the cover alone, the pages in spreads, the back cover alone. The print look
@@ -285,11 +306,15 @@ export const projects: Project[] = [
         baseline: 1287.06,
         size: 12,
         lines: [
-          "Surahi is a poolside bar at Wyndham Resort, Udaipur,",
-          "created for laid-back days, good food, and refreshing",
-          "drinks. Blending a relaxed poolside atmosphere with a",
-          "vibrant dining experience, Surahi is a space to unwind,",
-          "sip, snack, and soak in the Udaipur sun.",
+          "Nektar is a non-carbonated caffeinated water brand",
+          "created for people who want a refreshing boost while",
+          "staying on the go. The brand combines caffeine,",
+          "refreshing fruit flavours, and a playful visual identity to",
+          "create a beverage that feels youthful, energetic, and",
+          "contemporary. Its bold packaging and expressive",
+          "graphics are designed to make Nektar stand out while",
+          "communicating a sense of movement, spontaneity,",
+          "and everyday adventure.",
         ],
       },
 
@@ -498,7 +523,16 @@ export const projects: Project[] = [
       { kind: "image", src: surahi("thank-you-card.jpg"), alt: "A brown card framing a pavilion arch, reading “would love to host you again”", x: 74.37, y: 5883.97, w: 236.11, h: 292.03, stack: "half", motion: "deal" },
       { kind: "image", src: surahi("reserved.jpg"), alt: "A “Reserved” table card carrying the Surahi mark, on a wooden stand", x: 87.42, y: 6198.46, w: 405.15, h: 513.37, stack: "half" },
       { kind: "image", src: surahi("apron.jpg"), alt: "An olive apron embroidered with the Surahi logo", x: 329.68, y: 5894.03, w: 507.81, h: 292.02 },
-      { kind: "rule", x: 504.42, y: 6199.13, w: 511.52, h: 305.38, color: surahiBlack },
+      {
+        kind: "panel",
+        x: 504.42,
+        y: 6199.13,
+        w: 511.52,
+        h: 305.38,
+        color: surahiOlive,
+        ink: surahiKhaki,
+        type: { x: 532.2, baseline: 6421.4, size: 53.3, leading: 38.8, lines: ["you choose", "we pour the rest"] },
+      },
 
       { kind: "text", role: "label", x: 71.01, baseline: 6773.63, size: 12.23, lines: ["FOOD MENU"] },
       { kind: "slideshow", label: "The Surahi food menu, spread by spread", x: 62.4, y: 6821.97, w: 1056.34, h: 575.18, color: surahiOlive, slides: menu("food", 6, 848 / 1200) },
@@ -641,79 +675,83 @@ export const projects: Project[] = [
     title: "The Better Made",
     folders: ["packaging"],
     cover: { src: betterMade("logo.jpg"), aspectRatio: 328.67 / 246.5 },
-    page: { width: 1195.28, height: 6061.34 },
+    page: { width: 1195.28, height: 6151.47 },
     accent: betterMadeGreen,
-    hero: { src: betterMade("hero.jpg"), alt: "A beige food trailer carrying the Better Made logo and the line “label you can believe in”, parked outside a brick building", w: 1195.28, h: 705.97 },
+    hero: { src: betterMade("hero.jpg"), alt: "A beige food trailer carrying the Better Made logo and the line “label you can believe in”, parked outside a brick building", w: 1195.28, h: 816.9 },
     // Its callouts are set in Outfit, like its headings, so they carry the project's face.
     blocks: [
-      { kind: "image", src: betterMade("awning.jpg"), alt: "A green awning with the Better Made logomark in white", x: 228.04, y: 741.97, w: 739.19, h: 576 },
+      { kind: "image", src: betterMade("awning.jpg"), alt: "A green awning with the Better Made logomark in white", x: 402.07, y: 898.74, w: 391.14, h: 304.79 },
+      { kind: "text", role: "title", x: 469.11, baseline: 1255.11, size: 32.97, lines: ["About Better Made"] },
+      {
+        kind: "text",
+        role: "body",
+        x: 452.08,
+        baseline: 1287.06,
+        size: 12,
+        lines: [
+          "BetterMade is an organic oats brand built around",
+          "making breakfast simple, wholesome, and convenient.",
+          "I developed its brand identity, packaging, and visual",
+          "language, creating a clean and approachable system",
+          "that reflects its promise of better ingredients and",
+          "better mornings.",
+        ],
+      },
 
-      { kind: "image", src: betterMade("logo.jpg"), alt: "The Better Made logo, three stacked orange bowls beside the wordmark in green, on peach", x: 71.5, y: 1439.24, w: 328.67, h: 246.5, stack: "half" },
-      { kind: "image", src: betterMade("logomark.svg"), alt: "The Better Made logomark, three stacked bowls, in orange on peach", x: 800.41, y: 1439.24, w: 323.36, h: 198.79, stack: "half" },
-      { kind: "text", role: "label", x: 71.5, baseline: 1707.04, size: 12, lines: ["LOGO"], stack: "half" },
-      { kind: "text", role: "label", x: 800.41, baseline: 1661.45, size: 12, lines: ["LOGOMARK"], stack: "half" },
-      { kind: "image", src: betterMade("box-open.jpg"), alt: "An open Better Made box of instant organic oats, with a line drawing on its side", x: 438.61, y: 1439.24, w: 320.71, h: 490.35, depth: 0.6 },
+      { kind: "image", src: betterMade("logo.jpg"), alt: "The Better Made logo, three stacked orange bowls beside the wordmark in green, on peach", x: 71.5, y: 1529.36, w: 328.67, h: 246.5, stack: "half" },
+      { kind: "image", src: betterMade("logomark.svg"), alt: "The Better Made logomark, three stacked bowls, in orange on peach", x: 800.41, y: 1529.36, w: 323.36, h: 198.79, stack: "half" },
+      { kind: "text", role: "label", x: 71.5, baseline: 1797.16, size: 12, lines: ["LOGO"], stack: "half" },
+      { kind: "text", role: "label", x: 800.41, baseline: 1751.58, size: 12, lines: ["LOGOMARK"], stack: "half" },
+      { kind: "image", src: betterMade("box-open.jpg"), alt: "An open Better Made box of instant organic oats, with a line drawing on its side", x: 438.61, y: 1529.36, w: 320.71, h: 490.35, depth: 0.6 },
 
-      { kind: "text", role: "heading", x: 85.12, baseline: 2096.02, size: 24, lines: ["THOUGHT BEHIND", "THE LOGO"] },
+      { kind: "text", role: "heading", x: 85.12, baseline: 2186.15, size: 24, lines: ["THOUGHT BEHIND", "THE LOGO"] },
       {
         kind: "text",
         role: "body",
         face: "outfit",
         x: 472.15,
-        baseline: 2078.06,
+        baseline: 2168.19,
         size: 12,
-        lines: [
-          "The surahi flows naturally into the",
-          "wordmark, making the symbol and",
-          "typography feel like one cohesive",
-          "mark rather than separate elements.",
-        ],
+        lines: ["Rounded forms and bold typography", "create a friendly, accessible", "personality."],
       },
-      { kind: "rule", x: 481.75, y: 2134.54, w: 1, h: 44.52 },
+      { kind: "rule", x: 481.75, y: 2224.66, w: 1, h: 44.52 },
       {
         kind: "text",
         role: "body",
         face: "outfit",
         x: 211.55,
-        baseline: 2258.12,
+        baseline: 2348.25,
         size: 12,
         lines: [
-          "The illustrated surahi",
-          "acts as the key visual",
-          "symbol, immediately",
-          "connecting the identity",
-          "to Indian culture, craft",
-          "and traditional vessels.",
+          "The stacked bowl-like",
+          "forms visually reinforce",
+          "the idea of making",
+          "something better, layer",
+          "by layer.",
         ],
       },
-      { kind: "rule", x: 359.71, y: 2257.62, w: 44.52, h: 1 },
-      { kind: "image", src: betterMade("wordmark.svg"), alt: "The Better Made logo in black", x: 434.52, y: 2203.26, w: 300.28, h: 161.69, motion: "write" },
-      { kind: "rule", x: 639, y: 2381.27, w: 1, h: 44.52 },
+      { kind: "rule", x: 359.71, y: 2347.75, w: 44.52, h: 1 },
+      { kind: "image", src: betterMade("wordmark.svg"), alt: "The Better Made logo in black", x: 434.52, y: 2293.38, w: 300.28, h: 161.69, motion: "write" },
+      { kind: "rule", x: 639, y: 2471.4, w: 1, h: 44.52 },
       {
         kind: "text",
         role: "body",
         face: "outfit",
         x: 568.22,
-        baseline: 2443.24,
+        baseline: 2533.37,
         size: 12,
-        lines: [
-          "A bold, rounded serif typeface",
-          "gives the logo a soft, elegant",
-          "and handcrafted character,",
-          "balancing tradition with a",
-          "contemporary feel.",
-        ],
+        lines: ["The chunky, rounded", "letterforms give the", "typography a warm and", "approachable feel."],
       },
-      { kind: "image", src: betterMade("night-sign.jpg"), alt: "A lit sign of line-drawn figures over a shopfront at night", x: 824.8, y: 2050.81, w: 288, h: 423, depth: -0.4 },
+      { kind: "image", src: betterMade("night-sign.jpg"), alt: "A lit sign of line-drawn figures over a shopfront at night", x: 824.8, y: 2140.94, w: 288, h: 423, depth: -0.4 },
 
-      { kind: "text", role: "label", x: 82.5, baseline: 2617.23, size: 12, lines: ["COLOR"] },
-      { kind: "image", src: betterMade("palette.svg"), alt: "The colour palette: sand, orange, green and black swatches", x: 76.8, y: 2650.55, w: 429.31, h: 245.66, motion: "deal" },
-      { kind: "text", role: "label", x: 625.71, baseline: 2617.23, size: 12, lines: ["TYPOGRAPHY"] },
+      { kind: "text", role: "label", x: 82.5, baseline: 2707.36, size: 12, lines: ["COLOR"] },
+      { kind: "image", src: betterMade("palette.svg"), alt: "The colour palette: sand, orange, green and black swatches", x: 76.8, y: 2740.68, w: 429.31, h: 245.66, motion: "deal" },
+      { kind: "text", role: "label", x: 625.71, baseline: 2707.36, size: 12, lines: ["TYPOGRAPHY"] },
       {
         kind: "text",
         role: "display",
         x: 625.71,
-        baseline: 2676.33,
+        baseline: 2766.46,
         size: 48,
         lines: [
           "Primary font",
@@ -724,28 +762,81 @@ export const projects: Project[] = [
         ],
       },
 
-      { kind: "slogan", y: 2975, h: 300, text: "label you can believe in" },
+      { kind: "slogan", y: 3065, h: 300, text: "label you can believe in" },
 
-      { kind: "text", role: "heading", x: 83.06, baseline: 3067.69, size: 24, lines: ["THOUGHT BEHIND", "THE PACKAGING AND BRANDING"] },
+      { kind: "text", role: "heading", x: 83.06, baseline: 3157.82, size: 24, lines: ["THOUGHT BEHIND", "THE PACKAGING AND BRANDING"] },
       // Listed in pairs of similar shape, which is how they stack below lg.
-      { kind: "image", src: betterMade("box-in-hand.jpg"), alt: "A hand holding the closed box, its lid fastened with a green tab", x: 75.25, y: 3203.33, w: 234, h: 180, stack: "half" },
-      { kind: "image", src: betterMade("box-and-sachets.jpg"), alt: "The box of instant organic oats beside a spread of sachets", x: 345.25, y: 3203.33, w: 414, h: 234, stack: "half" },
-      { kind: "image", src: betterMade("tote-aisle.jpg"), alt: "A woman carrying a Better Made tote reaches for a box on a cereal aisle shelf", x: 804.25, y: 3203.33, w: 315, h: 405, stack: "half" },
-      { kind: "image", src: betterMade("sachet-fan.jpg"), alt: "Sachets of instant organic oats fanned out, from maroon and green to brown and rust", x: 73.17, y: 3535.39, w: 326.44, h: 412.85, stack: "half" },
-      { kind: "text", role: "label", x: 414.79, baseline: 3915.39, size: 12, lines: ["INSTANT", "FRESH", "ON THE GO"] },
-      { kind: "image", src: betterMade("sachet-plate.jpg"), alt: "A rust sachet of instant organic oats on a gold-rimmed plate", x: 617.71, y: 3651.79, w: 505.72, h: 287.74 },
-      { kind: "image", src: betterMade("hanging-totes.jpg"), alt: "Two canvas bags printed with the logomark, hung on a white wall with dried flowers", x: 436.66, y: 4050.76, w: 236.2, h: 176.65, stack: "half" },
-      { kind: "image", src: betterMade("box-side.jpg"), alt: "The side of the box: a line-drawn figure walking a cat, and “the better made’s box of instant organic oats”", x: 712.14, y: 4034.88, w: 439.99, h: 331.44, stack: "half" },
-      { kind: "image", src: betterMade("box-nutrition.jpg"), alt: "The box turned to show its nutrition table and the line “it’s THAT good”", x: 73.17, y: 4513.39, w: 505.72, h: 361.5 },
-      { kind: "image", src: betterMade("sachet-in-bag.jpg"), alt: "Hands slipping a sachet of instant organic oats into a cream shoulder bag", x: 616.39, y: 4513.39, w: 505.72, h: 287.74 },
-      { kind: "rule", x: 435.33, y: 4912.35, w: 236.2, h: 176.66, color: betterMadeOlive, motion: "grow" },
+      { kind: "image", src: betterMade("box-in-hand.jpg"), alt: "A hand holding the closed box, its lid fastened with a green tab", x: 75.25, y: 3293.46, w: 234, h: 180, stack: "half" },
+      { kind: "image", src: betterMade("box-and-sachets.jpg"), alt: "The box of instant organic oats beside a spread of sachets", x: 345.25, y: 3293.46, w: 414, h: 234, stack: "half" },
+      { kind: "image", src: betterMade("tote-aisle.jpg"), alt: "A woman carrying a Better Made tote reaches for a box on a cereal aisle shelf", x: 804.25, y: 3293.46, w: 315, h: 405, stack: "half" },
+      { kind: "image", src: betterMade("sachet-fan.jpg"), alt: "Sachets of instant organic oats fanned out, from maroon and green to brown and rust", x: 73.17, y: 3625.52, w: 326.44, h: 412.85, stack: "half" },
+      { kind: "text", role: "label", x: 414.79, baseline: 4005.51, size: 12, lines: ["INSTANT", "FRESH", "ON THE GO"] },
+      { kind: "image", src: betterMade("sachet-plate.jpg"), alt: "A rust sachet of instant organic oats on a gold-rimmed plate", x: 617.71, y: 3741.92, w: 505.72, h: 287.74 },
+      { kind: "image", src: betterMade("hanging-totes.jpg"), alt: "Two canvas bags printed with the logomark, hung on a white wall with dried flowers", x: 436.66, y: 4140.89, w: 236.2, h: 176.65, stack: "half" },
+      { kind: "image", src: betterMade("box-side.jpg"), alt: "The side of the box: a line-drawn figure walking a cat, and “the better made’s box of instant organic oats”", x: 712.14, y: 4125.01, w: 439.99, h: 331.44, stack: "half" },
+      { kind: "image", src: betterMade("box-nutrition.jpg"), alt: "The box turned to show its nutrition table and the line “it’s THAT good”", x: 73.17, y: 4603.52, w: 505.72, h: 361.5 },
+      { kind: "image", src: betterMade("sachet-in-bag.jpg"), alt: "Hands slipping a sachet of instant organic oats into a cream shoulder bag", x: 616.39, y: 4603.52, w: 505.72, h: 287.74 },
+      { kind: "rule", x: 435.33, y: 5002.48, w: 236.2, h: 176.66, color: betterMadeOlive, motion: "grow" },
       // A cut-out, laid over the olive block.
-      { kind: "image", src: betterMade("blocks.webp"), alt: "Wooden blocks with a wrap in the logomark pattern, and two tags carrying the logo and “it’s THAT good”", x: 8.05, y: 4833.58, w: 731.03, h: 475.18, motion: "deal" },
-      { kind: "image", src: betterMade("sachets-and-box.jpg"), alt: "Sachets in maroon, brown and rust fanned out in front of the box", x: 74.5, y: 4050.76, w: 326.43, h: 412.85, stack: "half" },
-      { kind: "image", src: betterMade("box-flavours.jpg"), alt: "The back of the box, listing what goes into each of its seven flavours", x: 707.26, y: 4912.36, w: 414.85, h: 581.56, stack: "half" },
-      { kind: "text", role: "label", x: 619.65, baseline: 5461.06, size: 12, lines: ["With", "seven different", "flavours"] },
-      { kind: "image", src: betterMade("sachet-cut.jpg"), alt: "A hand cutting open a sachet on a wooden board", x: 73.17, y: 5565.96, w: 505.72, h: 361.5 },
-      { kind: "image", src: betterMade("box-front.jpg"), alt: "The box with sachets beside it, its front reading “it’s THAT good”", x: 616.39, y: 5565.96, w: 505.72, h: 287.74 },
+      { kind: "image", src: betterMade("blocks.webp"), alt: "Wooden blocks with a wrap in the logomark pattern, and two tags carrying the logo and “it’s THAT good”", x: 8.05, y: 4923.71, w: 731.03, h: 475.18, motion: "deal" },
+      { kind: "image", src: betterMade("sachets-and-box.jpg"), alt: "Sachets in maroon, brown and rust fanned out in front of the box", x: 74.5, y: 4140.89, w: 326.43, h: 412.85, stack: "half" },
+      { kind: "image", src: betterMade("box-flavours.jpg"), alt: "The back of the box, listing what goes into each of its seven flavours", x: 707.26, y: 5002.48, w: 414.85, h: 581.56, stack: "half" },
+      { kind: "text", role: "label", x: 619.65, baseline: 5551.19, size: 12, lines: ["With", "seven different", "flavours"] },
+      { kind: "image", src: betterMade("sachet-cut.jpg"), alt: "A hand cutting open a sachet on a wooden board", x: 73.17, y: 5656.09, w: 505.72, h: 361.5 },
+      { kind: "image", src: betterMade("box-front.jpg"), alt: "The box with sachets beside it, its front reading “it’s THAT good”", x: 616.39, y: 5656.09, w: 505.72, h: 287.74 },
+    ],
+  },
+  {
+    slug: "editorial",
+    title: "Editorial",
+    folders: ["editorial"],
+    cover: { src: editorial("mehr.jpg"), aspectRatio: 414.84 / 462.17 },
+    page: { width: 1195.28, height: 4221 },
+    accent: indikalakritiBrown,
+    hero: { src: editorial("hero.jpg"), alt: "Two women in festive wear before a weathered white door, one in teal holding sunflowers, the other in a mustard fringed top holding red roses", w: 1195.28, h: 816.9 },
+    // Social posts for three brands. Their lines are all set in the pictures, including the
+    // "knots of tradition" script, so only the page's own title, copy and headings are text.
+    blocks: [
+      { kind: "text", role: "title", x: 537.98, baseline: 962.41, size: 32.97, lines: ["Editorial"] },
+      {
+        kind: "text",
+        role: "body",
+        x: 421.02,
+        baseline: 994.35,
+        size: 12,
+        lines: [
+          "Illustration, layouts, and the essence of a visual diary.",
+          "Exploring visual storytelling while maintaining brand aesthetics.",
+          "Studying social media visuals, composition, and visual language.",
+        ],
+      },
+
+      { kind: "slogan", y: 1090, h: 300, text: "The first of many stories." },
+
+      // Listed in pairs of similar shape, which is how they stack below lg.
+      { kind: "text", role: "heading", x: 67.23, baseline: 1175.65, size: 24, lines: ["SIP & SOCIAL"] },
+      { kind: "image", src: editorial("upcoming-events.jpg"), alt: "A Sip & Social “upcoming events” post: a Pinterest-inspired pottery workshop and a supper club dinner, on pink and coral cards", x: 67.23, y: 1204.3, w: 328.67, h: 246.5, stack: "half" },
+      { kind: "image", src: editorial("how-to-join.jpg"), alt: "A Sip & Social post, “How to join Sip & Social?”: DM us, then get verified, on a cream card over a table of papers", x: 796.14, y: 1204.3, w: 323.37, h: 198.79, stack: "half" },
+      { kind: "image", src: editorial("belong.jpg"), alt: "A Sip & Social post: friends talking around a table in a drawing room, over the line “We wanted to create a place where people actually belong.”", x: 409.39, y: 1207.87, w: 370.92, h: 490.35, stack: "half" },
+      { kind: "image", src: editorial("pottery-welcome.jpg"), alt: "A card welcoming guests to Pinterest Pottery, with hands around a cup drawn in oxblood, dated 6 August 2026", x: 799.76, y: 1731.03, w: 315, h: 405, stack: "half", motion: "deal" },
+      { kind: "image", src: editorial("wheel-sketch.jpg"), alt: "An illustration of a potter at the wheel, seen from above", x: 70.76, y: 1731.03, w: 234, h: 180, stack: "half" },
+      { kind: "image", src: editorial("clay.jpg"), alt: "Hands shaping a small clay bowl", x: 340.76, y: 1731.03, w: 414, h: 234, stack: "half" },
+
+      { kind: "text", role: "heading", x: 70.76, baseline: 2217.56, size: 24, lines: ["RAYA THE LABEL"] },
+      { kind: "image", src: editorial("sakhi.jpg"), alt: "Two women laughing in festive wear, one holding a bottle of cola, under the title “Sakhi: Mehr, styled the Raya way.”", x: 70.76, y: 2233.24, w: 511.36, h: 428.68 },
+      { kind: "image", src: editorial("shutter.jpg"), alt: "A woman in a mustard fringed top before a rolled-down shutter, beside a carved wooden eave", x: 615.74, y: 2374.18, w: 500.68, h: 287.74 },
+      { kind: "image", src: editorial("window.jpg"), alt: "A woman in a sage embroidered kurta beside an arched window in a weathered wall", x: 85.65, y: 2709.07, w: 295.15, h: 295.14, stack: "half" },
+      { kind: "image", src: editorial("toast.jpg"), alt: "Two women toasting with a bottle of cola and a glass of chai, above a brass tray of red rose petals", x: 432.17, y: 2709.76, w: 236.2, h: 176.65, stack: "half" },
+      { kind: "image", src: editorial("mehr.jpg"), alt: "A Mehr card: the two women with sunflowers and roses, between the lines “Are not flowers the stars of earth?”", x: 704.1, y: 2709.76, w: 414.84, h: 462.17 },
+      { kind: "image", src: editorial("knots-of-tradition.webp"), alt: "“knots of tradition” in maroon script", x: 188.69, y: 3173.76, w: 818.62, h: 146.64, motion: "write" },
+
+      { kind: "text", role: "heading", x: 76.93, baseline: 3499.49, size: 24, lines: ["INDIKALAKRITI"] },
+      { kind: "image", src: editorial("motifs-around-us.jpg"), alt: "An Indikalakriti post, “motifs around us”: a block-printed textile beside its flower motif in cream on brown", x: 70.01, y: 3519.43, w: 415.06, h: 234.88 },
+      { kind: "image", src: editorial("kalamkari.jpg"), alt: "A kalamkari swatch in blue and gold on brown, captioned “The first of many stories.”", x: 521.49, y: 3519.43, w: 326.57, h: 194.69, stack: "half", motion: "deal" },
+      { kind: "image", src: editorial("kalamkari-words.jpg"), alt: "A woman in a kalamkari sari, beside the words poetic, thoughtful, detailed, timeless and “kalamkari”", x: 885.74, y: 3519.43, w: 233.2, h: 179.61, stack: "half", motion: "deal" },
+      { kind: "image", src: editorial("prints-card.jpg"), alt: "“my heart seeks prints” on brown, between squares of red floral kalamkari", x: 70.01, y: 3795.09, w: 232, h: 128.93, stack: "half", motion: "deal" },
+      { kind: "image", src: editorial("girl-you-were.jpg"), alt: "Two women in kalamkari prints, one above the other, split by the line “for the girl you were and the woman you are.”", x: 337.74, y: 3795.09, w: 236.11, h: 292.03, stack: "half" },
+      { kind: "image", src: editorial("prints.jpg"), alt: "“my heart seeks prints” on brown, framed by squares of mustard floral kalamkari", x: 612.37, y: 3795.09, w: 506.57, h: 292.03 },
     ],
   },
 ];

@@ -229,6 +229,55 @@ function Block({
     );
   }
 
+  if (block.kind === "panel") {
+    const { type } = block;
+    const lineHeight = type.leading / type.size;
+    // The first line box starts its ascent and half-leading above the baseline, at the
+    // panel's own line height rather than the 1.2 baselineOffset assumes.
+    const top = type.baseline - block.y - (baselineOffset.times + (lineHeight - 1.2) / 2) * type.size;
+    return (
+      <div
+        className={`pp-wipe ${wipeFrom(block.x, block.w, pageWidth)} relative col-span-2 justify-self-stretch @container lg:m-0 ${placed} ${sized}`}
+        style={
+          {
+            "--x": block.x,
+            "--y": shift(block.y),
+            "--w": block.w,
+            "--h": block.h,
+            "--pp-lag": where.lag,
+            "--pp-delay": where.delay,
+            aspectRatio: `${block.w} / ${block.h}`,
+            backgroundColor: block.color,
+          } as CSSProperties
+        }
+      >
+        {/* In fractions of the panel, and sized in cqw of its width, so the type keeps its
+            place on the panel at every size. */}
+        <p
+          data-reveal=""
+          className="absolute whitespace-nowrap font-times italic"
+          style={{
+            left: `${((type.x - block.x) / block.w) * 100}%`,
+            top: `${(top / block.h) * 100}%`,
+            fontSize: `${(type.size / block.w) * 100}cqw`,
+            lineHeight,
+            color: block.ink,
+          }}
+        >
+          {type.lines.map((line, i) => (
+            // Lines never reorder.
+            <Fragment key={i}>
+              {i > 0 && " "}
+              <span className="pp-line block" style={{ "--i": i } as CSSProperties}>
+                {line}
+              </span>
+            </Fragment>
+          ))}
+        </p>
+      </div>
+    );
+  }
+
   if (block.kind === "slideshow") {
     return (
       <MenuSlideshow
@@ -395,16 +444,20 @@ function Opener({ project, index }: { project: Project; index: number }) {
         </div>
         <div className="pp-opener-frame">
           <div className="pp-opener-wipe">
-            <Image
-              src={hero.src}
-              alt={hero.alt}
-              fill
-              sizes="100vw"
-              // The largest paint on arrival.
-              loading="eager"
-              fetchPriority="high"
-              className="object-cover"
-            />
+            {/* The photo's own box, apart from the wipe's: below lg it shrinks to the
+                whole photo (project-motion.css), which the wipe's clip must not follow. */}
+            <div className="pp-opener-photo">
+              <Image
+                src={hero.src}
+                alt={hero.alt}
+                fill
+                sizes="100vw"
+                // The largest paint on arrival.
+                loading="eager"
+                fetchPriority="high"
+                className="object-cover"
+              />
+            </div>
           </div>
         </div>
         <p aria-hidden="true" className="pp-opener-cue label text-ink/45 [--label-size:11px]">
