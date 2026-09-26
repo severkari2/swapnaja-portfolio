@@ -32,11 +32,12 @@ export default function Home() {
         aria-labelledby="about-teaser"
         className="relative min-h-svh bg-burgundy pb-[calc(192*var(--u))] [--u:max(1px,0.07143vw)]"
       >
-        {/* Misty sage ridges under an ivory sky: the green sits opposite the burgundy card
-            and picks up the denim jacket on /about. Decorative, so it has no alt text. */}
+        {/* A sunset over wet sand, its apricot sky running down into the burgundy card.
+            The 16:9 photo is cropped to a wide band across clouds and horizon. Decorative,
+            so it has no alt text. */}
         <div className="absolute inset-x-0 top-0 h-[calc(420*var(--u))]">
           <Image
-            src="/home/landscape.jpg"
+            src="/home/sunset.png"
             alt=""
             fill
             sizes="100vw"
