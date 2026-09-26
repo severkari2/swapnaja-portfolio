@@ -3,6 +3,7 @@ import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { MenuSlideshow } from "@/components/MenuSlideshow";
 import { QuietLink } from "@/components/QuietLink";
 import { SiteNav } from "@/components/SiteNav";
 import {
@@ -96,6 +97,20 @@ function Block({
             ...(block.color && { backgroundColor: block.color }),
           } as CSSProperties
         }
+      />
+    );
+  }
+
+  if (block.kind === "slideshow") {
+    return (
+      <MenuSlideshow
+        label={block.label}
+        color={block.color}
+        slides={block.slides}
+        aspect={block.w / block.h}
+        share={(block.w / pageWidth) * 100}
+        className={`col-span-2 ${placed} ${sized}`}
+        style={{ "--x": block.x, "--y": block.y, "--w": block.w, "--h": block.h } as CSSProperties}
       />
     );
   }

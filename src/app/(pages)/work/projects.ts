@@ -68,6 +68,21 @@ export type ProjectBlock =
       w: number;
       h: number;
       color?: string;
+    }
+  | {
+      /**
+       * A panel of `color` that cuts through `slides` once a second, like a flip through a
+       * printed piece (MenuSlideshow). Each slide is a spread or a single page, `aspect`
+       * its width over height. Drawn at every size.
+       */
+      kind: "slideshow";
+      label: string;
+      x: number;
+      y: number;
+      w: number;
+      h: number;
+      color: string;
+      slides: { src: string; aspect: number }[];
     };
 
 export interface Project {
@@ -96,6 +111,16 @@ const nektarRust = "#af4025";
 // Surahi's olive, which fills the two menu panels, and the near-black of its third panel.
 const surahiOlive = "#4f4c1f";
 const surahiBlack = "#231f20";
+
+// The menus, rendered out of their PDFs (food menu final.pdf, beverage menu final.pdf) at
+// the trim box: the cover alone, the pages in spreads, the back cover alone. The print look
+// of surahi_collage_refrence.mp4 is baked in: paper held at 94% white, a static mottle, the
+// crease at the fold and a darker lip along the bottom edge.
+const menu = (name: string, count: number, page: number) =>
+  Array.from({ length: count }, (_, i) => ({
+    src: surahi(`${name}-menu-${i + 1}.jpg`),
+    aspect: i === 0 || i === count - 1 ? page : page * 2,
+  }));
 
 export const projects: Project[] = [
   {
@@ -406,7 +431,7 @@ export const projects: Project[] = [
       { kind: "image", src: surahi("poolside.jpg"), alt: "Legs stretched out on a poolside lounger, beside an aperitif and a deck of cards", x: 594.18, y: 2964.83, w: 513.08, h: 641.12 },
 
       { kind: "text", role: "label", x: 79.94, baseline: 3673.15, size: 12.23, lines: ["BEVERAGE MENU"] },
-      { kind: "rule", x: 74.37, y: 3713.09, w: 1056.34, h: 575.18, color: surahiOlive },
+      { kind: "slideshow", label: "The Surahi beverage menu, spread by spread", x: 74.37, y: 3713.09, w: 1056.34, h: 575.18, color: surahiOlive, slides: menu("beverage", 9, 550 / 1200) },
       { kind: "image", src: surahi("beverage-menu.jpg"), alt: "The Surahi beverage menu, an embossed green cover with the logo in cream, laid on a dinner plate", x: 78.07, y: 4315.72, w: 571.43, h: 588.67, stack: "half" },
       { kind: "image", src: surahi("menu-holder.jpg"), alt: "A wooden menu holder engraved with the Surahi logo", x: 693.32, y: 4315.72, w: 437.39, h: 604.49, stack: "half" },
       { kind: "text", role: "label", x: 74.37, baseline: 4953.41, size: 12.23, lines: ["basic idea"] },
@@ -421,7 +446,7 @@ export const projects: Project[] = [
       { kind: "rule", x: 504.42, y: 6199.13, w: 511.52, h: 305.38, color: surahiBlack },
 
       { kind: "text", role: "label", x: 71.01, baseline: 6773.63, size: 12.23, lines: ["FOOD MENU"] },
-      { kind: "rule", x: 62.4, y: 6821.97, w: 1056.34, h: 575.18, color: surahiOlive },
+      { kind: "slideshow", label: "The Surahi food menu, spread by spread", x: 62.4, y: 6821.97, w: 1056.34, h: 575.18, color: surahiOlive, slides: menu("food", 6, 848 / 1200) },
       { kind: "image", src: surahi("food-menu.jpg"), alt: "The open Surahi food menu in a ring binder, listing vegetarian and non-vegetarian starters", x: 62.4, y: 7457.15, w: 604.49, h: 604.49, stack: "half" },
       { kind: "image", src: surahi("tablet-menu.jpg"), alt: "Hands holding the Surahi snack menu at a café table", x: 691.44, y: 7456.96, w: 427.3, h: 604.87, stack: "half" },
       { kind: "image", src: surahi("platter.jpg"), alt: "Guests reaching for canapés served on banana leaves", x: 456.68, y: 8106.69, w: 662.06, h: 417.23 },
