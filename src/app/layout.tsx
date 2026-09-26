@@ -52,7 +52,7 @@ export default function RootLayout({
     >
       <body className="flex min-h-full flex-col bg-paper text-ink">
         {/* Pages supply their own <main> and navigation: home draws the full header and
-            footer, every other page starts with SiteNav. */}
+            footer, every other page starts with SiteNav and ends with the (pages) footer. */}
         {children}
       </body>
     </html>

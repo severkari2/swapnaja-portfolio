@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import Image from "next/image";
 import { Fragment } from "react";
-import { Footer } from "@/components/Footer";
 import { SiteNav } from "@/components/SiteNav";
 
 export const metadata: Metadata = {
@@ -21,7 +20,7 @@ const contributions = [
 ];
 
 // about-page.jpeg and about-second-section.jpeg: two 1400×842 frames, between the SiteNav
-// row and the contact footer. From md up everything sits where the mockups draw it, in --u
+// row and the footer. From md up everything sits where the mockups draw it, in --u
 // (one mockup pixel); below md each frame stacks.
 //
 // Tops are line-box tops worked back from the glyph baselines measured off the mockups.
@@ -134,9 +133,6 @@ export default function About() {
             ))}
           </ul>
         </section>
-
-        {/* Contact, as on home: the one other place it appears. */}
-        <Footer />
       </div>
     </div>
   );

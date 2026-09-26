@@ -2,8 +2,8 @@ import { email, external, resumeHref, socials } from "./contact";
 
 const link = "nav-link transition-opacity hover:opacity-60";
 
-// The contact bar (Home.png). It sits in the page flow: on home it closes the first screen,
-// and /about ends with it.
+// The contact bar (Home.png). It sits in the page flow, never fixed: it closes every page (the
+// (pages) layout adds it after the rest), and on home it also closes the first screen.
 export function Footer() {
   return (
     <footer className="flex h-[var(--footer-h)] shrink-0 items-end justify-between bg-paper px-6 pb-10 sm:px-[7vw] sm:pb-16">

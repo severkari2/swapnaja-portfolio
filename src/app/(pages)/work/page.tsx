@@ -61,11 +61,12 @@ const folders: WorkFolderProps["items"] = [
 // titles in proportion. Below 700px WorkFolder stacks them at fixed sizes.
 const u = (px: number) => `calc(${px} * var(--u))`;
 
-// The page fills at least one screen, and the last folder runs on down past it: the page's
-// overflow clip cuts it off at the bottom, so no paper shows below the folders.
+// The page and the footer after it fill at least one screen, and the last folder runs on down
+// past it: the page's overflow clip cuts it off above the footer, so no paper shows below the
+// folders.
 export default function Work() {
   return (
-    <div className="flex min-h-dvh flex-col overflow-y-clip">
+    <div className="flex min-h-[calc(100dvh-var(--footer-h))] flex-col overflow-y-clip">
       <SiteNav />
       <h1 className="sr-only">works</h1>
       {/* Headroom for the first folder's card fan and its captions. At 700px and below the
