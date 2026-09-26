@@ -13,8 +13,8 @@ export default function Home() {
   return (
     <>
       <main className="flex flex-1 flex-col">
-        {/* First screen (Home.png): header, hero and footer land together as one screen, the
-            hero taking whatever the two bars leave. All three scroll away with the page. */}
+        {/* First screen (Home.png): header and hero land together as one screen, the hero
+            taking whatever the header leaves. Both scroll away with the page. */}
         <div className="flex min-h-svh flex-col">
           <Header />
           <section className="flex flex-1 items-center justify-center px-6">
@@ -23,7 +23,6 @@ export default function Home() {
               className="font-sans font-medium tracking-[-0.01em] text-burgundy text-[clamp(4rem,15vw,15rem)]"
             />
           </section>
-          <Footer />
         </div>
 
         {/* About teaser (Home-section-2.png). Everything is measured in --u: one pixel of the
@@ -113,7 +112,7 @@ export default function Home() {
         </section>
       </main>
 
-      {/* The footer again at the foot of the page, as on every other page. */}
+      {/* The footer at the foot of the page, as on every other page. */}
       <Footer />
     </>
   );
