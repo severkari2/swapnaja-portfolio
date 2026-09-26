@@ -3,6 +3,7 @@ import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { BackToTop } from "@/components/BackToTop";
 import { MenuSlideshow } from "@/components/MenuSlideshow";
 import { QuietLink } from "@/components/QuietLink";
 import { SiteNav } from "@/components/SiteNav";
@@ -233,7 +234,10 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
           } as CSSProperties
         }
       >
-        <h1 className="sr-only">{project.title}</h1>
+        {/* Focusable only from script: BackToTop lands here. */}
+        <h1 id="project-title" tabIndex={-1} className="sr-only">
+          {project.title}
+        </h1>
         {blocks.map((block, i) => (
           <Block
             key={block.kind === "image" ? block.src : `${block.kind}-${i}`}
@@ -247,7 +251,7 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
 
       <nav
         aria-label="More projects"
-        className="mx-4 grid grid-cols-2 gap-6 border-t border-rule pb-16 pt-8 sm:mx-6 md:mx-[3.2vw] lg:mt-16"
+        className="mx-4 grid grid-cols-2 gap-6 border-t border-rule pt-8 sm:mx-6 md:mx-[3.2vw] lg:mt-16"
       >
         {[
           { rel: "prev", project: prev, label: <>&larr; previous</>, align: "" },
@@ -267,6 +271,10 @@ export default async function ProjectPage(props: PageProps<"/work/[slug]">) {
           </Link>
         ))}
       </nav>
+
+      <div className="flex justify-center pb-16 pt-14">
+        <BackToTop target="project-title" />
+      </div>
     </>
   );
 }
