@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Montserrat, Outfit, Tinos } from "next/font/google";
 import "./globals.css";
+import { siteDescription, siteName, siteOpenGraph } from "./site";
 
 // Two families site-wide: Times italic and Montserrat. The only other face is Outfit, which
 // the project PDFs set their headings and labels in.
@@ -34,11 +35,24 @@ const outfit = Outfit({
   preload: false,
 });
 
+// Pages set a bare title ("Work", a project's name) and the template adds the name. The icons
+// (favicon.ico, icon.svg, apple-icon.png) and the share card (opengraph-image.jpg) are files
+// beside this layout. Link previews need their image URLs absolute: on Vercel, Next takes the
+// production domain on its own; on any other host, set SITE_URL (https://…) at build time.
 export const metadata: Metadata = {
-  title: "Swapnaja — Graphic Designer",
-  description:
-    "Portfolio of Swapnaja, an aspiring graphic designer with an eye for fun and simple style.",
+  metadataBase: process.env.SITE_URL ? new URL(process.env.SITE_URL) : undefined,
+  title: { default: `${siteName} — Graphic Designer`, template: `%s — ${siteName}` },
+  description: siteDescription,
+  applicationName: siteName,
+  authors: [{ name: siteName }],
+  creator: siteName,
+  keywords: ["graphic designer", "portfolio", "branding", "packaging design", "editorial design", siteName],
+  openGraph: siteOpenGraph,
+  twitter: { card: "summary_large_image" },
 };
+
+// The browser chrome on phones takes the paper colour.
+export const viewport: Viewport = { themeColor: "#f7f4ef" };
 
 export default function RootLayout({
   children,
