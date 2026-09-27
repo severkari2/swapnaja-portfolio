@@ -96,6 +96,13 @@ same markup serves phones and desktops (no hamburger).
 - Pages have no visible title where the header already says where you are (`/work`,
   `/work/archive`, `/about`); they keep an `sr-only` h1.
 
+**Metadata.** The name, description and base Open Graph fields live in `src/app/site.ts`. Pages
+set a bare `title` (*About*, a project's name) and the root layout's template appends
+*— Swapnaja Sevekari*. The tab icon is a paper Times-italic *s* on burgundy (`favicon.ico`,
+`icon.svg`, `apple-icon.png` in `src/app/`), and `src/app/opengraph-image.jpg` is the link
+preview card; project pages preview with their own `hero` instead. Off Vercel, set `SITE_URL`
+at build time so the preview image URLs are absolute.
+
 The root layout renders only `children`. Everything except home lives in the `(pages)` route
 group (URLs are unaffected), whose layout supplies `<main>` and the `Footer`; home supplies its own.
 
