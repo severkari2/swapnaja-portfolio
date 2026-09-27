@@ -18,6 +18,7 @@ import {
   type ProjectStack,
   type ProjectTextRole,
 } from "../projects";
+import { siteName, siteOpenGraph } from "@/app/site";
 import "./project-motion.css";
 
 // Only the projects listed; anything else under /work is a 404.
@@ -32,7 +33,34 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { slug } = await props.params;
   const project = projects.find((p) => p.slug === slug);
-  return project ? { title: `${project.title} — Work — Swapnaja` } : {};
+  if (!project) return {};
+  const description = summary(project);
+  // A shared link previews with the project's own hero rather than the site's card.
+  return {
+    title: project.title,
+    description,
+    openGraph: {
+      ...siteOpenGraph,
+      title: `${project.title} — ${siteName}`,
+      description,
+      images: [{ url: project.hero.src, alt: project.hero.alt }],
+    },
+  };
+}
+
+// The first sentence of the project's About copy, its first body block.
+function summary(project: Project) {
+  const body = project.blocks.find(
+    (block) => block.kind === "text" && block.role === "body"
+  );
+  if (body?.kind !== "text") return undefined;
+  const text = body.lines
+    .flat()
+    .map((run) => (typeof run === "string" ? run : run.text))
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return text.match(/^.*?[.!?](?=\s|$)/)?.[0] ?? text;
 }
 
 // Stacked layout, below lg. A bleed block cancels the article's side padding.
