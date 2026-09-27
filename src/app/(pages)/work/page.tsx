@@ -5,8 +5,10 @@ import { WorkFolder, type WorkFolderProps } from "@/components/WorkFolder";
 import { projectHref, projects, type ProjectFolder } from "./projects";
 
 export const metadata: Metadata = {
-  title: "Work — Swapnaja",
-  description: "Selected graphic design work by Swapnaja.",
+  title: "Work",
+  description: `Branding, packaging and editorial work by Swapnaja Sevekari: ${projects
+    .map((project) => project.title)
+    .join(", ")}.`,
 };
 
 // One card per project filed in the folder: its cover, named on hover, linking to its page.

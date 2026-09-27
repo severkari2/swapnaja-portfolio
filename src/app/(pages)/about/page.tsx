@@ -5,9 +5,9 @@ import { Fragment } from "react";
 import { SiteNav } from "@/components/SiteNav";
 
 export const metadata: Metadata = {
-  title: "About — Swapnaja",
+  title: "About",
   description:
-    "Swapnaja is a communication designer working across branding, packaging, editorial and creative design.",
+    "Swapnaja Sevekari is a communication designer working across branding, packaging, editorial and creative design.",
 };
 
 // The labels around the table (about-second-section.jpeg), each with its hand-set line

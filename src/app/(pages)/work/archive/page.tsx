@@ -7,8 +7,9 @@ import { SiteNav } from "@/components/SiteNav";
 import { archiveEntries } from "./entries";
 
 export const metadata: Metadata = {
-  title: "Archive — Swapnaja",
-  description: "Archive of past work by Swapnaja.",
+  title: "Archive",
+  description:
+    "The archive of Swapnaja Sevekari, graphic designer: i model, i document and behind the scenes.",
 };
 
 // The mockups break these lines by hand; below lg they wrap freely.
